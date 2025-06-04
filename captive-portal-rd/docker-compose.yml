@@ -1,0 +1,24 @@
+# version: '3.4'
+
+services:
+  plx-captive-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      #- "127.0.0.1:3022:80" # access via http://localhost:3000
+      - "4022:80"
+      - "4023:3000"
+    restart: unless-stopped
+    networks:
+      - default
+      - public-proxy
+
+volumes:
+  plx-captive-portal:
+
+networks:
+  default:
+    name: plx-captive-portal
+  public-proxy:
+    external: true
