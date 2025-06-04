@@ -5,7 +5,7 @@ export function IndexPage() {
   return (
     <>
       <nav className="flex items-center justify-center w-full">
-        <div className="w-full flex items-center justify-start pt-5 p-4 max-w-sm">
+        <div className="w-full flex items-center justify-start pt-8 p-4 max-w-sm">
           <a href="index.html" className="w-28">
             <img src="pluxnet-logo.svg" alt="PluxNet logo" width="auto" height="auto" />
           </a>
