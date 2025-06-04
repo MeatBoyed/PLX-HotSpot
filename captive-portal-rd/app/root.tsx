@@ -34,20 +34,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-gray-50 flex flex-col justify-between">
-        {/* Logo / Navbar */}
-        <nav className="flex items-center justify-center w-full shadow-xl">
-          <div className="w-full flex items-center justify-start p-4 max-w-sm">
-            <a href="index.html" className="w-28">
-              <img src="pluxnet-logo.svg" alt="PluxNet logo" width="auto" height="auto" />
-            </a>
-          </div>
-        </nav>
-        {children}
-        {/* Ads Manager */}
-        <AdBanner />
-        <ScrollRestoration />
-        <Scripts />
+      <body className="min-h-screen bg-gray-50 ">
+        <div className="flex flex-col justify-between min-h-screen">
+
+          {/* Logo / Navbar */}
+          {/* <nav className="flex items-center justify-center w-full">
+            <div className="w-full flex items-center justify-start pt-5 p-4 max-w-sm">
+              <a href="index.html" className="w-28">
+                <img src="pluxnet-logo.svg" alt="PluxNet logo" width="auto" height="auto" />
+              </a>
+            </div>
+          </nav> */}
+          {children}
+          {/* Ads Manager */}
+          <AdBanner />
+          <ScrollRestoration />
+          <Scripts />
+        </div>
       </body>
     </html>
   );
