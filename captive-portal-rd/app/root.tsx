@@ -9,7 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import AdBanner from "./components/ad-banner";
+import AdBanner from "./index/ad-banner";
 // import "./scss/main.scss";
 
 export const links: Route.LinksFunction = () => [
@@ -34,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-gray-50">
+      <body className="min-h-screen bg-gray-50 flex flex-col justify-between">
         {/* Logo / Navbar */}
         <nav className="flex items-center justify-center w-full shadow-xl">
           <div className="w-full flex items-center justify-start p-4 max-w-sm">

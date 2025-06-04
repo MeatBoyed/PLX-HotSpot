@@ -1,9 +1,9 @@
-import ConnectCard from "~/components/connect-card";
-import { NewsCarousel } from "~/components/news-carousel";
+import ConnectCard from "~/index/connect-card";
+import { NewsCarousel } from "./news-carousel";
 
-export function Welcome() {
+export function IndexPage() {
   return (
-    <main className="flex items-center justify-center mb-10">
+    <main className="flex items-center justify-center ">
       <div className="p-4 w-full space-y-6">
         {/* Connect Card */}
         <ConnectCard backgroundImage="/internet-claim-bg.png" />

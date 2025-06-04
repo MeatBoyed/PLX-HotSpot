@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/button"
-import { Checkbox } from "./ui/checkbox"
+import { Button } from "../components/ui/button"
+import { Checkbox } from "../components/ui/checkbox"
 import { Play, PlayCircleIcon, Wifi } from "lucide-react"
 
 interface ConnectCardProps {
