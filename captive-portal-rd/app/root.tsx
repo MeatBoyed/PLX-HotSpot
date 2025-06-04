@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import AdBanner from "./components/ad-banner";
+// import "./scss/main.scss";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,8 +34,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="min-h-screen bg-gray-50">
+        {/* Logo / Navbar */}
+        <nav className="flex items-center justify-center w-full shadow-xl">
+          <div className="w-full flex items-center justify-start p-4 max-w-sm">
+            <a href="index.html" className="w-28">
+              <img src="pluxnet-logo.svg" alt="PluxNet logo" width="auto" height="auto" />
+            </a>
+          </div>
+        </nav>
         {children}
+        {/* Ads Manager */}
+        <AdBanner />
         <ScrollRestoration />
         <Scripts />
       </body>

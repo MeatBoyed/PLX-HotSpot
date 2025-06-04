@@ -1,0 +1,22 @@
+// media querry variable
+$breakpoints: (
+	full: 1919px,
+	desktop: 1200px,
+	tablet: 991px,
+	phone: 767px,
+	phone-sm: 450px,
+);
+
+@mixin mq($width, $type: max) {
+	@if map_has_key($breakpoints, $width) {
+		$width: map_get($breakpoints, $width);
+
+		@if $type ==min {
+			$width: $width + 1px;
+		}
+
+		@media only screen and (#{$type}-width: $width) {
+			@content;
+		}
+	}
+}

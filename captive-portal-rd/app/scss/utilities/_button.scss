@@ -1,0 +1,108 @@
+
+.btn {
+	--btn-font-family: var(--font-family-primary);
+	--btn-bg-color: transparent;
+	--btn-font-color: var(--color-white);
+	--btn-font-size: 14px;
+	--btn-padding: 10px;
+	--btn-border-color: transparent;
+	--btn-border-radius: 99px;
+	--btn-hover-bg-color: transparent;
+	--btn-hover-font-color: var(--color-white);
+	--btn-hover-border-color: transparent;
+	--btn-focus-bg-color: transparent;
+	--btn-focus-font-color: transparent;
+	--btn-focus-border-color: transparent;
+	--btn-column-gap: 8px;
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	column-gap: var(--btn-column-gap);
+	background-color: var(--btn-bg-color);
+	font-family: var(--btn-font-family);
+	color: var(--btn-font-color);
+	font-weight: 600;
+	font-size: var(--btn-font-size);
+	line-height: 1.3;
+	text-align: center;
+	letter-spacing: 1%;
+	padding: var(--btn-padding);
+	border: 1px solid var(--btn-border-color);
+	border-radius: var(--btn-border-radius);
+	outline-color: var(--color-primary);
+	cursor: pointer;
+	transition-property: color, background-color, border-color, opacity, visibility, box-shadow, outline;
+	transition-duration: .4s;
+
+
+	&:disabled,
+	&.disabled,
+	&[aria-disabled='true'] {
+		pointer-events: none;
+		opacity: .7;
+		cursor: not-allowed;
+	}
+
+	&:hover {
+		background-color: var(--btn-hover-bg-color);
+		color: var(--btn-hover-font-color);
+		border-color: var(--btn-hover-border-color);
+
+		svg {
+			* {
+				stroke: var(--btn-hover-font-color);
+			}
+		}
+	}
+
+	.btn-icon {
+		display: inline-flex;
+		min-width: rem(32);
+		max-width: rem(32);
+		min-height: rem(32);
+		max-height: rem(32);
+		border-radius: 50%;
+	}
+
+	svg {
+		* {
+			transition: all .4s;
+		}
+	}
+
+	&-primary {
+		min-width: 143px;
+	
+		--btn-bg-color: var(--color-primary);
+		--btn-font-color: var(--color-white);
+		--btn-hover-bg-color: var(--color-primary-dark);
+		--btn-hover-font-color: var(--color-white);
+		--btn-hover-border-color: var(--color-primary-dark);
+	}
+
+	&-secondary {
+		--btn-font-size: 15px;
+		--btn-bg-color: var(--color-white);
+		--btn-font-color: var(--color-text-link);
+		--btn-hover-bg-color: var(--color-dark);
+		--btn-hover-font-color: var(--color-white);
+		--btn-padding: 9px 10px;
+	}
+}
+
+.btn-link {
+  font-size: rem(15);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--link-text-primary);
+	padding: 0;
+	transition-property: color, background-color, border-color, opacity, visibility, box-shadow, outline;
+	transition-duration: .4s;
+	&:hover {
+		text-decoration: underline;
+		color: var(--link-text-primary);
+	}
+}
+
+

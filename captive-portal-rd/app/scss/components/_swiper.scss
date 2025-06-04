@@ -1,0 +1,35 @@
+
+.slider-navigation {
+  --swiper-navigation-sides-offset: 0;
+  --swiper-navigation-size: 40px;
+
+  @include mq(tablet) {
+    display: none;
+  }
+
+  .swiper-button-next,
+  .swiper-button-prev {
+    width: var(--swiper-navigation-size);
+    transition: all .4s;
+  }
+}
+
+
+.page-item {
+  &::before,
+  &::after {
+    display: none;
+  }
+
+  .btn {
+    --btn-padding: 0;
+    --btn-border-radius: 50%;
+    min-width: 40px;
+    aspect-ratio: 1;
+  }
+
+  svg {
+    width: auto;
+    height: auto;
+  }
+}
