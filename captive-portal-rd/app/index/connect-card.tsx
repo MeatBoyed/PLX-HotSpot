@@ -31,7 +31,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
     }
 
     return (
-        <div className="relative bg-[#301358] rounded-3xl w-full max-w-sm mx-auto">
+        <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
             {/* Background image overlay if provided */}
             {backgroundImage && (
                 <img
