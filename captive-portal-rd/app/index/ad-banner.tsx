@@ -1,7 +1,7 @@
 
 export default function AdBanner() {
     return (
-        <section className="w-full flex items-center justify-center">
+        <section className="w-full flex items-center justify-center md:bg-[#301358]">
             <div className="w-full max-w-md">
 
                 <div className="w-full relative">

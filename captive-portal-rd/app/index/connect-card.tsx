@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "~/components/
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useNavigate } from "react-router"
 
 interface ConnectCardProps {
     backgroundImage?: string
@@ -17,6 +18,7 @@ export const ConnectFormSchema = z.object({
 export type ConnectFormSchemaType = z.infer<typeof ConnectFormSchema>
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) {
+    const navigate = useNavigate()
 
     const form = useForm<z.infer<typeof ConnectFormSchema>>({
         resolver: zodResolver(ConnectFormSchema),
@@ -28,6 +30,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
         // ✅ This will be type-safe and validated.
         // console.log(values)
         alert("Connecting to WiFi... Please wait.")
+        navigate("/welcome")
     }
 
     return (
