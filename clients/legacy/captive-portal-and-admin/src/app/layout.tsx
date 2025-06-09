@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AdBanner from "@/components/home-page/ad-banner";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           {children}
           {/* Ads Manager */}
           <AdBanner />
+          <Toaster position="top-center" richColors />
         </div>
       </body>
     </html>

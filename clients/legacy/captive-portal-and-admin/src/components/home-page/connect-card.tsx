@@ -7,10 +7,12 @@ import { z } from "zod"
 import { Checkbox } from "@radix-ui/react-checkbox"
 import { Button } from "../ui/button"
 // import { FormField, FormItem, FormControl, FormLabel } from "../ui/form"
-import { useState } from "react"
-// import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Form from "next/form"
 import { loginToHotspot } from "@/lib/mikrotik/mikrotik-service"
+import { useFormState } from "react-dom"
+import { toast } from "sonner"
 
 interface ConnectCardProps {
     backgroundImage?: string
@@ -22,35 +24,42 @@ export const ConnectFormSchema = z.object({
     }),
 })
 export type ConnectFormSchemaType = z.infer<typeof ConnectFormSchema>
+const initialState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) {
-    const [termsAccepted, setTermsAccepted] = useState(false)
-    // const router = useRouter()
+    const router = useRouter()
+    const [state, formAction] = useFormState(loginToHotspot, initialState);
 
-    // const form = useForm<z.infer<typeof ConnectFormSchema>>({
-    //     resolver: zodResolver(ConnectFormSchema),
-    // })
-
-    // 2. Define a submit handler.
-    // function onSubmit(values: ConnectFormSchemaType) {
+    // function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    //     event.preventDefault()
+    //     if (!termsAccepted) {
+    //         alert("You must accept the terms and conditions to continue")
+    //         return
+    //     }
     //     // Do something with the form values.
     //     // ✅ This will be type-safe and validated.
-    //     // console.log(values)
     //     alert("Connecting to WiFi... Please wait.")
-    //     router.push("/welcome")
+    //     // router.push("/welcome")
     // }
 
-    function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        if (!termsAccepted) {
-            alert("You must accept the terms and conditions to continue")
-            return
+    // Handles displaying appropriate toast per Action response
+    useEffect(() => {
+        if (state.message) {
+            toast.error("Oops! Something went wrong. Please try again.", {
+                description: state.message
+            })
+        } else if (state.success) {
+            toast.success("Successfully connected to WiFi!", {
+                description: "Redirecting you to the welcome page..."
+            })
+            router.push("/welcome")
         }
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        alert("Connecting to WiFi... Please wait.")
-        // router.push("/welcome")
-    }
+    }, [state])
+    // if (state.success && typeof window !== "undefined") {
+    //     setTimeout(() => {
+    //         window.location.href = "/welcome";
+    //     }, 1000)
+    // }
 
     return (
         <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
@@ -82,8 +91,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
                 {/* Checkbox */}
                 {/* <Form {...form}> */}
                 {/* <form onSubmit={form.handleSubmit(onSubmit)} > */}
-                <Form action={loginToHotspot}>
-
+                <Form action={formAction}>
                     <div className="flex items-start justify-center space-x-3 mb-4">
                         {/* <FormField
                             control={form.control}
@@ -112,8 +120,9 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
 
                     {/* CTA Button */}
                     <Button
-                        className="w-full bg-white rounded-4xl hover:bg-gray-100 text-[#301358] font-medium py-6  text-base"
+                        className="w-full bg-white rounded-4xl hover:bg-gray-100 text-[#301358] font-medium py-6  text-base hover:cursor-pointer"
                         type="submit"
+                        disabled={state.success}
                     // disabled={!accepted}
                     >
                         {/* <PlayCircleIcon size={70} className="w-5 h-5 mr-2 fill-white text-[#301358]" /> */}
