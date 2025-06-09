@@ -2,12 +2,12 @@
 
 
 import { z } from "zod"
-import { Form, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Checkbox } from "@radix-ui/react-checkbox"
+// import { Form, useForm } from "react-hook-form"
+// import { zodResolver } from "@hookform/resolvers/zod"
+// import { Checkbox } from "@radix-ui/react-checkbox"
 import { Button } from "../ui/button"
-import { FormField, FormItem, FormControl, FormLabel } from "../ui/form"
-import { useRouter } from "next/navigation"
+// import { FormField, FormItem, FormControl, FormLabel } from "../ui/form"
+// import { useRouter } from "next/navigation"
 
 interface ConnectCardProps {
     backgroundImage?: string
@@ -21,7 +21,7 @@ export const ConnectFormSchema = z.object({
 export type ConnectFormSchemaType = z.infer<typeof ConnectFormSchema>
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) {
-    const router = useRouter()
+    // const router = useRouter()
 
     // const form = useForm<z.infer<typeof ConnectFormSchema>>({
     //     resolver: zodResolver(ConnectFormSchema),
@@ -40,6 +40,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
         <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
             {/* Background image overlay if provided */}
             {backgroundImage && (
+                //    /* eslint-disable @next/next/no-img-element */
                 <img
                     src={backgroundImage || "/placeholder.svg"}
                     alt="Background overlay"
@@ -98,6 +99,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
                 // disabled={!accepted}
                 >
                     {/* <PlayCircleIcon size={70} className="w-5 h-5 mr-2 fill-white text-[#301358]" /> */}
+                    {/* eslint-disable @next/next/no-img-element  */}
                     <img src="watch-video-icon.svg" alt="watch video" width={"auth"} height={"auto"} />
                     Watch video to claim
                 </Button>

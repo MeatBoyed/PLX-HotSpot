@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 export default async function Home() {
   const cookieStore = await cookies();
   const mikrotikRaw = cookieStore.get('mikrotik-data')?.value;
-  const mikrotik = mikrotikRaw ? JSON.parse(mikrotikRaw) : null;
+  // const mikrotik = mikrotikRaw ? JSON.parse(mikrotikRaw) : null;
 
   console.log("Raw data: ", mikrotikRaw)
 
@@ -15,6 +15,7 @@ export default async function Home() {
       <nav className="flex items-center justify-center w-full">
         <div className="w-full flex items-center justify-start pt-8 p-4 max-w-md">
           <a href="index.html" className="w-28">
+            {/* eslint-disable @next/next/no-img-element  */}
             <img src="pluxnet-logo.svg" alt="PluxNet logo" width="auto" height="auto" />
           </a>
         </div>

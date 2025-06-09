@@ -26,6 +26,7 @@ export function NewsCarousel() {
 export function NewsCard() {
     return (
         <div className="flex justify-start items-start gap-2.5 bg-gray-100 rounded-lg p-3 shadow-md min-w-full">
+            {/* eslint-disable @next/next/no-img-element  */}
             <img src="news-img-1.png" alt="news image" className="min-w-20 min-h-20 rounded-md" />
             <div className="news-slide-info">
                 <h6 className="font-medium text-base">Bond Market Shudders as Tax Bill Deepens Deficit Worries</h6>
