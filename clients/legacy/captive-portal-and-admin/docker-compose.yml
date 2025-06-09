@@ -1,0 +1,23 @@
+# version: '3.4'
+
+services:
+  next-captive-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      #- "127.0.0.1:3022:80" # access via http://localhost:3000
+      - "3022:80"
+    restart: unless-stopped
+    networks:
+      - default
+      - public-proxy
+
+volumes:
+  next-captive-portal:
+
+networks:
+  default:
+    name: next-captive-portal
+  public-proxy:
+    external: true
