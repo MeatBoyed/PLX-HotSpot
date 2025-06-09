@@ -7,7 +7,7 @@ export default function CurrentPlanCard() {
         <Card className="bg-[#F2F2F2] w-full">
             <CardHeader>
                 <CardTitle className="text-[#F60031] font-bold text-2xl">
-                    You're out of internet!
+                    You&apos;re out of internet!
                 </CardTitle>
                 <CardDescription className="flex flex-col items-start justify-start gap-4 border-b pb-4">
                     <p className="text-[#5D5D5D] font-medium text-sm">
