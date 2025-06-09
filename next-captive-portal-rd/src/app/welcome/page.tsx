@@ -1,14 +1,29 @@
 // app/page.tsx
+"use client"
 import CurrentPlanCard from '@/components/welcome-page/current-plan-card';
 import PlanCard from '@/components/welcome-page/plan-card';
-import { cookies } from 'next/headers';
+import { getHotspotStatus } from '@/lib/mikrotik/mikrotik-service';
+import { MikroTikStatus } from '@/lib/mikrotik/mikrotik-types';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-export default async function WelcomePage() {
-    const cookieStore = await cookies();
-    const mikrotikRaw = cookieStore.get('mikrotik-data')?.value;
-    // const mikrotik = mikrotikRaw ? JSON.parse(mikrotikRaw) : null;
+export default function WelcomePage() {
 
-    console.log("Raw data: ", mikrotikRaw)
+    const [status, setStatus] = useState<MikroTikStatus | null>(null);
+    // const status = await getHotspotStatus()
+    // console.log("Status:", status);
+
+    useEffect(() => {
+        getHotspotStatus().then((res) => {
+            if (res.success && res.data) {
+                console.log("Hotspot Status:", res.data);
+                setStatus(res.data);
+            } else {
+                toast.error(`Failed to fetch hotspot status: ${res.message || "Unknown error"}`);
+            }
+        });
+    }, []);
+
 
     return (
         <div className="flex flex-col items-center justify-start bg-[#301358]">
@@ -38,7 +53,7 @@ export default async function WelcomePage() {
                     {/* Current Plan */}
                     <div className="flex flex-col items-start justify-start gap-4 w-full">
                         <h4 className="text-lg font-bold text-[#7A7A7A]">Current plan</h4>
-                        <CurrentPlanCard />
+                        <CurrentPlanCard bytesIn={status?.bytes_in_nice || ""} bytes_limit={status?.remain_bytes_out || ""} />
                     </div>
 
                     {/* Available Plans */}
