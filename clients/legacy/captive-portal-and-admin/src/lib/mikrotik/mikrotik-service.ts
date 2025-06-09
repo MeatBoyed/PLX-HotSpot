@@ -2,7 +2,7 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { MikroTikData, MikroTikDataSchema, MikroTikStatus, MikroTikStatusSchema } from "./mikrotik-types";
+import { MikroTikDataSchema, MikroTikStatus, } from "./mikrotik-types";
 import { getMikroTikDataFromCookie, parseMikroTikStatus } from "./mikrotik-lib";
 
 type LoginFormState = {
@@ -10,7 +10,7 @@ type LoginFormState = {
     message?: string;
 };
 
-export async function loginToHotspot(_: any, formData: FormData): Promise<LoginFormState> {
+export async function loginToHotspot(): Promise<LoginFormState> {
     // Default credentials (No Registration)
     const username = "click_to_connect@dev";
     const password = "click_to_connect";
