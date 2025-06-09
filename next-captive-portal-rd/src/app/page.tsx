@@ -1,15 +1,14 @@
-import ConnectCard from "~/index/connect-card";
-import { NewsCarousel } from "./news-carousel";
-import { useSearchParams } from "react-router";
+// app/page.tsx
+import ConnectCard from '@/components/home-page/connect-card';
+import { NewsCarousel } from '@/components/home-page/news-carousel';
+import { cookies } from 'next/headers';
 
-export function IndexPage() {
-  const [params] = useSearchParams();
+export default async function Home() {
+  const cookieStore = await cookies();
+  const mikrotikRaw = cookieStore.get('mikrotik-data')?.value;
+  const mikrotik = mikrotikRaw ? JSON.parse(mikrotikRaw) : null;
 
-  const mac = params.get('mac');
-  const loginLink = params.get('loginlink');
-  const nasid = params.get('nasid');
-
-  console.log(`mac: ${mac}, loginLink: ${loginLink}, nasid: ${nasid}`);
+  console.log("Raw data: ", mikrotikRaw)
 
   return (
     <>

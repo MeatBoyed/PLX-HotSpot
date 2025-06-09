@@ -1,0 +1,54 @@
+$(if error == '')
+<html>
+
+<head>
+    <title>Redirecting...</title>
+</head>
+
+<body>
+
+    $(if chap-id)
+    <noscript>
+        <center><b>JavaScript required. Enable JavaScript to continue.</b></center>
+    </noscript>
+    $(endif)
+
+    <center>
+        If you are not redirected in a few seconds, click 'continue' below<br>
+
+        <!-- Debug output -->
+        <pre>
+    loginlink: $(link-login-only)
+    mac: $(mac-esc)
+    identity: $(identity)
+    link_status: $(link-status)
+  </pre>
+
+        <form name="redirect" action="http://localhost:3000/post-handler" method="post">
+            <input type="hidden" name="loginlink" value="$(link-login-only)">
+            <input type="hidden" name="nasid" value="$(identity)">
+            <input type="hidden" name="link_status" value="$(link-status)">
+            <input type="hidden" name="link_login_only" value="$(link-login-only)">
+            <input type="hidden" name="link_logout" value="$(link-logout)">
+            <input type="hidden" name="mac" value="$(mac-esc)">
+            <input type="hidden" name="type" value="mikrotik">
+            <input type="hidden" name="ssid" value="dev">
+            <input type="submit" value="continue">
+        </form>
+
+        <script>
+            document.forms['redirect'].submit();
+        </script>
+    </center>
+
+</body>
+
+</html>
+$(else)
+$(var)({
+'logged_in': '$(logged-in)',
+'link_login_only': '$(link-login-only)',
+'error_orig': '$(error-orig)',
+'error': '$(error)'
+})
+$(endif)

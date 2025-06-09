@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Processing POST...</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background: #f2f2f2;
+      }
+      pre {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        max-height: 400px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🛂 Mikrotik POST Bridge</h2>
+    <p>Reading POST data and redirecting shortly...</p>
+    <pre id="output">Waiting for POST...</pre>
+
+    <form method="POST">
+      <!-- Required dummy form for FormData API -->
+    </form>
+
+    <script>
+      (function () {
+        if (window.location.method === 'GET') {
+          document.getElementById("output").textContent =
+            "❌ GET method not allowed. This page only works with POST requests.";
+          return;
+        }
+
+        try {
+          const form = document.forms[0];
+          const formData = new FormData(form);
+          const params = new URLSearchParams();
+          const output = {};
+
+          for (const [key, value] of formData.entries()) {
+            params.append(key, value);
+            output[key] = value;
+          }
+
+          // Show the POST data on screen
+          document.getElementById("output").textContent = JSON.stringify(output, null, 2);
+
+          // Delay redirect so you can read it
+          setTimeout(() => {
+            window.location.href = `/?${params.toString()}`;
+          }, 5000);
+        } catch (err) {
+          document.getElementById("output").textContent = `❌ Error: ${err.message}`;
+        }
+      })();
+    </script>
+    <noscript>
+      <p><strong>⚠ JavaScript is required to continue.</strong></p>
+    </noscript>
+  </body>
+</html>
