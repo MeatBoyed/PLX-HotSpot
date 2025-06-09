@@ -36,7 +36,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) 
             })
             router.push("/welcome")
         }
-    }, [state])
+    }, [state, router])
 
     return (
         <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
