@@ -1,8 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 
-export default function CurrentPlanCard() {
-
+export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: string, bytes_limit: string }) {
     return (
         <Card className="bg-[#F2F2F2] w-full">
             <CardHeader>
@@ -20,7 +19,7 @@ export default function CurrentPlanCard() {
                         </div>
                         <div className="space-y-1.5">
                             <h3 className="text-sm font-medium text-[#5D5D5D]">Data used</h3>
-                            <h5 className="font-bold text-base text-[#181818]">1.41 GB/<span className="text-base font-medium text-[#5D5D5D]">2GB</span></h5>
+                            <h5 className="font-bold text-base text-[#181818]">{bytesIn} / <span className="text-base font-medium text-[#5D5D5D]">{bytes_limit === "" ? "Unlimited" : bytes_limit}</span></h5>
                         </div>
                     </div>
                 </CardDescription>

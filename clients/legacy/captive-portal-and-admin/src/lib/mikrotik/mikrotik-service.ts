@@ -2,7 +2,8 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { MikroTikData, MikroTikDataSchema } from "./mikrotik-types";
+import { MikroTikData, MikroTikDataSchema, MikroTikStatus, MikroTikStatusSchema } from "./mikrotik-types";
+import { getMikroTikDataFromCookie, parseMikroTikStatus } from "./mikrotik-lib";
 
 type LoginFormState = {
     success: boolean;
@@ -40,25 +41,52 @@ export async function loginToHotspot(_: any, formData: FormData): Promise<LoginF
     }
 }
 
-// Handles retrieving Mikrotik data from cookie, validating, typing and returning it
-export async function getMikroTikDataFromCookie(): Promise<MikroTikData | null> {
+
+type StatusResponse = {
+    success: boolean;
+    data?: MikroTikStatus;
+    message?: string;
+};
+
+export async function getHotspotStatus(): Promise<StatusResponse> {
     const cookieStore = await cookies();
     const raw = cookieStore.get("mikrotik-data")?.value;
 
-    if (!raw) return null;
+    if (!raw) return { success: false, message: "No Session data found" };
+
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch {
+        return { success: false, message: "Invalid cookie format" };
+    }
+
+    const validated = MikroTikDataSchema.safeParse(parsed);
+    if (!validated.success) {
+        return { success: false, message: "Invalid session structure" };
+    }
+
+    const baseUrl = validated.data.link_status ?? "http://10.5.50.1/status";
+    const url = new URL(baseUrl);
+
+    // Optional: add cache buster
+    url.searchParams.set("_", Date.now().toString());
 
     try {
-        const parsed = JSON.parse(raw);
-        const result = MikroTikDataSchema.safeParse(parsed);
+        const res = await fetch(url.toString(), { method: "GET" });
+        const rawText = await res.text();
 
-        if (!result.success) {
-            console.error("Invalid MikroTik cookie data:", result.error.flatten());
-            return null;
-        }
 
-        return result.data;
+        console.log("Raw Text res: ", rawText);
+
+        const status = parseMikroTikStatus(rawText);
+        if (!status) return { success: false, message: "Failed to parse status" };
+
+        return { success: true, data: status };
     } catch (err) {
-        console.error("Failed to parse MikroTik cookie:", err);
-        return null;
+        console.error("Fetch error:", err);
+        return { success: false, message: "Request failed" };
     }
 }
+
+
