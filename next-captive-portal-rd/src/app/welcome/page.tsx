@@ -1,29 +1,27 @@
 // app/page.tsx
-"use client"
-import CurrentPlanCard from '@/components/welcome-page/current-plan-card';
-import PlanCard from '@/components/welcome-page/plan-card';
-import { getHotspotStatus } from '@/lib/mikrotik/mikrotik-service';
-import { MikroTikStatus } from '@/lib/mikrotik/mikrotik-types';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+"use server"
 
-export default function WelcomePage() {
+import UserSession from '@/components/welcome-page/user-session';
+import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
+import { getUserSession } from '@/lib/mikrotik/mikrotik-service';
+import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
+import { redirect } from 'next/navigation';
 
-    const [status, setStatus] = useState<MikroTikStatus | null>(null);
-    // const status = await getHotspotStatus()
-    // console.log("Status:", status);
+export default async function WelcomePage() {
+    // Get Posted Mikrotik Data
+    const mikrotikRaw = await getMikroTikDataFromCookie();
+    if (!mikrotikRaw) {
+        redirect("/");
+    }
+    console.log("Raw data: ", mikrotikRaw)
 
-    useEffect(() => {
-        getHotspotStatus().then((res) => {
-            if (res.success && res.data) {
-                console.log("Hotspot Status:", res.data);
-                setStatus(res.data);
-            } else {
-                toast.error(`Failed to fetch hotspot status: ${res.message || "Unknown error"}`);
-            }
-        });
-    }, []);
 
+    const userSession = await getUserSession(mikrotikRaw as MikroTikData);
+    if (userSession.success && userSession.data) {
+        console.log("Hotspot Status:", userSession.data);
+    } else {
+        redirect("/")
+    }
 
     return (
         <div className="flex flex-col items-center justify-start bg-[#301358]">
@@ -49,22 +47,10 @@ export default function WelcomePage() {
             </section>
 
             <main className="flex items-start justify-start bg-white w-full rounded-t-[20px] pt-3 pb-10 md:items-center md:justify-center max-w-md">
-                <section className="p-4 w-full space-y-6">
-                    {/* Current Plan */}
-                    <div className="flex flex-col items-start justify-start gap-4 w-full">
-                        <h4 className="text-lg font-bold text-[#7A7A7A]">Current plan</h4>
-                        <CurrentPlanCard bytesIn={status?.bytes_in_nice || ""} bytes_limit={status?.remain_bytes_out || ""} />
-                    </div>
+                {mikrotikRaw && (
 
-                    {/* Available Plans */}
-                    <div className="flex flex-col items-start justify-start gap-4 w-full">
-                        <h4 className="text-lg font-bold text-[#7A7A7A]">Plans</h4>
-                        <div className="flex justify-between items-start gap-4 w-full">
-                            <PlanCard />
-                            <PlanCard />
-                        </div>
-                    </div>
-                </section>
+                    <UserSession status={userSession.data} />
+                )}
             </main>
         </div>
     );

@@ -1,42 +1,38 @@
 "use client"
-
 import { Button } from "../ui/button"
-import { useEffect, } from "react"
 import { useRouter } from "next/navigation"
 import Form from "next/form"
 import { loginToHotspot } from "@/lib/mikrotik/mikrotik-service"
 import { useFormState } from "react-dom"
 import { toast } from "sonner"
+import { LoginFormState, MikroTikData } from "@/lib/mikrotik/mikrotik-types"
 
 interface ConnectCardProps {
     backgroundImage?: string
+    mikrotikData: MikroTikData
 }
-
-// export const ConnectFormSchema = z.object({
-//     termsAccepted: z.boolean().refine((val) => val === true, {
-//         message: "You must accept the terms and conditions to continue",
-//     }),
-// })
-// export type ConnectFormSchemaType = z.infer<typeof ConnectFormSchema>
 const initialState = { success: false, message: "" };
 
-export default function ConnectCard({ backgroundImage }: ConnectCardProps = {}) {
+export default function ConnectCard({ backgroundImage, mikrotikData }: ConnectCardProps) {
     const router = useRouter()
-    const [state, formAction] = useFormState(loginToHotspot, initialState);
+    const [state, formAction] = useFormState(handleSubmit, initialState);
 
-    // Handles displaying appropriate toast per Action response
-    useEffect(() => {
-        if (state.message) {
-            toast.error("Oops! Something went wrong. Please try again.", {
-                description: state.message
-            })
-        } else if (state.success) {
-            toast.success("Successfully connected to WiFi!", {
-                description: "Redirecting you to the welcome page..."
-            })
-            router.push("/welcome")
-        }
-    }, [state, router])
+    function handleSubmit(): LoginFormState {
+        let res: LoginFormState = { success: false, message: "" };
+        toast.promise(loginToHotspot(mikrotikData), {
+            loading: "Connecting to PluxNet Fibre Hotspot...",
+            success: (data) => {
+                res = data
+                return "Connected to PluxNet Fibre Hotspot"
+            },
+            error: (error) => {
+                res = error
+                return "Oops! Something went wrong. Please try again."
+            }
+        })
+        router.push("/welcome")
+        return res
+    }
 
     return (
         <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
