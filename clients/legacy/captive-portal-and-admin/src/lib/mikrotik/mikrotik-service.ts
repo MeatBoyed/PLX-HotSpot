@@ -1,7 +1,7 @@
 "use server"
 import { parseMikroTikStatus } from "./mikrotik-lib";
 // Must run Client side to use Brower's Fetch/Network to access Mikrotik Hotspot on the network
-import { LoginFormState, MikroTikData, MikroTikStatus, MikroTikStatusSchema, StatusResponse, } from "./mikrotik-types";
+import { LoginFormState, MikroTikData, StatusResponse, } from "./mikrotik-types";
 
 export async function loginToHotspot(mikrotikData: MikroTikData): Promise<LoginFormState> {
     // Default credentials (No Registration)
