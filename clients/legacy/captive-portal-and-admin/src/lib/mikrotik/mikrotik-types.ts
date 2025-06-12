@@ -34,3 +34,13 @@ export const MikroTikStatusSchema = z.object({
 });
 
 export type MikroTikStatus = z.infer<typeof MikroTikStatusSchema>;
+
+export type LoginFormState = {
+    success: boolean;
+    message?: string;
+};
+export type StatusResponse = {
+    success: boolean;
+    data?: MikroTikStatus;
+    message?: string;
+};

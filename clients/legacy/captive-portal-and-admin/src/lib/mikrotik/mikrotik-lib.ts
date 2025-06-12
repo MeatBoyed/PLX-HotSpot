@@ -1,3 +1,5 @@
+// Must be Server Side to access Cookies
+"use server";
 import { cookies } from "next/headers";
 import { MikroTikData, MikroTikDataSchema, MikroTikStatus, MikroTikStatusSchema } from "./mikrotik-types";
 
@@ -25,7 +27,7 @@ export async function getMikroTikDataFromCookie(): Promise<MikroTikData | null> 
 }
 
 
-export function parseMikroTikStatus(rawText: string): MikroTikStatus | null {
+export async function parseMikroTikStatus(rawText: string): Promise<MikroTikStatus | null> {
     try {
         const trimmed = rawText.trim();
 

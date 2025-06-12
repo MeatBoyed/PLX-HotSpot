@@ -1,14 +1,24 @@
 // app/page.tsx
+"use server"
 import ConnectCard from '@/components/home-page/connect-card';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { cookies } from 'next/headers';
+import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
+import { getUserSession } from '@/lib/mikrotik/mikrotik-service';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const mikrotikRaw = cookieStore.get('mikrotik-data')?.value;
-  // const mikrotik = mikrotikRaw ? JSON.parse(mikrotikRaw) : null;
-
+  // Get Posted Mikrotik Data
+  const mikrotikRaw = await getMikroTikDataFromCookie();
+  if (!mikrotikRaw) {
+    redirect("https://pluxnet.co.za");
+  }
   console.log("Raw data: ", mikrotikRaw)
+
+  // Check if user is already logged in & redirect to "/welcome" if they are
+  const userSession = await getUserSession(mikrotikRaw)
+  if (userSession.success && userSession.data) {
+    redirect("/welcome")
+  }
 
   return (
     <>
@@ -23,7 +33,9 @@ export default async function Home() {
       <main className="flex items-center justify-center ">
         <div className="p-4 w-full space-y-6">
           {/* Connect Card */}
-          <ConnectCard backgroundImage="/internet-claim-bg.png" />
+          {mikrotikRaw && (
+            <ConnectCard mikrotikData={mikrotikRaw} backgroundImage="/internet-claim-bg.png" />
+          )}
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             <h4 className="flex items-center justify-between w-full max-w-md">
