@@ -1,13 +1,14 @@
 "use server"
-import { parseMikroTikStatus } from "./mikrotik-lib";
 // Must run Client side to use Brower's Fetch/Network to access Mikrotik Hotspot on the network
+import { parseMikroTikStatus } from "./mikrotik-lib";
 import { LoginFormState, MikroTikData, StatusResponse, } from "./mikrotik-types";
 
-export async function loginToHotspot(mikrotikData: MikroTikData): Promise<LoginFormState> {
+export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: string): Promise<LoginFormState> {
     // Default credentials (No Registration)
-    const username = "click_to_connect@dev";
-    const password = "click_to_connect";
+    const username = voucherCode ?? "click_to_connect@dev";
+    const password = voucherCode ?? "click_to_connect";
 
+    console.log("Credentials: ", { username, password });
     // Use provided Mikrotik login link and supply credentials
     const url = `${mikrotikData.loginlink}?${new URLSearchParams({ username, password })}`;
 
@@ -38,9 +39,9 @@ export async function getUserSession(mikrotikData: MikroTikData): Promise<Status
 
     try {
         const res = await fetch(url.toString(), { method: "GET" });
-        console.log("Response: ", res)
         const rawText = await res.text();
 
+        // console.log("Response: ", res)
         // console.log("Raw Text res: ", rawText);
 
         const status = await parseMikroTikStatus(rawText);
