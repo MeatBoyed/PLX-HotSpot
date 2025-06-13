@@ -15,10 +15,12 @@ const initialState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage, mikrotikData }: ConnectCardProps) {
     const router = useRouter()
+    // const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useFormState(handleSubmit, initialState);
 
     function handleSubmit(): LoginFormState {
         let res: LoginFormState = { success: false, message: "" };
+        // toast.promise(loginToHotspot(mikrotikData, voucherCode === "" ? undefined : voucherCode), {
         toast.promise(loginToHotspot(mikrotikData), {
             loading: "Connecting to PluxNet Fibre Hotspot...",
             success: (data) => {
@@ -62,8 +64,16 @@ export default function ConnectCard({ backgroundImage, mikrotikData }: ConnectCa
                 </div>
 
                 {/* Checkbox */}
-                <Form action={formAction}>
-                    <div className="flex items-start justify-center space-x-3 mb-4">
+                <Form action={formAction} className="flex flex-col justify-center items-center">
+                    {/* <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-white border border-[#CECECE] rounded-lg text-black">
+                        <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder="Enter voucher code" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
+                        <button type="button" className="text-base font-semibold text-[#5B3393]" onClick={() => {
+
+                        }} >
+                            Apply
+                        </button>
+                    </div> */}
+                    <div className="flex items-center justify-center space-x-3 mb-4">
                         <input
                             id="terms"
                             type="checkbox"
