@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: nextjs-docker
+    image: next-captive-portal
     container_name: next-captive-portal
     ports:
       - "3000:3000"
