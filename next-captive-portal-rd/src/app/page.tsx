@@ -2,15 +2,27 @@
 "use server"
 import ConnectCard from '@/components/home-page/connect-card';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
+// import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
 import { getUserSession } from '@/lib/mikrotik/mikrotik-service';
+import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
 import { redirect } from 'next/navigation';
 
 export default async function Home() {
   // Get Posted Mikrotik Data
-  const mikrotikRaw = await getMikroTikDataFromCookie();
+  // const mikrotikRaw = await getMikroTikDataFromCookie();
+  const mikrotikRaw: MikroTikData = {
+    loginlink: 'http://charles.hotspot/login',
+    nasid: 'Charles-MT',
+    link_status: 'http://charles.hotspot/status',
+    link_login_only: 'http://charles.hotspot/login',
+    link_logout: 'http://charles.hotspot/logout',
+    mac: '98%3ABD%3A80%3ACE%3AD8%3A35',
+    type: 'mikrotik',
+    ssid: 'dev'
+
+  }
   if (!mikrotikRaw) {
-    redirect("/");
+    redirect("https://pluxnet.co.za");
   }
   console.log("Raw data: ", mikrotikRaw)
 
@@ -36,17 +48,6 @@ export default async function Home() {
           {mikrotikRaw && (
             <ConnectCard mikrotikData={mikrotikRaw} backgroundImage="/internet-claim-bg.png" />
           )}
-          {/* <ConnectCard mikrotikData={{
-            loginlink: 'http://charles.hotspot/login',
-            nasid: 'Charles-MT',
-            link_status: 'http://charles.hotspot/status',
-            link_login_only: 'http://charles.hotspot/login',
-            link_logout: 'http://charles.hotspot/logout',
-            mac: '98%3ABD%3A80%3ACE%3AD8%3A35',
-            type: 'mikrotik',
-            ssid: 'dev'
-
-          }} backgroundImage="/internet-claim-bg.png" /> */}
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             <h4 className="flex items-center justify-between w-full max-w-md">
