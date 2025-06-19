@@ -3,7 +3,7 @@
 
 import UserSession from '@/components/welcome-page/user-session';
 // import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
-import { getUserSession } from '@/lib/mikrotik/mikrotik-service';
+// import { getUserSession } from '@/lib/mikrotik/mikrotik-service';
 import { MikroTikData, StatusResponse } from '@/lib/mikrotik/mikrotik-types';
 import { redirect } from 'next/navigation';
 
