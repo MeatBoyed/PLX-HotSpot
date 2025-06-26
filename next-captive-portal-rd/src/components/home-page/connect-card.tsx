@@ -110,6 +110,7 @@ import { useFormState } from "react-dom";
 import Form from "next/form";
 import { MikroTikData, LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
+import VideoAd from "@/lib/revive-video-ad";
 
 interface ConnectCardProps {
     backgroundImage?: string;
@@ -119,7 +120,7 @@ interface ConnectCardProps {
 const initialState: LoginFormState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage, mikrotikData }: ConnectCardProps) {
-    const { connect } = useConnect();
+    const { connect, showAd, adUrl, onAdComplete } = useConnect();
     const [state, formAction] = useFormState(handleSubmit, initialState);
 
     async function handleSubmit(): Promise<LoginFormState> {
@@ -127,49 +128,62 @@ export default function ConnectCard({ backgroundImage, mikrotikData }: ConnectCa
     }
 
     return (
-        <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
-            {backgroundImage && (
-                <img
-                    src={backgroundImage || "/placeholder.svg"}
-                    alt="Background overlay"
-                    className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-                />
+        <>
+            {showAd && (
+                <div className="fixed min-h-screen inset-0 z-50 flex items-center justify-center">
+                    {/* Dark transparent background */}
+                    <div className="absolute inset-0 bg-black/70 z-0" />
+
+                    {/* Video Ad on top */}
+                    <div className="relative z-10 max-w-2xl w-full">
+                        <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
+                    </div>
+                </div>
             )}
+            <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
+                {backgroundImage && (
+                    <img
+                        src={backgroundImage || "/placeholder.svg"}
+                        alt="Background overlay"
+                        className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+                    />
+                )}
 
-            <div className="relative rounded-sm p-4 text-white overflow-hidden">
-                <div className="flex justify-center mb-2">
-                    <img src="wifi-icon.svg" alt="wifi icon" width="70px" height="70px" />
-                </div>
-
-                <div className="text-center mb-10">
-                    <h2 className="text-xl font-bold leading-tight">
-                        Get 1.5 GB of internet free of cost, provided by PluxNet Fibre
-                    </h2>
-                </div>
-
-                <Form action={formAction} className="flex flex-col justify-center items-center">
-                    <div className="flex items-center justify-center space-x-3 mb-4">
-                        <input
-                            id="terms"
-                            type="checkbox"
-                            required
-                            className="border-white data-[state=checked]:bg-white data-[state=checked]:text-[#301358] mt-0.5"
-                        />
-                        <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
-                            Accept terms & conditions to continue
-                        </label>
+                <div className="relative rounded-sm p-4 text-white overflow-hidden">
+                    <div className="flex justify-center mb-2">
+                        <img src="wifi-icon.svg" alt="wifi icon" width="70px" height="70px" />
                     </div>
 
-                    <Button
-                        className="w-full bg-white rounded-4xl hover:bg-gray-100 text-[#301358] font-medium py-6  text-base hover:cursor-pointer"
-                        type="submit"
-                        disabled={state.success}
-                    >
-                        <img src="watch-video-icon.svg" alt="watch video" width="auth" height="auto" />
-                        Watch video to claim
-                    </Button>
-                </Form>
+                    <div className="text-center mb-10">
+                        <h2 className="text-xl font-bold leading-tight">
+                            Get 1.5 GB of internet free of cost, provided by PluxNet Fibre
+                        </h2>
+                    </div>
+
+                    <Form action={formAction} className="flex flex-col justify-center items-center">
+                        <div className="flex items-center justify-center space-x-3 mb-4">
+                            <input
+                                id="terms"
+                                type="checkbox"
+                                required
+                                className="border-white data-[state=checked]:bg-white data-[state=checked]:text-[#301358] mt-0.5"
+                            />
+                            <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+                                Accept terms & conditions to continue
+                            </label>
+                        </div>
+
+                        <Button
+                            className="w-full bg-white rounded-4xl hover:bg-gray-100 text-[#301358] font-medium py-6  text-base hover:cursor-pointer"
+                            type="submit"
+                            disabled={state.success}
+                        >
+                            <img src="watch-video-icon.svg" alt="watch video" width="auth" height="auto" />
+                            Watch video to claim
+                        </Button>
+                    </Form>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
