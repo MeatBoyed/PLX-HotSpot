@@ -4,7 +4,7 @@ import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
 import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
-import VideoAd from '@/lib/revive-video-ad';
+// import VideoAd from '@/lib/revive-video-ad';
 import { redirect } from 'next/navigation';
 
 export default async function Home() {
@@ -44,6 +44,7 @@ export default async function Home() {
       </nav>
       <main className="flex items-center justify-center ">
         <div className="p-4 w-full space-y-6">
+          {/* <VideoAd vastUrl={"https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615"} /> */}
 
           {/* Connect Card */}
           {mikrotikRaw && (

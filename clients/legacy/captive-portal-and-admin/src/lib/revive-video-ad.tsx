@@ -6,10 +6,11 @@ import { VastAdData } from './types';
 
 interface VideoAdProps {
     vastUrl: string;
+    onComplete?: () => void;
     className?: string;
 }
 
-export default function VideoAd({ vastUrl, className }: VideoAdProps) {
+export default function VideoAd({ vastUrl, onComplete, className }: VideoAdProps) {
     const [adData, setAdData] = useState<VastAdData | null>(null)
 
     useEffect(() => {
@@ -35,9 +36,11 @@ export default function VideoAd({ vastUrl, className }: VideoAdProps) {
                     className={cn('w-full h-auto', className)}
                     src={adData.mediaFileUrl}
                     autoPlay
-                    muted
+                    // muted
+                    loop={false}
                     controls={false}
                     playsInline
+                    onEnded={onComplete}
                     onClick={() => window.open(adData.clickThroughUrl, '_blank')}
                 // style={{ width: '100%', height: 'auto' }}
                 />
