@@ -18,7 +18,7 @@ export async function clientLoginToHotspot(voucherCode?: string): Promise<LoginF
         }
 
         return await response.json();
-    } catch (error) {
+    } catch {
         return { success: false, message: 'Login request failed' };
     }
 }

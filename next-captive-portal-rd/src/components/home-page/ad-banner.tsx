@@ -14,7 +14,6 @@ export default function AdBanner() {
                         />
                         {/* <!-- Revive Adserver Hosted edition Javascript Tag - Generated with Revive Adserver v5.5.2 --> */}
 
-                        {/* eslint-disable @next/next/no-img-element  */}
                         {/* <img src="add-img-1.png" className="" width="100%" height="auto" alt="add image" /> */}
                         {/* Top Right close icon */}
                         {/* <span className="absolute top-2 right-2 hover:cursor-pointer hover:bg-gray-800 p-1 rounded-full">

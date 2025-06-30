@@ -3,7 +3,7 @@
 import { Button } from "../ui/button";
 import { useFormState } from "react-dom";
 import Form from "next/form";
-import { MikroTikData, LoginFormState } from "@/lib/mikrotik/mikrotik-types";
+import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
 import { useState } from "react";
