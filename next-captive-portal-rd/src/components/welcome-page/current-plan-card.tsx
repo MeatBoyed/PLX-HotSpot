@@ -5,9 +5,12 @@ export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: str
     return (
         <Card className="bg-[#F2F2F2] w-full">
             <CardHeader>
-                <CardTitle className="text-[#F60031] font-bold text-2xl">
-                    You&apos;re out of internet!
+                <CardTitle className="font-bold text-2xl">
+                    Hotspot usage
                 </CardTitle>
+                {/* <CardTitle className="text-[#F60031] font-bold text-2xl">
+                    You&apos;re out of internet!
+                </CardTitle> */}
                 <CardDescription className="flex flex-col items-start justify-start gap-4 border-b pb-4">
                     <p className="text-[#5D5D5D] font-medium text-sm">
                         For uninterrupted internet usage, use your voucher code below or select a top up plan.

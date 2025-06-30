@@ -35,7 +35,10 @@ export default async function WelcomePage() {
 
             <main className="flex items-start justify-start bg-white w-full rounded-t-[20px] pt-3 pb-10 md:items-center md:justify-center max-w-md">
                 {authState.userSession && (
-                    <UserSession status={authState.userSession} />
+                    <UserSession
+                        status={authState.userSession}
+                        userUsage={authState.userUsage}
+                    />
                 )}
             </main>
         </div>
