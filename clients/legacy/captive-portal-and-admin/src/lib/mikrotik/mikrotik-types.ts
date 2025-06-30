@@ -44,3 +44,16 @@ export type StatusResponse = {
     data?: MikroTikStatus;
     message?: string;
 };
+
+// types/radiusdesk.ts
+export interface RadiusDeskUsageResponse {
+    success: boolean;
+    data?: {
+        data_used: number | null;
+        data_cap: number | null;
+        time_used: number | null;
+        time_cap: number | null;
+        depleted: boolean;
+    };
+    message?: string;
+}
