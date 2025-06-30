@@ -1,15 +1,16 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { loginToHotspot } from "@/lib/mikrotik/mikrotik-service";
-import { MikroTikData, LoginFormState } from "@/lib/mikrotik/mikrotik-types";
+import { checkUserUsage, loginToHotspot } from "@/lib/mikrotik/mikrotik-service";
+import { MikroTikData, LoginFormState, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
 
 interface ConnectContextType {
-    connect: (mikrotikData: MikroTikData) => Promise<LoginFormState>;
+    connect: (voucherCode?: string) => Promise<LoginFormState>;
     showAd: boolean;
     adUrl: string;
+    isDepleted?: boolean;
     onAdComplete: () => void;
 }
 
@@ -23,18 +24,22 @@ export function useConnect() {
     return context;
 }
 
-export function ConnectProvider({ children }: { children: ReactNode }) {
+export function ConnectProvider({ children, mikrotikData, userUsage }: { children: ReactNode, mikrotikData: MikroTikData, userUsage?: RadiusDeskUsageResponse }) {
     const router = useRouter();
     const [showAd, setShowAd] = useState(false);
-    const [pendingLoginData, setPendingLoginData] = useState<MikroTikData | null>(null);
+    const [voucherCode, setVoucherCode] = useState<string | undefined>(undefined);
+    const [pendingLoginData, setPendingLoginData] = useState<MikroTikData | null>(mikrotikData);
 
+    const isDepleted = userUsage?.data?.depleted || false;
     const adUrl = "https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615";
 
-    const connect = async (mikrotikData: MikroTikData): Promise<LoginFormState> => {
-        const isFirstLogin = true; // Replace with logic later
+    // Main Connect method - This method will handle the login process and show the ad if it's the first login
+    const connect = async (voucherCode?: string): Promise<LoginFormState> => {
+        setVoucherCode(voucherCode);
 
-        if (isFirstLogin) {
-            setPendingLoginData(mikrotikData);
+        // IsDepleted False: User hasn't used up Free data (Show Ad), True: User has used up Free data (Don't Show Ad)
+        if (!isDepleted) {
+            // setPendingLoginData(mikrotikData);
             setShowAd(true);
             return { success: false, message: "Waiting for ad to complete" };
         }
@@ -42,11 +47,12 @@ export function ConnectProvider({ children }: { children: ReactNode }) {
         return await doLogin(mikrotikData);
     };
 
+    // Main Login method - Authenticates with Mikrotik and handles the response
     const doLogin = async (mikrotikData: MikroTikData): Promise<LoginFormState> => {
         let result: LoginFormState = { success: false, message: "" };
 
         await toast.promise(
-            loginToHotspot(mikrotikData),
+            loginToHotspot(mikrotikData, voucherCode),
             {
                 loading: "Connecting to PluxNet Fibre Hotspot...",
                 success: (data) => {
@@ -60,6 +66,7 @@ export function ConnectProvider({ children }: { children: ReactNode }) {
             }
         );
 
+        console.log("Login Result: ", result);
         if (result.success) {
             router.push("/welcome");
         }
@@ -67,6 +74,7 @@ export function ConnectProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
+    // Callback for when the Ad completes playing
     const onAdComplete = async () => {
         setShowAd(false);
         if (pendingLoginData) {
@@ -76,7 +84,7 @@ export function ConnectProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <ConnectContext.Provider value={{ connect, showAd, adUrl, onAdComplete }}>
+        <ConnectContext.Provider value={{ connect, showAd, adUrl, onAdComplete, isDepleted }}>
             {children}
         </ConnectContext.Provider>
     );

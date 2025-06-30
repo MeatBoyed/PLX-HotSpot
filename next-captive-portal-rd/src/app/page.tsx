@@ -1,36 +1,42 @@
-// app/page.tsx
 "use server"
+
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
-// import VideoAd from '@/lib/revive-video-ad';
+import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
+import { checkUserUsage, getUserSession } from '@/lib/mikrotik/mikrotik-service';
+// import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
 import { redirect } from 'next/navigation';
 
-export default async function Home() {
-  // Get Posted Mikrotik Data
-  // const mikrotikRaw = await getMikroTikDataFromCookie();
-  const mikrotikRaw: MikroTikData = {
-    loginlink: 'http://charles.hotspot/login',
-    nasid: 'Charles-MT',
-    link_status: 'http://charles.hotspot/status',
-    link_login_only: 'http://charles.hotspot/login',
-    link_logout: 'http://charles.hotspot/logout',
-    mac: '98%3ABD%3A80%3ACE%3AD8%3A35',
-    type: 'mikrotik',
-    ssid: 'dev'
+// const mikrotikRaw: MikroTikData = {
+//   loginlink: 'http://charles.hotspot/login',
+//   nasid: 'Charles-MT',
+//   link_status: 'http://charles.hotspot/status',
+//   link_login_only: 'http://charles.hotspot/login',
+//   link_logout: 'http://charles.hotspot/logout',
+//   mac: '98%3ABD%3A80%3ACE%3AD8%3A35',
+//   type: 'mikrotik',
+//   ssid: 'dev'
 
-  }
+// }
+
+export default async function Home() {
+  // 1. Get Posted Mikrotik Data
+  const mikrotikRaw = await getMikroTikDataFromCookie();
   if (!mikrotikRaw) {
     redirect("https://pluxnet.co.za");
   }
   console.log("Raw data: ", mikrotikRaw)
 
-  // Check if user is already logged in & redirect to "/welcome" if they are
-  // const userSession = await getUserSession(mikrotikRaw)
-  // if (userSession.success && userSession.data) {
-  //   redirect("/welcome")
-  // }
+  // 2. Check if user is already logged in & redirect to "/welcome" if they are
+  const userSession = await getUserSession(mikrotikRaw)
+  if (userSession.success && userSession.data) {
+    redirect("/welcome")
+  }
+
+  // 3. Check if user's usage is depleted or expired
+  const usageResult = await checkUserUsage(mikrotikRaw);
+  console.log("Usage Result: ", usageResult)
 
   return (
     <>
@@ -44,12 +50,10 @@ export default async function Home() {
       </nav>
       <main className="flex items-center justify-center ">
         <div className="p-4 w-full space-y-6">
-          {/* <VideoAd vastUrl={"https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615"} /> */}
-
           {/* Connect Card */}
           {mikrotikRaw && (
-            <ConnectProvider>
-              <ConnectCard mikrotikData={mikrotikRaw} backgroundImage="/internet-claim-bg.png" />
+            <ConnectProvider userUsage={usageResult} mikrotikData={mikrotikRaw} >
+              <ConnectCard backgroundImage="/internet-claim-bg.png" />
             </ConnectProvider>
           )}
 

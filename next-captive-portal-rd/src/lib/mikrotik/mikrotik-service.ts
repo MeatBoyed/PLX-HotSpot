@@ -1,11 +1,13 @@
 "use server"
 // Must run Client side to use Brower's Fetch/Network to access Mikrotik Hotspot on the network
 import { parseMikroTikStatus } from "./mikrotik-lib";
-import { LoginFormState, MikroTikData, StatusResponse, } from "./mikrotik-types";
+import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, } from "./mikrotik-types";
+
+const Default_Username = "click_to_connect@dev";
 
 export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: string): Promise<LoginFormState> {
     // Default credentials (No Registration)
-    const username = voucherCode ?? "click_to_connect@dev";
+    const username = voucherCode ?? Default_Username;
     const password = voucherCode ?? "click_to_connect";
 
     console.log("Credentials: ", { username, password });
@@ -30,8 +32,8 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
 }
 
 
-export async function getUserSession(mikrotikData: MikroTikData): Promise<StatusResponse> {
-    const baseUrl = mikrotikData.link_status ?? "http://10.5.50.1/status";
+export async function getUserSession(mikrotikData?: MikroTikData): Promise<StatusResponse> {
+    const baseUrl = mikrotikData?.link_status ?? "http://10.5.50.1/status";
     const url = new URL(baseUrl);
 
     // Optional: add cache buster
@@ -54,7 +56,52 @@ export async function getUserSession(mikrotikData: MikroTikData): Promise<Status
     }
 }
 
+// Check User's Usage Status (Before login)
+export async function checkUserUsage(mikrotikData: MikroTikData): Promise<RadiusDeskUsageResponse> {
+    const username = Default_Username;
+    const macRaw = mikrotikData.mac;
 
+    if (!username || !macRaw) {
+        return {
+            success: false,
+            message: "Missing username or MAC address in MikroTik data"
+        };
+    }
 
+    // Convert MAC to hyphen format if needed
+    const mac = macRaw.replace(/%3A|:/g, "-").toLowerCase();
 
+    const url = new URL("https://radiusdesk.pluxnet.co.za/cake4/rd_cake/radaccts/get-usage.json");
+    url.searchParams.set("mac", mac);
+    url.searchParams.set("username", username);
+
+    try {
+        const res = await fetch(url.toString(), { method: "GET" });
+
+        if (!res.ok) {
+            return {
+                success: false,
+                message: `HTTP error: ${res.status} ${res.statusText}`
+            };
+        }
+
+        const json = await res.json();
+
+        if (typeof json !== "object" || !("success" in json)) {
+            return {
+                success: false,
+                message: "Unexpected response format"
+            };
+        }
+
+        return json as RadiusDeskUsageResponse;
+
+    } catch (err) {
+        console.error("RadiusDesk usage fetch error:", err);
+        return {
+            success: false,
+            message: "Failed to fetch RadiusDesk usage"
+        };
+    }
+}
 
