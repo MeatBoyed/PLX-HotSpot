@@ -1,8 +1,9 @@
-export type VastAdData = {
-    adId: string;
-    duration: string;
+export interface VastAdData {
     mediaFileUrl: string;
-    clickThroughUrl: string;
+    clickThroughUrl?: string;
     impressionUrls: string[];
-    trackingEvents: Record<string, string[]>;
-};
+    duration?: number;
+    title?: string;
+    adId?: string;
+    trackingEvents?: Record<string, string[]>;
+}

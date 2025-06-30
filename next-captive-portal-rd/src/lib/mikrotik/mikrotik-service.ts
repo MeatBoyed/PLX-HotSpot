@@ -1,31 +1,82 @@
 "use server"
-// Must run Client side to use Brower's Fetch/Network to access Mikrotik Hotspot on the network
+// Must run Client side to use Browser's Fetch/Network to access Mikrotik Hotspot on the network
 import { parseMikroTikStatus } from "./mikrotik-lib";
 import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, } from "./mikrotik-types";
 
 const Default_Username = "click_to_connect@dev";
+const Default_Password = "click_to_connect";
 
 export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: string): Promise<LoginFormState> {
-    // Default credentials (No Registration)
-    const username = voucherCode ?? Default_Username;
-    const password = voucherCode ?? "click_to_connect";
+    // Credential logic: if voucher code provided, use it as username, otherwise use defaults
+    const username = voucherCode || Default_Username;
+    const password = voucherCode ? voucherCode : Default_Password;
 
     console.log("Credentials: ", { username, password });
     // Use provided Mikrotik login link and supply credentials
     const url = `${mikrotikData.loginlink}?${new URLSearchParams({ username, password })}`;
 
     try {
-        const res = await fetch(url, { method: "GET", redirect: "follow" });
+        const res = await fetch(url, {
+            method: "GET",
+            redirect: "follow",
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
         const text = await res.text();
-        const success = res.ok && /already|logged/i.test(text);
 
-        if (!success) {
-            return { success: false, message: "Login failed. Please try again." };
+        console.log("Login response:", text);
+
+        // Parse the MikroTik response - it's in a specific format like ({...})
+        let parsedResponse: any = null;
+        try {
+            // Remove the outer parentheses and parse as JavaScript object
+            const cleanedText = text.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '');
+            // Convert single quotes to double quotes for valid JSON
+            const jsonText = cleanedText.replace(/'/g, '"');
+            parsedResponse = JSON.parse(jsonText);
+            console.log("Parsed response:", parsedResponse);
+        } catch (parseError) {
+            console.error("Failed to parse MikroTik response:", parseError);
+            // Fallback to text analysis if JSON parsing fails
         }
 
+        // Check for success based on parsed response or text content
+        let success = false;
+        let errorMessage = "Login failed. Please try again.";
+
+        if (parsedResponse) {
+            // Check if logged_in is 'yes' and no error exists
+            success = parsedResponse.logged_in === 'yes' && !parsedResponse.error;
+
+            if (!success && parsedResponse.error) {
+                errorMessage = parsedResponse.error;
+            } else if (!success && parsedResponse.error_orig) {
+                errorMessage = parsedResponse.error_orig;
+            } else if (!success) {
+                errorMessage = "Authentication failed - not logged in";
+            }
+        } else {
+            // Fallback to text analysis
+            success = res.ok && /logged_in['"]*:\s*['"]*yes/i.test(text) && !/error['"]*:\s*['"]*[^'"]+/i.test(text);
+
+            if (!success) {
+                // Try to extract error message from response
+                const errorMatch = text.match(/error['"]*:\s*['"]*([^'",\n}]+)/i);
+                if (errorMatch) {
+                    errorMessage = errorMatch[1].trim();
+                }
+            }
+        }
+
+        if (!success) {
+            return { success: false, message: errorMessage };
+        }
+
+        console.log("Login result: ", success);
         return { success: true };
     } catch (err) {
-        // console.error("Login error:", err);
+        console.error("Login error:", err);
         const message = (err as Error).message || "An error occurred during login.";
         return { success: false, message: message };
     }
@@ -43,10 +94,9 @@ export async function getUserSession(mikrotikData?: MikroTikData): Promise<Statu
         const res = await fetch(url.toString(), { method: "GET" });
         const rawText = await res.text();
 
-        // console.log("Response: ", res)
-        // console.log("Raw Text res: ", rawText);
-
         const status = await parseMikroTikStatus(rawText);
+        console.log("Hotspot Status:", status);
+
         if (!status) return { success: false, message: "Failed to parse status" };
 
         return { success: true, data: status };
@@ -105,3 +155,6 @@ export async function checkUserUsage(mikrotikData: MikroTikData): Promise<Radius
     }
 }
 
+export async function getReviveAdData() {
+
+}
