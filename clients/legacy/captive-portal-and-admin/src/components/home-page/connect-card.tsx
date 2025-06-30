@@ -31,15 +31,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     return (
         <>
             {showAd && (
-                <div className="fixed min-h-screen inset-0 z-50 flex items-center justify-center">
-                    {/* Dark transparent background */}
-                    <div className="absolute inset-0 bg-black/70 z-0" />
-
-                    {/* Video Ad on top */}
-                    <div className="relative z-10 max-w-2xl w-full">
-                        <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
-                    </div>
-                </div>
+                <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
             <div className="relative bg-[#301358] rounded-3xl w-full max-w-md mx-auto">
                 {backgroundImage && (

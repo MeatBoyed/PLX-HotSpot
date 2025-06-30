@@ -3,40 +3,19 @@
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
-import { checkUserUsage, getUserSession } from '@/lib/mikrotik/mikrotik-service';
-// import { MikroTikData } from '@/lib/mikrotik/mikrotik-types';
-import { redirect } from 'next/navigation';
-
-// const mikrotikRaw: MikroTikData = {
-//   loginlink: 'http://charles.hotspot/login',
-//   nasid: 'Charles-MT',
-//   link_status: 'http://charles.hotspot/status',
-//   link_login_only: 'http://charles.hotspot/login',
-//   link_logout: 'http://charles.hotspot/logout',
-//   mac: '98%3ABD%3A80%3ACE%3AD8%3A35',
-//   type: 'mikrotik',
-//   ssid: 'dev'
-
-// }
+import { requireAuth } from '@/lib/auth/auth-service';
 
 export default async function Home() {
-  // 1. Get Posted Mikrotik Data
-  const mikrotikRaw = await getMikroTikDataFromCookie();
-  if (!mikrotikRaw) {
-    redirect("https://pluxnet.co.za");
-  }
-  console.log("Raw data: ", mikrotikRaw)
+  // Get auth state and redirect if needed
+  const authState = await requireAuth();
 
-  // 2. Check if user is already logged in & redirect to "/welcome" if they are
-  const userSession = await getUserSession(mikrotikRaw)
-  if (userSession.success && userSession.data) {
-    redirect("/welcome")
+  // If already authenticated, redirect to welcome page
+  if (authState.isAuthenticated) {
+    const { redirect } = await import('next/navigation');
+    redirect("/welcome");
   }
 
-  // 3. Check if user's usage is depleted or expired
-  const usageResult = await checkUserUsage(mikrotikRaw);
-  console.log("Usage Result: ", usageResult)
+  console.log("Auth state: ", authState);
 
   return (
     <>
@@ -51,11 +30,9 @@ export default async function Home() {
       <main className="flex items-center justify-center ">
         <div className="p-4 w-full space-y-6">
           {/* Connect Card */}
-          {mikrotikRaw && (
-            <ConnectProvider userUsage={usageResult} mikrotikData={mikrotikRaw} >
-              <ConnectCard backgroundImage="/internet-claim-bg.png" />
-            </ConnectProvider>
-          )}
+          <ConnectProvider userUsage={authState.userUsage ?? undefined} >
+            <ConnectCard backgroundImage="/internet-claim-bg.png" />
+          </ConnectProvider>
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             <h4 className="flex items-center justify-between w-full max-w-md">
