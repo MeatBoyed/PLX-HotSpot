@@ -28,7 +28,7 @@ export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: str
                 <div className="w-full flex flex-col items-start justify-start gap-4">
                     <h5 className="font-bold text-base text-[#181818]">Apply voucher</h5>
                     <div className="flex items-center justify-between gap-4 w-full p-3 bg-white border border-[#CECECE] rounded-lg">
-                        <input type="text" id="voucherCode" className="text-base font-normal" placeholder="Enter voucher code" />
+                        <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder="Enter voucher code" />
                         <button type="button" className="text-base font-semibold text-[#5B3393]" >
                             Apply
                         </button>
