@@ -1,8 +1,8 @@
 // This is a fallback/test endpoint that provides sample VAST data
 // when the external Revive ad server is not accessible
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     // Sample VAST data for testing
     const sampleAdData = {
         mediaFileUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',

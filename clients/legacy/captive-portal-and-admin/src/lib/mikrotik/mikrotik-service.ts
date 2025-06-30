@@ -6,6 +6,13 @@ import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, 
 const Default_Username = "click_to_connect@dev";
 const Default_Password = "click_to_connect";
 
+interface MikroTikLoginResponse {
+    logged_in?: string;
+    error?: string;
+    error_orig?: string;
+    [key: string]: string | undefined;
+}
+
 export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: string): Promise<LoginFormState> {
     // Credential logic: if voucher code provided, use it as username, otherwise use defaults
     const username = voucherCode || Default_Username;
@@ -28,13 +35,13 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
         console.log("Login response:", text);
 
         // Parse the MikroTik response - it's in a specific format like ({...})
-        let parsedResponse: any = null;
+        let parsedResponse: MikroTikLoginResponse | null = null;
         try {
             // Remove the outer parentheses and parse as JavaScript object
             const cleanedText = text.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '');
             // Convert single quotes to double quotes for valid JSON
             const jsonText = cleanedText.replace(/'/g, '"');
-            parsedResponse = JSON.parse(jsonText);
+            parsedResponse = JSON.parse(jsonText) as MikroTikLoginResponse;
             console.log("Parsed response:", parsedResponse);
         } catch (parseError) {
             console.error("Failed to parse MikroTik response:", parseError);

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
 import { getUserSession, checkUserUsage } from '@/lib/mikrotik/mikrotik-service';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         // Get mikrotik data from cookie
         const mikrotikData = await getMikroTikDataFromCookie();
