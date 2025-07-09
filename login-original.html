@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+	<head>
+		<!--
+		<?xml version="1.0" encoding="UTF-8"?>
+		<WISPAccessGatewayParam xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://$(hostname)/xml/WISPAccessGatewayParam.xsd">
+			<Redirect>
+				<AccessProcedure>1.0</AccessProcedure>
+				<AccessLocation>$(location-id)</AccessLocation>
+				<LocationName>$(location-name)</LocationName>
+				<LoginURL>$(link-login-only)?target=xml</LoginURL>
+				<MessageType>100</MessageType>
+				<ResponseCode>0</ResponseCode>
+			</Redirect>
+		</WISPAccessGatewayParam>
+		-->
+		<title>Hotspot Login</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<meta http-equiv="pragma" content="no-cache"/>
+		<meta http-equiv="expires" content="-1" />
+        $(if http-header == Access-Control-Allow-Origin)*$(endif)
+		<style>
+			@keyframes Active {
+				0% {
+					color: rgba(255, 255, 255, 1);
+					width: 0px;
+				}
+				100% {
+					width: 100%;
+					color: #3f0;
+					opacity: 1;
+				}
+			}
+
+			@keyframes Pulse {
+				0% {
+					color: rgba(255, 255, 255, 1);
+				}
+				100% {
+					color: #3f0;
+					opacity: 1;
+				}
+			}
+
+			body {
+				background-color:#000;
+				font-family: monospace;
+				color:#fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size:14px;
+			}
+
+			.BulletContainer {
+				max-width: 500px;
+				text-align: left;
+			}
+
+			#RedirectError {
+				padding:10px;
+				animation-delay: 1s;
+				text-align: center;
+				color:red;
+			}
+
+			.SingleBullet {
+				animation: Active .5s forwards;
+				padding:10px;
+				text-align: center;
+				opacity: 0;
+				transition: all .5s ease-in;
+				overflow: hidden;
+				white-space: nowrap;
+			}
+
+			.SingleBulletPulse {
+				animation: Pulse 1s alternate-reverse infinite;
+			}
+
+			.SingleBullet_1 {
+				animation-delay: .2s
+			}
+			.SingleBullet_2 {
+				animation-delay: .4s
+			}
+			.SingleBullet_3 {
+				animation-delay: .6s
+			}
+			.SingleBullet_4 {
+				animation-delay: .8s
+			}
+			.SingleBullet_5 {
+				animation-delay: 1s
+			}
+		</style>
+		<script>
+			var UrlCount = 1;
+			var Url = [];
+			var AlreadyChecked = [false, false, false, false, false, false];
+			var ImageTimeout = 5000;
+			var MaxExecutionTime = Date.now() + ImageTimeout * 5;
+			var ImageObject;
+			var ImageTimeoutID;
+			var Redirected = false;
+
+			Url[0] = "hotspot.jozifreewifi.co.za";
+			Url[1] = "%Host2%";
+			Url[2] = "%Host3%";
+
+			function CheckServer(CheckUrl) {
+			    ImageObject = new Image();
+			    ImageObject.src = "//" + CheckUrl + "/images/chk.gif?r=" + Math.floor(Math.random() * 99999);
+			    ImageObject.onload = function() {
+					clearTimeout(ImageTimeoutID);
+
+			        if ('naturalHeight' in this) {
+			            if (this.naturalHeight + this.naturalWidth === 0) {
+			                Start();
+			                return;
+			            }
+			        } else if (this.width + this.height == 0) {
+			            Start();
+			            return;
+			        }
+			        if (!Redirected) {
+			            Redirected = true;
+			            clearTimeout(ImageTimeoutID);
+
+			            document.redirect.action = "//" + CheckUrl + "/portal/portal.php";
+			            document.redirect.submit();
+			        }
+			        else {
+			            Start();
+			        }
+			    };
+			    ImageObject.onerror = function() {
+			        //	Retry another URL
+					ImageObject = null;
+					clearTimeout(ImageTimeoutID);
+			        Start();
+			    };
+
+				ImageTimeoutID = setTimeout(function() {
+					ImageObject = null;
+					ImageTimeoutID = null;
+
+					Start();
+				}, ImageTimeout);
+			}
+				
+			function Start() {
+			    var found = false;
+			    for (var i = 0; i < UrlCount; i++) {
+			        if (!AlreadyChecked[i]) {
+			            AlreadyChecked[i] = true;
+			            CheckServer(Url[i]);
+			            found = true;
+			            break;
+			        }
+			    }
+
+			    if (!found) {
+					if (Date.now() < MaxExecutionTime) {
+						//	Retry
+						setTimeout(function() {
+							AlreadyChecked = [false, false, false, false, false, false];
+							Start();
+						}, 100);
+					}
+					else {
+						document.getElementById("RedirectError").style.display = 'block';
+					}
+				}
+			}
+
+			setTimeout("Start();", 1500);
+		</script>
+	</head>
+	<body style="background-color:#333">
+		<center>
+			<div class="BulletContainer">
+				<div class="SingleBullet SingleBullet_1">Hotspot Started</div>
+				<div class="SingleBullet SingleBullet_2">Network Check</div>
+				<div class="SingleBullet SingleBullet_3">Network Found</div>
+				<div class="SingleBullet SingleBullet_4">Redirect to Welcome Portal</div>
+				<div class="SingleBullet SingleBulletPulse SingleBullet_5">Please wait</div>
+				<div id="RedirectError" style="display: none;">
+					<b>Redirect error!</b><br/><br/>Connection lost, Welcome Portal not reachable or walled garden not updated!
+				</div>
+			</div>
+			<form id="redirect" name="redirect" action="" method="POST">
+				<input type="hidden" name="domain" value="hotspot.pluxnet.co.za"/>
+				<input type="hidden" name="hotspotname" value="PluxNetPublicWiFi"/>
+                <input type="hidden" name="servername" value="$(server-name)"/>
+				<input type="hidden" name="mac" value="$(mac)"/>
+				<input type="hidden" name="ip" value="$(ip)"/>
+				<input type="hidden" name="username" value="$(username)"/>
+				<input type="hidden" name="link-login" value="$(link-login)"/>
+				<input type="hidden" name="link-orig" value="$(link-orig)"/>
+				<input type="hidden" name="error" value="$(error)"/>
+				<input type="hidden" name="chap-id" value="$(chap-id)"/>
+				<input type="hidden" name="chap-challenge" value="$(chap-challenge)"/>
+				<input type="hidden" name="link-login-only" value="$(link-login-only)"/>
+				<input type="hidden" name="identity" value="$(identity)"/>
+			</form>
+		</center>
+	</body>
+</html>
