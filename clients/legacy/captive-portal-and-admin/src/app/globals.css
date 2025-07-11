@@ -41,6 +41,25 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Brand Colors for Tailwind Classes */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-surface-card: var(--surface-card);
+  --color-surface-white: var(--surface-white);
+  --color-surface-border: var(--surface-border);
+  --color-button-primary: var(--button-primary);
+  --color-button-primary-hover: var(--button-primary-hover);
+  --color-button-primary-text: var(--button-primary-text);
+  --color-button-secondary: var(--button-secondary);
+  --color-button-secondary-hover: var(--button-secondary-hover);
+  --color-button-secondary-text: var(--button-secondary-text);
 }
 
 :root {
@@ -76,6 +95,31 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand Theme Variables */
+  --brand-primary: #301358;
+  --brand-primary-hover: #5B3393;
+  --brand-secondary: #F2F2F2;
+  --brand-accent: #F60031;
+
+  /* Text Colors */
+  --text-primary: #181818;
+  --text-secondary: #5D5D5D;
+  --text-tertiary: #7A7A7A;
+  --text-muted: #CECECE;
+
+  /* Brand Surface Colors */
+  --surface-card: #F2F2F2;
+  --surface-white: #FFFFFF;
+  --surface-border: #CECECE;
+
+  /* Brand Button Colors */
+  --button-primary: var(--brand-primary);
+  --button-primary-hover: var(--brand-primary-hover);
+  --button-primary-text: var(--surface-white);
+  --button-secondary: var(--surface-white);
+  --button-secondary-hover: #f5f5f5;
+  --button-secondary-text: var(--brand-primary);
 }
 
 .dark {
@@ -110,6 +154,16 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Dark mode brand overrides */
+  --brand-primary: #5B3393;
+  --brand-primary-hover: #301358;
+  --brand-secondary: #2a2a2a;
+  --surface-card: #2a2a2a;
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-tertiary: #a3a3a3;
+  --surface-border: #404040;
 }
 
 @layer base {
@@ -124,7 +178,7 @@
 
 
 .strokeWidth {
-  background: #301358;
+  background: var(--brand-primary);
 }
 
 .strokeWidth::after {
@@ -179,21 +233,21 @@
   font-size: rem(14);
   font-weight: 500;
   line-height: 1.3;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .plan-list .plan-item .plan-item-name {
   font-size: rem(16);
   font-weight: 700;
   line-height: 1.3;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .plan-list .plan-item .plan-item-name .plan-item-text {
   font-size: rem(16);
   font-weight: 500;
   line-height: 1.3;
-  color: var(--color-text-tertiary);
+  color: var(--text-tertiary);
 }
 
 .voucher-block {
@@ -231,14 +285,14 @@
   font-size: rem(25);
   font-weight: 700;
   line-height: 1.3;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .plan-price-list .plan-price-item .plan-price .plan-price-text {
   font-size: rem(14);
   font-weight: 500;
   line-height: 1.3;
-  color: var(--color-text-tertiary);
+  color: var(--text-tertiary);
 }
 
 .plan-price-list .plan-price-item .plan-detail-info {
@@ -246,7 +300,7 @@
   font-size: rem(14);
   font-weight: 500;
   line-height: 1.3;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .plan-price-list .plan-price-item .plan-detail-info+.plan-detail-info {
@@ -259,7 +313,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: var(--border-primary);
+  background-color: var(--surface-border);
   top: 6px;
   left: -12px;
 }
