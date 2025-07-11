@@ -2,16 +2,21 @@
 "use server"
 
 import UserSession from '@/components/welcome-page/user-session';
-import { requireAuthenticated } from '@/lib/auth/auth-service';
+import { AuthState } from '@/lib/auth/auth-service';
+import { MikroTikStatus, RadiusDeskUsageResponse } from '@/lib/mikrotik/mikrotik-types';
+import { authState } from '@/lib/seed';
+import { z } from "zod";
+
+
 
 export default async function WelcomePage() {
     // Ensure user is authenticated, redirect if not
-    const authState = await requireAuthenticated();
+    // const authState = await requireAuthenticated();
 
     console.log("Welcome page auth state:", authState);
 
     return (
-        <div className="flex flex-col items-center justify-start bg-[#301358]">
+        <div className="flex flex-col items-center justify-start" style={{ backgroundColor: 'var(--brand-primary)' }}>
             <section className="relative w-full text-white">
                 {/* eslint-disable @next/next/no-img-element  */}
                 <img

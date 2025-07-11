@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: string, bytes_limit: string }) {
     return (
-        <Card className="bg-[#F2F2F2] w-full">
+        <Card className="w-full" style={{ backgroundColor: 'var(--surface-card)' }}>
             <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                     Hotspot usage
@@ -12,7 +12,7 @@ export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: str
                     You&apos;re out of internet!
                 </CardTitle> */}
                 <CardDescription className="flex flex-col items-start justify-start gap-4 border-b pb-4">
-                    <p className="text-[#5D5D5D] font-medium text-sm">
+                    <p className="font-medium text-sm" style={{ color: 'var(--text-secondary)' }}>
                         For uninterrupted internet usage, use your voucher code below or select a top up plan.
                     </p>
                     <div className="flex  items-center gap-20">

@@ -29,6 +29,7 @@ export default function RootLayout({
       <body
         // className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50`}
         className={`antialiased min-h-screen bg-gray-50`}
+      // style={{ backgroundColor: 'var(--brand-primary)' }}
       >
         <div className="flex flex-col justify-between min-h-screen">
 
