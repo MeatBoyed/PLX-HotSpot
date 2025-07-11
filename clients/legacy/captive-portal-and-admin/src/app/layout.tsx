@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AdBanner from "@/components/home-page/ad-banner";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ClientThemeSwitcher } from "@/components/client-theme-switcher";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -31,14 +33,18 @@ export default function RootLayout({
         className={`antialiased min-h-screen bg-gray-50`}
       // style={{ backgroundColor: 'var(--brand-primary)' }}
       >
-        <div className="flex flex-col justify-between min-h-screen">
+        <ThemeProvider>
+          <div className="flex flex-col justify-between min-h-screen">
+            {/* Theme Switcher for testing */}
+            <ClientThemeSwitcher />
 
-          {/* Logo / Navbar */}
-          {children}
-          {/* Ads Manager */}
-          <AdBanner />
-          <Toaster position="top-center" richColors />
-        </div>
+            {/* Logo / Navbar */}
+            {children}
+            {/* Ads Manager */}
+            <AdBanner />
+            <Toaster position="top-center" richColors />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
 
