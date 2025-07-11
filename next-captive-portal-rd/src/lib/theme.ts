@@ -85,6 +85,30 @@ export const exampleBusinessTheme: BrandTheme = {
   }
 };
 
+// Yellow brand theme
+export const yellowBrandTheme: BrandTheme = {
+  name: "Yellow Brand",
+  colors: {
+    brandPrimary: "#FFB600",       // Yellow primary
+    brandPrimaryHover: "#E6A500",   // Darker yellow for hover
+    brandSecondary: "#F2F2F2",      // Light gray like PluxNet
+    brandAccent: "#F60031",         // Keep red accent
+    textPrimary: "#181818",         // Black text like PluxNet
+    textSecondary: "#5D5D5D",       // Dark gray text like PluxNet
+    textTertiary: "#7A7A7A",        // Medium gray text like PluxNet
+    textMuted: "#CECECE",           // Light gray text like PluxNet
+    surfaceCard: "#F2F2F2",         // Light gray cards like PluxNet
+    surfaceWhite: "#FFFFFF",        // White surfaces
+    surfaceBorder: "#CECECE",       // Light gray borders like PluxNet
+    buttonPrimary: "#FFB600",       // Yellow primary buttons
+    buttonPrimaryHover: "#E6A500",  // Darker yellow hover
+    buttonPrimaryText: "#FFFFFF",   // White text on yellow buttons
+    buttonSecondary: "#FFFFFF",     // White secondary buttons
+    buttonSecondaryHover: "#f5f5f5", // Light gray hover
+    buttonSecondaryText: "#FFB600", // Yellow text on white buttons
+  }
+};
+
 /**
  * Apply a theme by setting CSS custom properties
  * Call this function to switch themes at runtime
