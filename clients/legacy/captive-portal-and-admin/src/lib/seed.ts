@@ -1,5 +1,6 @@
 import { AuthState } from "./auth/auth-service";
 import { MikroTikData, MikroTikStatus, RadiusDeskUsageResponse } from "./mikrotik/mikrotik-types";
+import { appConfig } from '@/lib/config';
 
 const mockUserSession: MikroTikStatus = {
     logged_in: "yes",
@@ -39,12 +40,12 @@ const mockMikrotikData: MikroTikData = {
     loginlink: "https://10.5.50.1/login",
     mac: "00:11:22:33:44:55",
     nasid: "nas-id",
-    ssid: "PluxNet",
+    ssid: appConfig.hotspot.ssid,
     type: "mikrotik"
 }
 
-export const authState: AuthState = {
-    isAuthenticated: true,
+export const seedAuthState: AuthState = {
+    isAuthenticated: false,
     mikrotikData: mockMikrotikData,
     userSession: mockUserSession,
     userUsage: mockUserUsage,

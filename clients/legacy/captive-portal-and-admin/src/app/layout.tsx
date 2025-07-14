@@ -5,6 +5,7 @@ import AdBanner from "@/components/home-page/ad-banner";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClientThemeSwitcher } from "@/components/client-theme-switcher";
+import { appConfig } from "@/lib/config";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -17,8 +18,8 @@ import { ClientThemeSwitcher } from "@/components/client-theme-switcher";
 // });
 
 export const metadata: Metadata = {
-  title: "PluxNet Fibre HotSpot",
-  description: "PluxNet Fibre HotSpot",
+  title: appConfig.site.title,
+  description: appConfig.site.description,
 };
 
 export default function RootLayout({

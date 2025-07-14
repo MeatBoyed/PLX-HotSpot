@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { appConfig } from "@/lib/config";
 
 
 export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: string, bytes_limit: string }) {
@@ -6,7 +7,7 @@ export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: str
         <Card className="w-full" style={{ backgroundColor: 'var(--surface-card)' }}>
             <CardHeader>
                 <CardTitle className="font-bold text-2xl">
-                    Hotspot usage
+                    {appConfig.messages.currentPlanTitle}
                 </CardTitle>
                 {/* <CardTitle className="text-[#F60031] font-bold text-2xl">
                     You&apos;re out of internet!

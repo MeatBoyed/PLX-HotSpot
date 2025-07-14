@@ -10,6 +10,7 @@ import Form from "next/form";
 import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
+import { appConfig } from "@/lib/config";
 
 interface ConnectCardProps {
     backgroundImage?: string;
@@ -51,7 +52,7 @@ export default function ConnectCardTailwind({ backgroundImage }: ConnectCardProp
 
                     <div className="text-center mb-10">
                         <h2 className="text-xl font-bold leading-tight">
-                            Get 1.5 GB of internet free of cost, provided by PluxNet Fibre
+                            {appConfig.hotspot.welcomeMessage}
                         </h2>
                     </div>
 
@@ -63,7 +64,7 @@ export default function ConnectCardTailwind({ backgroundImage }: ConnectCardProp
                                     type="text"
                                     id="voucherCode"
                                     className="text-base font-normal w-full"
-                                    placeholder="Enter voucher code"
+                                    placeholder={appConfig.messages.voucherPlaceholder}
                                     value={voucherCode}
                                     onChange={(e) => setVoucherCode(e.target.value)}
                                 />

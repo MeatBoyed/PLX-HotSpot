@@ -1,6 +1,7 @@
 "use client"
 import ReviveAd from '@/lib/revive-ad';
 import { usePathname } from 'next/navigation';
+import { appConfig } from '@/lib/config';
 
 export default function AdBanner() {
     const path = usePathname();
@@ -15,8 +16,8 @@ export default function AdBanner() {
 
                 <div className="w-full relative">
                     <ReviveAd
-                        zoneId="20641"
-                        reviveId="727bec5e09208690b050ccfc6a45d384"
+                        zoneId={appConfig.ads.zoneId}
+                        reviveId={appConfig.ads.reviveId}
                     />
                     {/* <!-- Revive Adserver Hosted edition Javascript Tag - Generated with Revive Adserver v5.5.2 --> */}
 
