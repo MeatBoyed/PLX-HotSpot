@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  hotspot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Development/Test Settings
+      - USE_SEED_DATA=${USE_SEED_DATA:-false}
+      
+      # Site Metadata
+      - SITE_TITLE=${SITE_TITLE:-PluxNet Fibre HotSpot}
+      - SITE_DESCRIPTION=${SITE_DESCRIPTION:-PluxNet Fibre HotSpot}
+      - BRAND_NAME=${BRAND_NAME:-PluxNet}
+      
+      # Navigation and Links
+      - LOGO_CLICK_URL=${LOGO_CLICK_URL:-https://pluxnet.co.za}
+      - HOME_URL=${HOME_URL:-/}
+      - VIEW_ALL_NEWS_URL=${VIEW_ALL_NEWS_URL:-#}
+      
+      # Hotspot Configuration
+      - HOTSPOT_PROVIDER_NAME=${HOTSPOT_PROVIDER_NAME:-PluxNet Fibre}
+      - HOTSPOT_FREE_DATA_AMOUNT=${HOTSPOT_FREE_DATA_AMOUNT:-1.5 GB}
+      - HOTSPOT_WELCOME_MESSAGE=${HOTSPOT_WELCOME_MESSAGE:-Get 1.5 GB of internet free of cost, provided by PluxNet Fibre}
+      - HOTSPOT_SSID=${HOTSPOT_SSID:-PluxNet}
+      
+      # Mikrotik Credentials and Settings
+      - MIKROTIK_DEFAULT_USERNAME=${MIKROTIK_DEFAULT_USERNAME:-click_to_connect@dev}
+      - MIKROTIK_DEFAULT_PASSWORD=${MIKROTIK_DEFAULT_PASSWORD:-click_to_connect}
+      - MIKROTIK_RADIUS_DESK_BASE_URL=${MIKROTIK_RADIUS_DESK_BASE_URL:-https://radiusdesk.pluxnet.co.za}
+      - MIKROTIK_REDIRECT_URL=${MIKROTIK_REDIRECT_URL:-https://pluxnet.co.za}
+      
+      # Revive Ad Configuration
+      - ADS_REVIVE_SERVER_URL=${ADS_REVIVE_SERVER_URL:-//servedby.revive-adserver.net/asyncjs.php}
+      - ADS_ZONE_ID=${ADS_ZONE_ID:-20641}
+      - ADS_REVIVE_ID=${ADS_REVIVE_ID:-727bec5e09208690b050ccfc6a45d384}
+      
+      # UI Messages
+      - MESSAGE_LOADING_CONNECT=${MESSAGE_LOADING_CONNECT:-Connecting to PluxNet Fibre Hotspot...}
+      - MESSAGE_SUCCESS_CONNECT=${MESSAGE_SUCCESS_CONNECT:-Successfully connected to PluxNet Fibre Hotspot!}
+      - MESSAGE_ERROR_CONNECT=${MESSAGE_ERROR_CONNECT:-Failed to connect. Please try again.}
+      - MESSAGE_CURRENT_PLAN_TITLE=${MESSAGE_CURRENT_PLAN_TITLE:-Hotspot usage}
+      - MESSAGE_OUT_OF_INTERNET=${MESSAGE_OUT_OF_INTERNET:-You're out of internet!}
+      - MESSAGE_VOUCHER_PLACEHOLDER=${MESSAGE_VOUCHER_PLACEHOLDER:-Enter voucher code}
+      
+      # Theme Selection
+      - SELECTED_THEME=${SELECTED_THEME:-pluxnet}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - hotspot-network
+
+networks:
+  hotspot-network:
+    driver: bridge
