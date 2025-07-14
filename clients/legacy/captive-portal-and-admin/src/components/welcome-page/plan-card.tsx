@@ -26,7 +26,6 @@ export default function PlanCard() {
                         className="w-full rounded-4xl text-white font-medium py-6 text-base"
                         style={{
                             backgroundColor: 'var(--button-primary)',
-                            // @ts-ignore: Allow custom CSS variable
                             '--tw-hover-bg': 'var(--button-primary-hover)'
                         } as React.CSSProperties & Record<string, string>}
                     >
