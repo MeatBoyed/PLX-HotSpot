@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { applyTheme, pluxnetTheme, exampleBusinessTheme, yellowBrandTheme, BrandTheme } from '@/lib/theme';
+import { applyTheme, pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme, BrandTheme } from '@/lib/theme';
 
 interface ThemeContextType {
   currentTheme: BrandTheme;
@@ -26,7 +26,7 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [currentTheme, setCurrentTheme] = useState<BrandTheme>(pluxnetTheme);
 
-  const availableThemes = [pluxnetTheme, exampleBusinessTheme, yellowBrandTheme];
+  const availableThemes = [pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme];
 
   const switchTheme = (theme: BrandTheme) => {
     setCurrentTheme(theme);

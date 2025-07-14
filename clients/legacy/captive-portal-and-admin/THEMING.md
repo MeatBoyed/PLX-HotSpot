@@ -46,6 +46,53 @@ import { applyTheme, exampleBusinessTheme } from '@/lib/theme';
 applyTheme(exampleBusinessTheme);
 ```
 
+### Option 3: Dynamic Brand Images
+Each theme can now include brand-specific images:
+
+```typescript
+export const myBrandTheme: BrandTheme = {
+  name: "My Brand",
+  colors: {
+    // ... color configuration
+  },
+  images: {
+    logo: "/my-brand-logo.svg",                    // Main logo (dark backgrounds)
+    logoWhite: "/my-brand-logo-white.svg",         // White logo (dark backgrounds)
+    connectCardBackground: "/my-brand-bg.png",     // Connect card background
+    bannerOverlay: "/my-brand-overlay.png",        // Banner overlay image
+    favicon: "/my-brand-favicon.svg",              // Browser favicon
+  }
+};
+```
+
+## Using Theme Images in Components
+
+### Method 1: useTheme Hook
+```typescript
+import { useTheme } from '@/components/theme-provider';
+
+function MyComponent() {
+  const { currentTheme } = useTheme();
+  
+  return (
+    <img src={currentTheme.images.logo} alt="Brand logo" />
+  );
+}
+```
+
+### Method 2: useThemeImages Hook (Recommended)
+```typescript
+import { useThemeImages } from '@/components/use-theme-images';
+
+function MyComponent() {
+  const { logo, logoWhite, connectCardBackground } = useThemeImages();
+  
+  return (
+    <img src={logo} alt="Brand logo" />
+  );
+}
+```
+
 ## Dark Mode Support
 
 The app also includes dark mode variants. Update the `.dark` section in `globals.css`:

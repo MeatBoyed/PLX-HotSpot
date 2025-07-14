@@ -1,14 +1,17 @@
 // app/welcome/page.tsx
-"use server"
+"use client"
 
 import { ClientThemeSwitcher } from '@/components/client-theme-switcher';
 import UserSession from '@/components/welcome-page/user-session';
 import { AuthState } from '@/lib/auth/auth-service';
 import { authState } from '@/lib/seed';
+import { useTheme } from '@/components/theme-provider';
 
 
 
-export default async function WelcomePage() {
+export default function WelcomePage() {
+    const { currentTheme } = useTheme();
+    
     // Ensure user is authenticated, redirect if not
     // const authState = await requireAuthenticated();
 
@@ -20,7 +23,7 @@ export default async function WelcomePage() {
                 <section className="relative w-full text-white">
                     {/* eslint-disable @next/next/no-img-element  */}
                     <img
-                        src={"banner-overlay.png"}
+                        src={currentTheme.images.bannerOverlay || "banner-overlay.png"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full bg-top-right object-cover bg-no-repeat "
                     />
@@ -29,7 +32,12 @@ export default async function WelcomePage() {
                             <div className="w-full flex flex-col items-start justify-center pt-8 p-4 max-w-md">
                                 <a href="index.html" className="logo d-flex align-items-center">
                                     {/*  eslint-disable @next/next/no-img-element  */}
-                                    <img src="pluxnet-logo-white.svg" alt="PluxNet logo" width="auto" height="auto" />
+                                    <img 
+                                        src={currentTheme.images.logoWhite} 
+                                        alt="Brand logo" 
+                                        width="auto" 
+                                        height="auto" 
+                                    />
                                 </a>
                                 <h3 className="mt-7 font-bold text-2xl">Welcome 👋🏼</h3>
                                 <p className="mt-1.5 text-base opacity-70 font-medium">View your connection details below</p>
