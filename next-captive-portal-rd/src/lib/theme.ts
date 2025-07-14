@@ -35,6 +35,18 @@ export interface BrandTheme {
     buttonSecondaryHover: string;
     buttonSecondaryText: string;
   };
+  images: {
+    // Logo images
+    logo: string;
+    logoWhite: string;
+
+    // Connect card background
+    connectCardBackground: string;
+
+    // Other brand-specific images
+    bannerOverlay?: string;
+    favicon?: string;
+  };
 }
 
 // Default PluxNet theme
@@ -58,6 +70,13 @@ export const pluxnetTheme: BrandTheme = {
     buttonSecondary: "#FFFFFF",
     buttonSecondaryHover: "#f5f5f5",
     buttonSecondaryText: "#301358",
+  },
+  images: {
+    logo: "/pluxnet-logo.svg",
+    logoWhite: "/pluxnet-logo-white.svg",
+    connectCardBackground: "/internet-claim-bg.png",
+    bannerOverlay: "/banner-overlay.png",
+    favicon: "/favicon.svg",
   }
 };
 
@@ -82,12 +101,19 @@ export const exampleBusinessTheme: BrandTheme = {
     buttonSecondary: "#ffffff",
     buttonSecondaryHover: "#f1f5f9",
     buttonSecondaryText: "#2563eb",
+  },
+  images: {
+    logo: "/pluxnet-logo.svg", // Can be replaced with business-specific logo
+    logoWhite: "/pluxnet-logo-white.svg", // Can be replaced with white version
+    connectCardBackground: "/internet-claim-bg.png", // Can be replaced with custom background
+    bannerOverlay: "/banner-overlay.png",
+    favicon: "/favicon.svg",
   }
 };
 
 // Yellow brand theme
-export const yellowBrandTheme: BrandTheme = {
-  name: "Yellow Brand",
+export const CityOfJbhTheme: BrandTheme = {
+  name: "Jozi Free Wifi",
   colors: {
     brandPrimary: "#FFB600",       // Yellow primary
     brandPrimaryHover: "#E6A500",   // Darker yellow for hover
@@ -106,6 +132,13 @@ export const yellowBrandTheme: BrandTheme = {
     buttonSecondary: "#FFFFFF",     // White secondary buttons
     buttonSecondaryHover: "#f5f5f5", // Light gray hover
     buttonSecondaryText: "#FFB600", // Yellow text on white buttons
+  },
+  images: {
+    logo: "/coj-logo-black.svg", // Replace with yellow brand logo
+    logoWhite: "/coj-logo-white.svg", // Replace with yellow brand white logo
+    connectCardBackground: "/coj-internet-claim-bg.png", // Replace with yellow brand background
+    bannerOverlay: "/banner-overlay.png",
+    favicon: "/favicon.svg", // Replace with yellow brand favicon
   }
 };
 
@@ -122,12 +155,21 @@ export function applyTheme(theme: BrandTheme) {
     const cssVar = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
     root.style.setProperty(cssVar, value);
   });
+
+  // Store current theme data for components to access
+  (window as any).__currentTheme = theme;
 }
 
 /**
  * Get the currently active theme
  */
 export function getCurrentTheme(): BrandTheme {
+  // Try to get from stored theme first
+  if (typeof window !== 'undefined' && (window as any).__currentTheme) {
+    return (window as any).__currentTheme;
+  }
+
+  // Fallback to reading from CSS (colors only)
   const root = document.documentElement;
   const computedStyle = getComputedStyle(root);
 
@@ -151,6 +193,11 @@ export function getCurrentTheme(): BrandTheme {
       buttonSecondary: computedStyle.getPropertyValue('--button-secondary').trim(),
       buttonSecondaryHover: computedStyle.getPropertyValue('--button-secondary-hover').trim(),
       buttonSecondaryText: computedStyle.getPropertyValue('--button-secondary-text').trim(),
+    },
+    images: {
+      logo: "/pluxnet-logo.svg",
+      logoWhite: "/pluxnet-logo-white.svg",
+      connectCardBackground: "/internet-claim-bg.png",
     }
   };
 }
