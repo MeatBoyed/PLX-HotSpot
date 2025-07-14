@@ -1,47 +1,33 @@
-"use client"
-
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { ClientThemeSwitcher } from '@/components/client-theme-switcher';
-import { AuthState, requireAuth } from '@/lib/auth/auth-service';
-import { authState } from '@/lib/seed';
-import { useTheme } from '@/components/theme-provider';
+import { requireAuth } from '@/lib/auth/auth-service';
+import { seedAuthState } from '@/lib/seed';
+import { appConfig } from '@/lib/config';
+import Head from '@/components/home-page/head';
 
-export default function Home() {
-  const { currentTheme } = useTheme();
-  
+export default async function Home() {
   // Get auth state and redirect if needed
-  // const authState = await requireAuth();
+  const authState = appConfig.useSeedData ? seedAuthState : await requireAuth();
 
   // If already authenticated, redirect to welcome page
-  // if (authState.isAuthenticated) {
-  //   const { redirect } = await import('next/navigation');
-  //   redirect("/welcome");
-  // }
+  if (authState.isAuthenticated) {
+    const { redirect } = await import('next/navigation');
+    redirect("/welcome");
+  }
 
   console.log("Auth state: ", authState);
 
   return (
     <>
-        <nav className="flex items-center justify-center w-full">
-          <div className="w-full flex items-center justify-start pt-8 p-4 max-w-md">
-            <a href="index.html" className="w-28">
-              {/* eslint-disable @next/next/no-img-element  */}
-              <img 
-                src={currentTheme.images.logo} 
-                alt="Brand logo" 
-                width="auto" 
-                height="auto" 
-              />
-            </a>
-          </div>
-        </nav>
+      <nav className="flex items-center justify-center w-full">
+        <Head />
+      </nav>
       <main className="flex items-center justify-center">
         <div className="p-4 w-full space-y-6 max-w-md">            {/* Connect Card */}
-            <ConnectProvider userUsage={authState.userUsage ?? undefined} >
-              <ConnectCard backgroundImage={currentTheme.images.connectCardBackground} />
-            </ConnectProvider>
+          <ConnectProvider userUsage={authState.userUsage ?? undefined} >
+            <ConnectCard />
+          </ConnectProvider>
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             <h4 className="flex items-center justify-between w-full">

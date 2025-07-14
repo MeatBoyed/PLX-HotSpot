@@ -7,18 +7,22 @@ import Form from "next/form";
 import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
+import { appConfig } from "@/lib/config";
+import { useTheme } from "../theme-provider";
 
 interface ConnectCardProps {
-    backgroundImage?: string;
+    // backgroundImage?: string;
     // mikrotikData: MikroTikData;
 }
 
 const initialState: LoginFormState = { success: false, message: "" };
 
-export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
+export default function ConnectCard({ }: ConnectCardProps) {
     const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useFormState(handleSubmit, initialState);
+    const { currentTheme } = useTheme();
+
 
     async function handleSubmit(): Promise<LoginFormState> {
         if (voucherCode.length > 1) {
@@ -34,9 +38,9 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                 <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
             <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                {backgroundImage && (
+                {currentTheme.images.connectCardBackground && (
                     <img
-                        src={backgroundImage || "/placeholder.svg"}
+                        src={currentTheme.images.connectCardBackground || "/placeholder.svg"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
                     />
@@ -49,7 +53,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
 
                     <div className="text-center mb-10">
                         <h2 className="text-xl font-bold leading-tight">
-                            Get 1.5 GB of internet free of cost, provided by PluxNet Fibre
+                            {appConfig.hotspot.welcomeMessage}
                         </h2>
                     </div>
 
@@ -57,7 +61,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         {/* Conditionally Rendered if User's Usage is depleted */}
                         {isDepleted && (
                             <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-white rounded-lg text-black" style={{ borderColor: 'var(--surface-border)', borderWidth: '1px' }}>
-                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder="Enter voucher code" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
+                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder={appConfig.messages.voucherPlaceholder} value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
                                 {/* <button type="button" className="text-base font-semibold text-[#5B3393]" onClick={() => {
 
                                 }} >
