@@ -11,13 +11,13 @@ import { appConfig } from "@/lib/config";
 import { useTheme } from "../theme-provider";
 
 interface ConnectCardProps {
-    // backgroundImage?: string;
-    // mikrotikData: MikroTikData;
+    backgroundImage?: string;
+    // mikrotikData?: MikroTikData;
 }
 
 const initialState: LoginFormState = { success: false, message: "" };
 
-export default function ConnectCard({ }: ConnectCardProps) {
+export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useFormState(handleSubmit, initialState);
@@ -38,9 +38,9 @@ export default function ConnectCard({ }: ConnectCardProps) {
                 <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
             <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                {currentTheme.images.connectCardBackground && (
+                {(backgroundImage || currentTheme.images.connectCardBackground) && (
                     <img
-                        src={currentTheme.images.connectCardBackground || "/placeholder.svg"}
+                        src={backgroundImage || currentTheme.images.connectCardBackground || "/placeholder.svg"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
                     />

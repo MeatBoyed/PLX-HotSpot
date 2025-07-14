@@ -7,6 +7,13 @@
  * Simply update the CSS variables below to change the brand colors throughout the app.
  */
 
+// Enhanced window interface for theme storage
+declare global {
+  interface Window {
+    __currentTheme?: BrandTheme;
+  }
+}
+
 export interface BrandTheme {
   name: string;
   colors: {
@@ -157,7 +164,9 @@ export function applyTheme(theme: BrandTheme) {
   });
 
   // Store current theme data for components to access
-  (window as any).__currentTheme = theme;
+  if (typeof window !== 'undefined') {
+    window.__currentTheme = theme;
+  }
 }
 
 /**
@@ -165,8 +174,8 @@ export function applyTheme(theme: BrandTheme) {
  */
 export function getCurrentTheme(): BrandTheme {
   // Try to get from stored theme first
-  if (typeof window !== 'undefined' && (window as any).__currentTheme) {
-    return (window as any).__currentTheme;
+  if (typeof window !== 'undefined' && window.__currentTheme) {
+    return window.__currentTheme;
   }
 
   // Fallback to reading from CSS (colors only)
