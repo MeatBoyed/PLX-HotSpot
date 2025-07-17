@@ -8,7 +8,15 @@ import Head from '@/components/home-page/head';
 
 export default async function Home() {
   // Get auth state and redirect if needed
-  const authState = appConfig.useSeedData ? seedAuthState : await requireAuth();
+  console.log("Use Theme: ", appConfig.theme);
+
+  let authState = null
+  if (appConfig.useSeedData) {
+    authState = seedAuthState;
+  } else {
+    authState = await requireAuth();
+  }
+  // const authState = appConfig.useSeedData ? seedAuthState : await requireAuth();
 
   // If already authenticated, redirect to welcome page
   if (authState.isAuthenticated) {
@@ -16,7 +24,7 @@ export default async function Home() {
     redirect("/welcome");
   }
 
-  console.log("Auth state: ", authState);
+  // console.log("Auth state: ", authState);
 
   return (
     <>
