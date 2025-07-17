@@ -19,7 +19,6 @@ import { appConfig } from "@/lib/config";
 
 // Get theme from config - could be environment variable or build-time setting
 const theme = appConfig.theme.selectedTheme || 'pluxnet';
-console.log("Current theme:", appConfig.theme.selectedTheme);
 
 export const metadata: Metadata = {
   title: appConfig.site.title,
