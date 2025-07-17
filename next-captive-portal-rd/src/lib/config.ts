@@ -89,6 +89,7 @@ export function getSelectedThemeFromConfig() {
         case 'example':
             return exampleBusinessTheme;
         case 'cityofjbh':
+            return CityOfJbhTheme;
         case 'coj':
             return CityOfJbhTheme;
         case 'pluxnet':

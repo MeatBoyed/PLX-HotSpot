@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import './themes.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -119,6 +120,73 @@
   --button-primary-text: var(--surface-white);
   --button-secondary: var(--surface-white);
   --button-secondary-hover: #f5f5f5;
+  --button-secondary-text: var(--brand-primary);
+}
+
+/* ============================================
+   CSS-BASED THEME SYSTEM
+   ============================================ */
+
+/* PluxNet Theme (explicit override) */
+[data-theme="pluxnet"] {
+  --brand-primary: #301358;
+  --brand-primary-hover: #5B3393;
+  --brand-secondary: #F2F2F2;
+  --brand-accent: #F60031;
+  --text-primary: #181818;
+  --text-secondary: #5D5D5D;
+  --text-tertiary: #7A7A7A;
+  --text-muted: #CECECE;
+  --surface-card: #F2F2F2;
+  --surface-white: #FFFFFF;
+  --surface-border: #CECECE;
+  --button-primary: var(--brand-primary);
+  --button-primary-hover: var(--brand-primary-hover);
+  --button-primary-text: var(--surface-white);
+  --button-secondary: var(--surface-white);
+  --button-secondary-hover: #f5f5f5;
+  --button-secondary-text: var(--brand-primary);
+}
+
+/* City of Johannesburg Theme */
+[data-theme="city-of-jbh"] {
+  --brand-primary: #FFB600;
+  --brand-primary-hover: #E6A500;
+  --brand-secondary: #F2F2F2;
+  --brand-accent: #F60031;
+  --text-primary: #181818;
+  --text-secondary: #5D5D5D;
+  --text-tertiary: #7A7A7A;
+  --text-muted: #CECECE;
+  --surface-card: #F2F2F2;
+  --surface-white: #FFFFFF;
+  --surface-border: #CECECE;
+  --button-primary: var(--brand-primary);
+  --button-primary-hover: var(--brand-primary-hover);
+  --button-primary-text: var(--surface-white);
+  --button-secondary: var(--surface-white);
+  --button-secondary-hover: #f5f5f5;
+  --button-secondary-text: var(--brand-primary);
+}
+
+/* Example Business Theme */
+[data-theme="example-business"] {
+  --brand-primary: #2563eb;
+  --brand-primary-hover: #1d4ed8;
+  --brand-secondary: #f8fafc;
+  --brand-accent: #dc2626;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-muted: #cbd5e1;
+  --surface-card: #f8fafc;
+  --surface-white: #ffffff;
+  --surface-border: #cbd5e1;
+  --button-primary: var(--brand-primary);
+  --button-primary-hover: var(--brand-primary-hover);
+  --button-primary-text: var(--surface-white);
+  --button-secondary: var(--surface-white);
+  --button-secondary-hover: #f1f5f9;
   --button-secondary-text: var(--brand-primary);
 }
 
