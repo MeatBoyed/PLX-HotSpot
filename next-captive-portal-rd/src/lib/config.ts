@@ -82,8 +82,9 @@ export const appConfig = {
 export type AppConfig = typeof appConfig;
 
 // Theme selection utility
-export function getSelectedThemeFromConfig() {
-    const { pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme } = require('./theme');
+export async function getSelectedThemeFromConfig() {
+    // Use dynamic import to avoid circular dependency issues
+    const { pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme } = await import('./theme');
 
     switch (appConfig.theme.selectedTheme.toLowerCase()) {
         case 'example':
