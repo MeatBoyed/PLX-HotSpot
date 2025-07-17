@@ -1,13 +1,31 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { applyTheme, pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme, BrandTheme, getCurrentTheme } from '@/lib/theme';
-import { getSelectedThemeFromConfig } from '@/lib/config';
+import { pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme, BrandTheme } from '@/lib/theme';
+
+// Map data-theme values to theme objects
+const themeMap: Record<string, BrandTheme> = {
+  'pluxnet': pluxnetTheme,
+  'city-of-jbh': CityOfJbhTheme,
+  'example-business': exampleBusinessTheme,
+};
+
+function getCurrentDataTheme(): string {
+  if (typeof window === 'undefined') return 'pluxnet';
+  return document.documentElement.getAttribute('data-theme') || 'pluxnet';
+}
+
+function getThemeFromDataAttribute(dataTheme: string): BrandTheme {
+  return themeMap[dataTheme] || pluxnetTheme;
+}
 
 interface ThemeContextType {
   currentTheme: BrandTheme;
-  switchTheme: (theme: BrandTheme) => void;
   availableThemes: BrandTheme[];
+  // Helper function to get theme images easily
+  getThemeImage: (imageKey: keyof BrandTheme['images']) => string;
+  // Function to switch CSS themes
+  switchCSSTheme: (themeId: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -25,22 +43,50 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [currentTheme, setCurrentTheme] = useState<BrandTheme>(CityOfJbhTheme);
+  // Get initial theme based on data-theme attribute
+  const [currentTheme, setCurrentTheme] = useState<BrandTheme>(() => {
+    const dataTheme = getCurrentDataTheme();
+    return getThemeFromDataAttribute(dataTheme);
+  });
 
-  const availableThemes = [pluxnetTheme, exampleBusinessTheme, CityOfJbhTheme];
+  const availableThemes = Object.values(themeMap);
 
-  const switchTheme = (theme: BrandTheme) => {
-    setCurrentTheme(theme);
-    applyTheme(theme);
+  const getThemeImage = (imageKey: keyof BrandTheme['images']): string => {
+    return currentTheme.images[imageKey] || '';
   };
 
-  // Initialize theme on mount
+  const switchCSSTheme = (themeId: string) => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.setAttribute('data-theme', themeId);
+  };
+
+  // Watch for data-theme changes and update image theme accordingly
   useEffect(() => {
-    applyTheme(CityOfJbhTheme);
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          const newDataTheme = getCurrentDataTheme();
+          const newTheme = getThemeFromDataAttribute(newDataTheme);
+          setCurrentTheme(newTheme);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ currentTheme, switchTheme, availableThemes }}>
+    <ThemeContext.Provider value={{
+      currentTheme,
+      availableThemes,
+      getThemeImage,
+      switchCSSTheme
+    }}>
       {children}
     </ThemeContext.Provider>
   );
