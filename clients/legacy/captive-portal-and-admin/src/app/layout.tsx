@@ -37,7 +37,9 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex flex-col justify-between min-h-screen">
             {/* Theme Switcher for testing */}
-            <ClientThemeSwitcher />
+            {appConfig.useSeedData && (
+              <ClientThemeSwitcher />
+            )}
 
             {/* Logo / Navbar */}
             {children}
