@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from './theme-provider';
+import Link from 'next/link';
 
 const availableThemes = [
   { id: 'pluxnet', name: 'PluxNet' },
@@ -43,6 +44,7 @@ export function ThemeSwitcher() {
           {theme.name}
         </button>
       ))}
+      <Link href="/welcome">View Dashboard</Link>
     </div>
   );
 }
