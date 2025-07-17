@@ -89,6 +89,8 @@ export async function getSelectedThemeFromConfig() {
     switch (appConfig.theme.selectedTheme.toLowerCase()) {
         case 'example':
             return exampleBusinessTheme;
+        case "city-of-jbh":
+            return CityOfJbhTheme;
         case 'cityofjbh':
             return CityOfJbhTheme;
         case 'coj':
