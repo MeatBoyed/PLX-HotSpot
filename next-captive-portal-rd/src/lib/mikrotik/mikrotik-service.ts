@@ -2,9 +2,10 @@
 // Must run Client side to use Browser's Fetch/Network to access Mikrotik Hotspot on the network
 import { parseMikroTikStatus } from "./mikrotik-lib";
 import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, } from "./mikrotik-types";
+import { appConfig } from "@/lib/config";
 
-const Default_Username = "click_to_connect@dev";
-const Default_Password = "click_to_connect";
+const Default_Username = appConfig.mikrotik.defaultUsername;
+const Default_Password = appConfig.mikrotik.defaultPassword;
 
 interface MikroTikLoginResponse {
     logged_in?: string;
@@ -129,7 +130,7 @@ export async function checkUserUsage(mikrotikData: MikroTikData): Promise<Radius
     // Convert MAC to hyphen format if needed
     const mac = macRaw.replace(/%3A|:/g, "-").toLowerCase();
 
-    const url = new URL("https://radiusdesk.pluxnet.co.za/cake4/rd_cake/radaccts/get-usage.json");
+    const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
     url.searchParams.set("mac", mac);
     url.searchParams.set("username", username);
 

@@ -25,7 +25,7 @@ export default function UserSession({ status: initialStatus, userUsage: initialU
         <section className="p-4 w-full space-y-6">
             {/* Current Plan */}
             <div className="flex flex-col items-start justify-start gap-4 w-full">
-                <h4 className="text-lg font-bold text-[#7A7A7A]">Current plan</h4>
+                <h4 className="text-lg font-bold" style={{ color: 'var(--text-tertiary)' }}>Current plan</h4>
                 <CurrentPlanCard
                     bytesIn={status?.bytes_out_nice || ""}
                     bytes_limit={userUsage?.data?.data_cap ? `${(userUsage.data.data_cap / (1024 * 1024)).toFixed(1)} MB` : "Unknown"}
@@ -34,7 +34,7 @@ export default function UserSession({ status: initialStatus, userUsage: initialU
 
             {/* Available Plans */}
             <div className="flex flex-col items-start justify-start gap-4 w-full">
-                <h4 className="text-lg font-bold text-[#7A7A7A]">Plans</h4>
+                <h4 className="text-lg font-bold" style={{ color: 'var(--text-tertiary)' }}>Plans</h4>
                 <div className="flex justify-between items-start gap-4 w-full">
                     <PlanCard />
                     <PlanCard />
