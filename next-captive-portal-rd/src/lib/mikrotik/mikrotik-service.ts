@@ -32,6 +32,7 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
         });
         const text = await res.text();
 
+        console.log("Response:", res);
         console.log("Login response:", text);
 
         // Parse the MikroTik response - it's in a specific format like ({...})

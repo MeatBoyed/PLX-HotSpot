@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  next-captive-portal-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: next-captive-portal-dev
+    container_name: next-captive-portal-dev
+    network_mode: "host"
+    environment:
+      - NODE_ENV=development
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    # Enable stdin/tty for interactive debugging if needed
+    stdin_open: true
+    tty: true
+
+
