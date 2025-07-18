@@ -1,3 +1,6 @@
+// Example: Alternative version of connect-card using Tailwind brand classes
+// This demonstrates how you can use the new Tailwind classes instead of inline styles
+
 "use client";
 
 import React, { useState } from "react";
@@ -8,21 +11,17 @@ import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
 import { appConfig } from "@/lib/config";
-import { useTheme } from "../theme-provider";
 
 interface ConnectCardProps {
     backgroundImage?: string;
-    // mikrotikData?: MikroTikData;
 }
 
 const initialState: LoginFormState = { success: false, message: "" };
 
-export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
+export default function ConnectCardTailwind({ backgroundImage }: ConnectCardProps) {
     const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useFormState(handleSubmit, initialState);
-    const { currentTheme } = useTheme();
-
 
     async function handleSubmit(): Promise<LoginFormState> {
         if (voucherCode.length > 1) {
@@ -37,10 +36,10 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
             {showAd && (
                 <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
-            <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                {(backgroundImage || currentTheme.images.connectCardBackground) && (
+            <div className="relative bg-brand-primary rounded-3xl w-full max-w-md mx-auto">
+                {backgroundImage && (
                     <img
-                        src={backgroundImage || currentTheme.images.connectCardBackground || "/placeholder.svg"}
+                        src={backgroundImage || "/placeholder.svg"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
                     />
@@ -60,13 +59,15 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                     <Form action={formAction} className="flex flex-col justify-center items-center">
                         {/* Conditionally Rendered if User's Usage is depleted */}
                         {isDepleted && (
-                            <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-white rounded-lg text-black" style={{ borderColor: 'var(--surface-border)', borderWidth: '1px' }}>
-                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder={appConfig.messages.voucherPlaceholder} value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
-                                {/* <button type="button" className="text-base font-semibold text-[#5B3393]" onClick={() => {
-
-                                }} >
-                                    Apply
-                                </button> */}
+                            <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-surface-white border border-surface-border rounded-lg text-text-primary">
+                                <input
+                                    type="text"
+                                    id="voucherCode"
+                                    className="text-base font-normal w-full"
+                                    placeholder={appConfig.messages.voucherPlaceholder}
+                                    value={voucherCode}
+                                    onChange={(e) => setVoucherCode(e.target.value)}
+                                />
                             </div>
                         )}
                         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -74,11 +75,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                                 id="terms"
                                 type="checkbox"
                                 required
-                                className="border-white mt-0.5"
-                                style={{
-                                    '--tw-checked-bg': 'var(--surface-white)',
-                                    '--tw-checked-color': 'var(--brand-primary)'
-                                } as React.CSSProperties}
+                                className="border-white data-[state=checked]:bg-surface-white data-[state=checked]:text-brand-primary mt-0.5"
                             />
                             <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                                 Accept terms & conditions to continue
@@ -86,12 +83,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         </div>
 
                         <Button
-                            className="w-full rounded-4xl font-medium py-6 text-base hover:cursor-pointer"
-                            style={{
-                                backgroundColor: 'var(--button-secondary)',
-                                color: 'var(--button-secondary-text)',
-                                '--tw-hover-bg': 'var(--button-secondary-hover)'
-                            } as React.CSSProperties}
+                            className="w-full bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover rounded-4xl font-medium py-6 text-base hover:cursor-pointer"
                             type="submit"
                             disabled={state.success}
                         >

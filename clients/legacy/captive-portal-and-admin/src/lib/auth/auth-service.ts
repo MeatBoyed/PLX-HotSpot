@@ -4,6 +4,7 @@ import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
 import { loginToHotspot, getUserSession, checkUserUsage } from '@/lib/mikrotik/mikrotik-service';
 import { MikroTikData, LoginFormState, StatusResponse, RadiusDeskUsageResponse } from '@/lib/mikrotik/mikrotik-types';
 import { redirect } from 'next/navigation';
+import { appConfig } from "@/lib/config";
 
 export interface AuthState {
     isAuthenticated: boolean;
@@ -129,7 +130,7 @@ export async function requireAuth(): Promise<AuthState> {
     const authState = await getAuthState();
 
     if (!authState.mikrotikData) {
-        redirect('https://pluxnet.co.za');
+        redirect(appConfig.mikrotik.redirectUrl);
     }
 
     return authState;
