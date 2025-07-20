@@ -1,6 +1,6 @@
-"use server"
 // Must run Client side to use Browser's Fetch/Network to access Mikrotik Hotspot on the network
 import { parseMikroTikStatus } from "./mikrotik-lib";
+import { MikroTikResponseParser } from "./mikrotik-parser";
 import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, } from "./mikrotik-types";
 import { appConfig } from "@/lib/config";
 
@@ -19,6 +19,7 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
     const username = voucherCode || Default_Username;
     const password = voucherCode ? voucherCode : Default_Password;
 
+    console.log("Default Credentials: ", { username: Default_Username, password: Default_Password });
     console.log("Credentials: ", { username, password });
     // Use provided Mikrotik login link and supply credentials
     const url = `${mikrotikData.loginlink}?${new URLSearchParams({ username, password })}`;
@@ -27,15 +28,22 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
         const res = await fetch(url, {
             method: "GET",
             redirect: "follow",
+            // mode: "no-cors", // NECESSARY if using HTTPS in configs
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                // "Content-Type": "text/html"
             }
         });
+        // const body = await res.body;
         const text = await res.text();
 
-        console.log("Response:", res);
-        console.log("Login response:", text);
+        // console.log("Full Response:", res);
+        console.log("Text response:", text);
+        // console.log("Body Response: ", body);
 
+        // PROBLEM AREA - We need some smart parsing
+        const result = MikroTikResponseParser.parse(text);
+        console.log("Parse result:", result);
         // Parse the MikroTik response - it's in a specific format like ({...})
         let parsedResponse: MikroTikLoginResponse | null = null;
         try {
@@ -49,7 +57,12 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
             console.error("Failed to parse MikroTik response:", parseError);
             // Fallback to text analysis if JSON parsing fails
         }
-
+        // if (MikroTikResponseParser.isLoggedIn(result)) {
+        //     return { success: true };
+        // } else {
+        //     const errorMessage = MikroTikResponseParser.getErrorMessage(result);
+        //     return { success: false, message: errorMessage };
+        // }
         // Check for success based on parsed response or text content
         let success = false;
         let errorMessage = "Login failed. Please try again.";
