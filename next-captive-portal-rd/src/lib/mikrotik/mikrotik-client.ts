@@ -1,5 +1,4 @@
 "use client";
-
 // Client-side wrapper for authentication services
 import { LoginFormState } from "./mikrotik-types";
 
