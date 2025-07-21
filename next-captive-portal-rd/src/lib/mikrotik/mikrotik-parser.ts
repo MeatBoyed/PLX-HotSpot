@@ -80,7 +80,7 @@ export class MikroTikResponseParser {
                 rawResponse: response
             };
 
-        } catch (jsonError) {
+        } catch {
             // Fallback: manual extraction
             return this.extractKeyValuePairs(response);
         }
