@@ -1,5 +1,4 @@
 import ConnectCard from '@/components/home-page/connect-card';
-import PureHtmlConnectCard from '@/components/home-page/pure-html-connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
 import { requireAuth } from '@/lib/auth/auth-service';
