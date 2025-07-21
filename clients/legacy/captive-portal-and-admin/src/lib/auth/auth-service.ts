@@ -90,17 +90,17 @@ export async function authenticateUser(voucherCode?: string): Promise<LoginFormS
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Verify the session was actually created
-        const sessionVerification = await getUserSession(mikrotikData);
+        // const sessionVerification = await getUserSession(mikrotikData);
 
-        if (!sessionVerification.success || !sessionVerification.data) {
-            console.error('Session verification failed:', sessionVerification.message);
-            return {
-                success: false,
-                message: 'Login appeared successful but session not established. Please try again.'
-            };
-        }
+        // if (!sessionVerification.success || !sessionVerification.data) {
+        //     console.error('Session verification failed:', sessionVerification.message);
+        //     return {
+        //         success: false,
+        //         message: 'Login appeared successful but session not established. Please try again.'
+        //     };
+        // }
 
-        console.log('Session verified successfully:', sessionVerification.data);
+        // console.log('Session verified successfully:', sessionVerification.data);
 
         // Additional connectivity test - try to reach an external endpoint
         try {
