@@ -25,7 +25,7 @@ export default async function Home() {
     redirect("https://pluxnet.co.za");
   }
 
-  // console.log("Auth state: ", authState);
+  console.log("Auth state: ", authState);
 
   return (
     <>
@@ -35,11 +35,8 @@ export default async function Home() {
       <main className="flex items-center justify-center">
         <div className="p-4 w-full space-y-6 max-w-md">
           {/* Iframe-based Connect Card */}
-          <ConnectProvider userUsage={authState.userUsage ?? undefined} >
-            <div className="space-y-2">
-              <h3 className="text-center text-sm font-semibold opacity-75">Iframe Implementation</h3>
-              <ConnectCard />
-            </div>
+          <ConnectProvider userUsage={authState.userUsage ?? undefined} mikrotikLoginUrl={authState.mikrotikData?.loginlink}>
+            <ConnectCard />
           </ConnectProvider>
 
           {/* Pure HTML Form Connect Card */}
