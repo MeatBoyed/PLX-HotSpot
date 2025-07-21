@@ -22,7 +22,7 @@ export default async function Home() {
   // If already authenticated, redirect to welcome page
   if (authState.isAuthenticated) {
     const { redirect } = await import('next/navigation');
-    redirect("/welcome");
+    redirect("https://pluxnet.co.za");
   }
 
   // console.log("Auth state: ", authState);

@@ -34,12 +34,10 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
                 // "Content-Type": "text/html"
             }
         });
-        // const body = await res.body;
         const text = await res.text();
 
-        // console.log("Full Response:", res);
+        console.log("Full Response:", res);
         console.log("Text response:", text);
-        // console.log("Body Response: ", body);
 
         // PROBLEM AREA - We need some smart parsing
         const result = MikroTikResponseParser.parse(text);
@@ -114,7 +112,12 @@ export async function getUserSession(mikrotikData?: MikroTikData): Promise<Statu
 
     try {
         const res = await fetch(url.toString(), { method: "GET" });
+        // const body = await res.body()
         const rawText = await res.text();
+
+        console.log("Response: ", res)
+        console.log("Test Response: ", rawText)
+        // console.log("Body response: ", body)
 
         const status = await parseMikroTikStatus(rawText);
         console.log("Hotspot Status:", status);
