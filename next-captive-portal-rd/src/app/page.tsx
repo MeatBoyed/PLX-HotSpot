@@ -1,30 +1,74 @@
+// Must be Client side to ensure all requests from auth are client side (Less auth, more client side)
+"use client"
+
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { requireAuth } from '@/lib/auth/auth-service';
+import { AuthState, requireAuth } from '@/lib/auth/auth-service';
 import { seedAuthState } from '@/lib/seed';
 import { appConfig } from '@/lib/config';
 import Head from '@/components/home-page/head';
+import { useEffect, useState } from 'react';
 
-export default async function Home() {
+export default function Home() {
   // Get auth state and redirect if needed
+  // const [authState, setAuthState] = useState<AuthState>()
   console.log("Use Theme: ", appConfig.theme);
 
-  let authState = null
-  if (appConfig.useSeedData) {
-    authState = seedAuthState;
-  } else {
-    authState = await requireAuth();
-  }
+  // let authState = null
+  // if (appConfig.useSeedData) {
+  //   authState = seedAuthState;
+  // } else {
+  //   authState = await requireAuth();
+  // }
+
+  // if (authState.isAuthenticated) {
+  //   const { redirect } = await import('next/navigation');
+  //   redirect("/welcome");
+  // }
+
+
+
   // const authState = appConfig.useSeedData ? seedAuthState : await requireAuth();
 
   // If already authenticated, redirect to welcome page
-  if (authState.isAuthenticated) {
-    const { redirect } = await import('next/navigation');
-    redirect("/welcome");
-  }
 
   // console.log("Auth state: ", authState);
+
+  const [authState, setAuthState] = useState<AuthState | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuth() {
+      let state: AuthState;
+      if (appConfig.useSeedData) {
+        state = seedAuthState;
+      } else {
+        state = await requireAuth();
+      }
+
+      if (!isMounted) return;
+
+      setAuthState(state);
+
+      if (state.isAuthenticated) {
+        const { redirect } = await import('next/navigation');
+        redirect("/welcome");
+      }
+    }
+
+    checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  console.log("Use Theme: ", appConfig.theme);
+
+  // Prevent rendering until authState is set
+  if (!authState) return null;
 
   return (
     <>

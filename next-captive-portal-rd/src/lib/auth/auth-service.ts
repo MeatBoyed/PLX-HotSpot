@@ -1,4 +1,4 @@
-"use server";
+// "use server";
 
 import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
 import { getUserSession, checkUserUsage, loginToHotspot } from '@/lib/mikrotik/mikrotik-service';
@@ -90,34 +90,34 @@ export async function authenticateUser(voucherCode?: string): Promise<LoginFormS
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Verify the session was actually created
-        const sessionVerification = await getUserSession(mikrotikData);
+        // const sessionVerification = await getUserSession(mikrotikData);
 
-        if (!sessionVerification.success || !sessionVerification.data) {
-            console.error('Session verification failed:', sessionVerification.message);
-            return {
-                success: false,
-                message: 'Login appeared successful but session not established. Please try again.'
-            };
-        }
+        // if (!sessionVerification.success || !sessionVerification.data) {
+        //     console.error('Session verification failed:', sessionVerification.message);
+        //     return {
+        //         success: false,
+        //         message: 'Login appeared successful but session not established. Please try again.'
+        //     };
+        // }
 
-        console.log('Session verified successfully:', sessionVerification.data);
+        // console.log('Session verified successfully:', sessionVerification.data);
 
         // Additional connectivity test - try to reach an external endpoint
-        try {
-            const connectivityTest = await fetch('https://www.google.com/favicon.ico', {
-                method: 'HEAD',
-                signal: AbortSignal.timeout(5000)
-            });
+        // try {
+        //     const connectivityTest = await fetch('https://www.google.com/favicon.ico', {
+        //         method: 'HEAD',
+        //         signal: AbortSignal.timeout(5000)
+        //     });
 
-            if (!connectivityTest.ok) {
-                console.warn('Internet connectivity test failed, but session exists');
-            } else {
-                console.log('Internet connectivity confirmed');
-            }
-        } catch (connectivityError) {
-            console.warn('Connectivity test failed:', connectivityError);
-            // Don't fail auth if connectivity test fails, session might still be valid
-        }
+        //     if (!connectivityTest.ok) {
+        //         console.warn('Internet connectivity test failed, but session exists');
+        //     } else {
+        //         console.log('Internet connectivity confirmed');
+        //     }
+        // } catch (connectivityError) {
+        //     console.warn('Connectivity test failed:', connectivityError);
+        //     // Don't fail auth if connectivity test fails, session might still be valid
+        // }
 
         return { success: true, message: 'Successfully authenticated' };
     } catch (error) {
