@@ -1,3 +1,4 @@
+// Must run on Server otherwise RadiusDesk requests fails
 import UserSession from '@/components/welcome-page/user-session';
 import { requireAuthenticated } from '@/lib/auth/auth-service';
 import { seedAuthState } from '@/lib/seed';
@@ -8,6 +9,7 @@ export default async function WelcomePage() {
     // Ensure user is authenticated, redirect if not
     const authState = appConfig.useSeedData ? seedAuthState : await requireAuthenticated();
     console.log("Welcome page auth state:", authState);
+
 
     return (
         <>

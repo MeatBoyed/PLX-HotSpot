@@ -53,6 +53,7 @@ export const appConfig = {
         defaultPassword: getEnvVar('MIKROTIK_DEFAULT_PASSWORD', "click_to_connect"),
         radiusDeskBaseUrl: getEnvVar('MIKROTIK_RADIUS_DESK_BASE_URL', "https://radiusdesk.pluxnet.co.za"),
         redirectUrl: getEnvVar('MIKROTIK_REDIRECT_URL', "https://pluxnet.co.za"),
+        baseUrl: getEnvVar('MIKROTIK_BASE_URL', "https://gateway.pluxnet.co.za"),
     },
 
     // Revive Ad configuration

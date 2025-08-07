@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: captive-portal:pluxnet
-    container_name: captive-portal-pluxnet
+    image: charlesmbv/vv-captive-portal:pluxnet
+    container_name: vv-captive-portal-pluxnet
     ports:
       - "3000:3000"
     env_file:
@@ -21,6 +21,6 @@ services:
 
 networks:
   default:
-    name: next-captive-portal
+    name: vv-captive-portal
   public-proxy:
     external: true

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 import { Button } from "../ui/button";
-import { useFormState } from "react-dom";
+// import { useFormState } from "react-dom";
 import Form from "next/form";
 import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
@@ -20,7 +20,7 @@ const initialState: LoginFormState = { success: false, message: "" };
 export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
-    const [state, formAction] = useFormState(handleSubmit, initialState);
+    const [state, formAction] = useActionState(handleSubmit, initialState);
     const { currentTheme } = useTheme();
 
 
