@@ -143,7 +143,12 @@ export async function getUserSession(mikrotikData?: MikroTikData): Promise<Statu
 
     try {
         const res = await fetch(url.toString(), { method: "GET" });
+        // const body = await res.body()
         const rawText = await res.text();
+
+        console.log("Response: ", res)
+        console.log("Test Response: ", rawText)
+        // console.log("Body response: ", body)
 
         const status = await parseMikroTikStatus(rawText);
         console.log("Hotspot Status:", status);

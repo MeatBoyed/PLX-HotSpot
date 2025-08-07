@@ -76,10 +76,17 @@ export default function Home() {
         <Head />
       </nav>
       <main className="flex items-center justify-center">
-        <div className="p-4 w-full space-y-6 max-w-md">            {/* Connect Card */}
-          <ConnectProvider userUsage={authState.userUsage ?? undefined} >
+        <div className="p-4 w-full space-y-6 max-w-md">
+          {/* Iframe-based Connect Card */}
+          <ConnectProvider userUsage={authState.userUsage ?? undefined} mikrotikLoginUrl={authState.mikrotikData?.loginlink}>
             <ConnectCard />
           </ConnectProvider>
+
+          {/* Pure HTML Form Connect Card */}
+          {/* <div className="space-y-2">
+            <h3 className="text-center text-sm font-semibold opacity-75">Pure HTML Form Implementation</h3>
+            <PureHtmlConnectCard mikrotikLoginUrl={authState.mikrotikData?.loginlink} />
+          </div> */}
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             <h4 className="flex items-center justify-between w-full">
