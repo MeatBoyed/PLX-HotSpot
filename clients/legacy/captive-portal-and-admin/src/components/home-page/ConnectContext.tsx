@@ -1,9 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { clientLoginToHotspot } from "@/lib/mikrotik/mikrotik-client";
 import { LoginFormState, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
 import { appConfig } from "@/lib/config";
 
@@ -26,14 +24,14 @@ export function useConnect() {
     return context;
 }
 
-export function ConnectProvider({ children, userUsage }: { children: ReactNode, userUsage?: RadiusDeskUsageResponse }) {
-    const router = useRouter();
+export function ConnectProvider({ children, userUsage, mikrotikLoginUrl }: { children: ReactNode, userUsage?: RadiusDeskUsageResponse, mikrotikLoginUrl?: string }) {
     const [showAd, setShowAd] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [pendingVoucherCode, setPendingVoucherCode] = useState<string | undefined>(undefined);
 
     const isDepleted = userUsage?.data?.depleted || false;
     const adUrl = "https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615";
+    const loginUrl = mikrotikLoginUrl || "http://10.5.50.1/login";
 
     // Main Connect method - This method will handle the login process and show the ad if it's the first login
     const connect = async (voucherCode?: string): Promise<LoginFormState> => {
@@ -53,29 +51,31 @@ export function ConnectProvider({ children, userUsage }: { children: ReactNode, 
         return await doLogin(voucherCode);
     };
 
-    // Main Login method - Authenticates with Mikrotik and handles the response
+    // Main Login method - Authenticates with Mikrotik using browser navigation
     const doLogin = async (voucherCode?: string): Promise<LoginFormState> => {
         setIsLoading(true);
 
         const loadingToast = toast.loading(appConfig.messages.loadingConnect);
 
         try {
-            const result = await clientLoginToHotspot(voucherCode);
+            // Determine credentials
+            const username = voucherCode || appConfig.mikrotik.defaultUsername;
+            const password = voucherCode || appConfig.mikrotik.defaultPassword;
 
-            // Dismiss loading toast
+            // Construct the final URL
+            const finalUrl = `${loginUrl}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+
+            console.log("ConnectContext navigating to:", finalUrl);
+
+            // Dismiss loading toast before navigation
             toast.dismiss(loadingToast);
+            toast.success(appConfig.messages.successConnect);
 
-            // Show appropriate toast based on actual result
-            if (result.success) {
-                toast.success(appConfig.messages.successConnect);
-                // Small delay to ensure session is fully established
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                router.push("/welcome");
-            } else {
-                toast.error(result.message || appConfig.messages.errorConnect);
-            }
+            // Small delay then navigate
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            window.location.href = finalUrl;
 
-            return result;
+            return { success: true, message: "Redirecting to authentication..." };
         } catch (error) {
             console.error("Login error:", error);
 

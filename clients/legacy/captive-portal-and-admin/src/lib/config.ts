@@ -27,7 +27,7 @@ export const appConfig = {
 
     // Site metadata
     site: {
-        title: getEnvVar('SITE_TITLE', "COJ Fibre HotSpot"),
+        title: getEnvVar('SITE_TITLE', "PluxNet Fibre HotSpot"),
         description: getEnvVar('SITE_DESCRIPTION', "PluxNet Fibre HotSpot"),
         brandName: getEnvVar('BRAND_NAME', "PluxNet"),
     },
@@ -43,7 +43,7 @@ export const appConfig = {
     hotspot: {
         providerName: getEnvVar('HOTSPOT_PROVIDER_NAME', "PluxNet Fibre"),
         freeDataAmount: getEnvVar('HOTSPOT_FREE_DATA_AMOUNT', "1.5 GB"),
-        welcomeMessage: getEnvVar('HOTSPOT_WELCOME_MESSAGE', "Get 1.5 GB of internet free of cost, provided by CoJ"),
+        welcomeMessage: getEnvVar('HOTSPOT_WELCOME_MESSAGE', "Get 1.5 GB of internet free of cost, provided by PluxNet Fibre."),
         ssid: getEnvVar('HOTSPOT_SSID', "PluxNet"),
     },
 
