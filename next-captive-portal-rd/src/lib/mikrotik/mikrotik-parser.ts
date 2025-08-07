@@ -82,6 +82,7 @@ export class MikroTikResponseParser {
 
         } catch {
             // Fallback: manual extraction
+            console.log("JSON Error: ", jsonError)
             return this.extractKeyValuePairs(response);
         }
     }
