@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="theme-light">
+
+<head>
+    <title>PluxNet</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 2 meta tags *must* come first in the <head>
+      to consistently ensure proper document rendering.
+      Any other head element should come *after* these tags. -->
+    
+
+    <!-- <meta name="theme-color" content="#ffffff">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="assets/images/browserconfig.xml"> -->
+
+    <!-- SEO -->
+    <meta name="author" content="PluxNet">
+    <meta name="description" content="PluxNet">
+    <meta name="keywords" content="PluxNet">
+    <!-- meta data preview image -->
+    <!-- <meta property="og:image" content="assets/images/metadata-preview.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="300">
+    <meta property="og:image:height" content="300"> -->
+
+     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+    <link rel="manifest" href="assets/images/site.webmanifest">
+    <link rel="mask-icon" href="assets/images/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <meta name="theme-color" content="#5B3393">
+    <!-- <meta name="msapplication-TileColor" content="#da532c"> -->
+    
+
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"> -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/css/main.min.css">
+
+</head>
+
+<body>
+
+    <main>
+        <section class="welcome-section">
+            <div class="container-fluid">
+                <div class="welcome-container bg-gradient">
+                    <div class="container">
+                    <a href="index.html" class="logo d-flex align-items-center">
+                        <img src="assets/images/plusnet-logo-white.svg" alt="PluxNet logo" width="auto" height="auto">
+                    </a>
+                    <h3 class="welcome-title font-title-large">Welcome 👋🏼</h3>
+                    <p class="welcome-desc">View your connection details below</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="plans-section">
+            <div class="plans-section-wrapper container-fluid">
+            <div class="container plans-block-conatiner">
+                <div class="plans-block">
+                    <h4 class="plans-section-title font-body-normal font-color-tertiary">Current plan</h4>
+                    <div class="plan-info bg-secondary"> 
+                        <h5 class="warning-text font-title-small">You’re out of internet!</h5>
+                        <p class="plan-desc font-body-xs font-color-primary pnt-pt-4">For uninterrupted internet usage, use your voucher code below or select a top up plan.</p>
+                    
+                        <div class="plan-list d-flex align-items-center pnt-column-gap-20">
+                            <div class="plan-item">
+                                <h3 class="plan-item-title">Plan</h3>
+                                <h5 class="plan-item-name">Free plan</h5>
+                            </div>
+                            <div class="plan-item">
+                                <h3 class="plan-item-title">Data used</h3>
+                                <h5 class="plan-item-name">1.41 GB/<span class="plan-item-text">2GB</span></h5>
+                            </div>
+                        </div>
+                        <div class="voucher-block">
+                            <h5 class="voucher-title font-title-xs pnt-pb-12">Apply voucher</h5>
+                            <div class="form-group d-flex align-items-center justify-content-between">
+                                <input type="text" id="voucherCode" class="form-control" placeholder="Enter voucher code">
+                                <button type="button" class="btn btn-link apply-btn" onclick="validateVoucher()">
+                                Apply
+                                </button>
+                            </div>
+                            <div id="error-msg" class="errror-msg">This voucher is expired</div>
+                        </div>
+                        </div>
+                </div>
+                <div class="plans-block">
+                    <h4 class="plans-section-title font-body-normal font-color-tertiary">Plans</h4>
+                    <div class="plan-price-list  d-flex align-items-center">
+                        <div class="plan-price-item bg-secondary">
+                            <div class="badge">Mini</div>
+                            <h5 class="plan-price">$8.00<span class="plan-price-text">/month</span></h5>
+                            <div class="plan-detail d-flex">
+                                <h6 class="plan-detail-info">50 Hrs</h6>
+                                <h6 class="plan-detail-info">2GB</h6>
+                            </div>
+                            <button type="submit"class="btn btn-primary w-100 pnt-mt-8">Select</button>
+                        </div>
+                        <div class="plan-price-item bg-secondary">
+                            <div class="badge">Mega</div>
+                            <h5 class="plan-price">$16.00<span class="plan-price-text">/month</span></h5>
+                            <div class="plan-detail d-flex">
+                                <h6 class="plan-detail-info">200 Hrs</h6>
+                                <h6 class="plan-detail-info">5GB</h6>
+                            </div>
+                            <button type="submit"class="btn btn-primary w-100 pnt-mt-8">Select</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <section class="add-section w-100">
+            <div class="container-fluid">
+            <div class="add-wrapper w-100">
+                <img src="assets/images/add-img-2.png" class="img-fluid" alt="add image">
+                <span class="add-close-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M14.8289 9.1709L9.17188 14.8279M9.17188 9.1709L14.8289 14.8279" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </div>
+            </div>
+        </section>
+    </main>
+    <!-- main-content -->
+
+    <script src="assets/js/jquery/jquery.min.js"></script>
+    <script src="assets/js/custom/validation.js"></script>
+</body>
+
+</html>

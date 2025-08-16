@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PluxNet HotSpot Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f7f9fc;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c5282;
+            margin-top: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #f0f4f8;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+        }
+
+        /* Form for auto-posting to your application */
+        #status-form {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Connection Status</h1>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">User</div>
+                <div class="stat-value">$(username)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">IP Address</div>
+                <div class="stat-value">$(ip)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Download</div>
+                <div class="stat-value">$(bytes-in-nice)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Upload</div>
+                <div class="stat-value">$(bytes-out-nice)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time Left</div>
+                <div class="stat-value">$(session-time-left)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Uptime</div>
+                <div class="stat-value">$(uptime)</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="$(link-logout)"><button class="logout-btn">Disconnect</button></a>
+        </div>
+    </div>
+
+    <!-- Hidden data for API compatibility -->
+    <div style="display:none;" id="api-data">
+        $(var)({
+        'logged_in': '$(logged-in)',
+        'link_login_only': '$(link-login-only)',
+        'link_logout': '$(link-logout)',
+        'username': '$(username)',
+        'ip': '$(ip)',
+        'mac': '$(mac)',
+        'bytes_in': '$(bytes-in)',
+        'bytes_in_nice': '$(bytes-in-nice)',
+        'bytes_out': '$(bytes-out)',
+        'bytes_out_nice': '$(bytes-out-nice)',
+        'remain_bytes_in': '$(remain-bytes-in)',
+        'remain_bytes_out': '$(remain-bytes-out)',
+        'packets_out': '$(packets-out)',
+        'packets_in': '$(packets-in)',
+        'session_time_left': '$(session-time-left)',
+        'uptime': '$(uptime)'
+        })
+    </div>
+
+    <!-- Auto post to your application's status endpoint -->
+    <form id="status-form" action="http://localhost:3000/status-update" method="post">
+        <input type="hidden" name="logged_in" value="$(logged-in)">
+        <input type="hidden" name="link_login_only" value="$(link-login-only)">
+        <input type="hidden" name="link_logout" value="$(link-logout)">
+        <input type="hidden" name="username" value="$(username)">
+        <input type="hidden" name="ip" value="$(ip)">
+        <input type="hidden" name="mac" value="$(mac)">
+        <input type="hidden" name="bytes_in" value="$(bytes-in)">
+        <input type="hidden" name="bytes_in_nice" value="$(bytes-in-nice)">
+        <input type="hidden" name="bytes_out" value="$(bytes-out)">
+        <input type="hidden" name="bytes_out_nice" value="$(bytes-out-nice)">
+        <input type="hidden" name="remain_bytes_in" value="$(remain-bytes-in)">
+        <input type="hidden" name="remain_bytes_out" value="$(remain-bytes-out)">
+        <input type="hidden" name="packets_in" value="$(packets-in)">
+        <input type="hidden" name="packets_out" value="$(packets-out)">
+        <input type="hidden" name="session_time_left" value="$(session-time-left)">
+        <input type="hidden" name="uptime" value="$(uptime)">
+    </form>
+
+    <!-- Auto-post to your application -->
+    <script>
+        // Set a flag to avoid multiple submissions
+        if (!window.submitted) {
+            window.submitted = true;
+
+            // Submit to your application in the background
+            document.getElementById('status-form').submit();
+
+            // Make the data available for parent frames/windows if needed
+            window.mikrotikData = {
+                logged_in: '$(logged-in)',
+                link_login_only: '$(link-login-only)',
+                link_logout: '$(link-logout)',
+                username: '$(username)',
+                ip: '$(ip)',
+                mac: '$(mac)',
+                bytes_in: '$(bytes-in)',
+                bytes_in_nice: '$(bytes-in-nice)',
+                bytes_out: '$(bytes-out)',
+                bytes_out_nice: '$(bytes-out-nice)',
+                remain_bytes_in: '$(remain-bytes-in)',
+                remain_bytes_out: '$(remain-bytes-out)',
+                packets_out: '$(packets-out)',
+                packets_in: '$(packets-in)',
+                session_time_left: '$(session-time-left)',
+                uptime: '$(uptime)'
+            };
+
+            // Periodically update status
+            setInterval(function () {
+                fetch('http://localhost:3000/status-update', {
+                    method: 'POST',
+                    body: new FormData(document.getElementById('status-form'))
+                }).catch(err => console.error('Status update failed:', err));
+            }, 30000); // Update every 30 seconds
+        }
+    </script>
+</body>
+
+</html>

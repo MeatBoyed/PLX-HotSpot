@@ -1,0 +1,38 @@
+# 2025-07-18 18:47:45 by RouterOS 7.19.3
+# software id = 
+#
+ # NAME                               TYPE             SIZE LAST-MODIFIED       
+ 0 hotspot                            directory             2025-07-18 18:47:45 
+ 1 cert.pem                           .pem file        1302 2025-07-17 21:11:52 
+ 2 skins                              directory             2025-01-27 11:29:45 
+ 3 chain.pem                          .pem file        1566 2025-07-17 21:11:53 
+ 4 hotspot/login-old.html             .html file       1486 2025-07-17 16:02:48 
+ 5 hotspot/error.html                 .html file        640 2025-07-15 13:37:39 
+ 6 hotspot/md5.js                     .js file       7.0KiB 2025-07-15 13:37:39 
+ 7 hotspot/logout.html                .html file         89 2025-07-17 15:49:10 
+ 8 hotspot/radvert.html               .html file       1204 2025-07-15 13:37:39 
+ 9 hotspot/login-dirk.html            .html file       1649 2025-07-16 13:55:13 
+10 hotspot/api.json                   .json file        311 2025-07-15 13:37:39 
+11 hotspot/redirect.html              .html file        330 2025-07-15 13:37:39 
+12 hotspot/favicon.ico                .ico file         903 2025-07-15 13:37:39 
+13 hotspot/api.json.txt               .txt file           0 2025-07-18 18:47:45 
+14 hotspot/img                        directory             2025-07-15 13:37:39 
+15 hotspot/errors.txt                 .txt file        3719 2025-07-15 13:37:39 
+16 hotspot/xml                        directory             2025-07-15 13:37:39 
+17 hotspot/rlogin.html                .html file        877 2025-07-15 13:37:39 
+18 hotspot/css                        directory             2025-07-15 13:37:39 
+19 hotspot/status.html                .html file        597 2025-07-17 15:49:11 
+20 hotspot/alogin.html                .html file         89 2025-07-17 15:49:10 
+21 hotspot/fstatus.html               .html file         89 2025-07-17 15:49:10 
+22 hotspot/login.html                 .html file       1610 2025-07-18 15:11:39 
+23 hotspot/css/style.css              .css file        4053 2025-07-15 13:37:39 
+24 hotspot/img/password.svg           .svg file         644 2025-07-15 13:37:39 
+25 hotspot/img/user.svg               .svg file         444 2025-07-15 13:37:39 
+26 hotspot/xml/flogout.html           .html file        372 2025-07-15 13:37:39 
+27 hotspot/xml/error.html             .html file        428 2025-07-15 13:37:39 
+28 hotspot/xml/logout.html            .html file        370 2025-07-15 13:37:39 
+29 hotspot/xml/WISPAccessGatewayPara  .xsd file        4251 2025-07-15 13:37:39 
+   m.xsd                             
+30 hotspot/xml/rlogin.html            .html file        545 2025-07-15 13:37:39 
+31 hotspot/xml/alogin.html            .html file        839 2025-07-15 13:37:39 
+32 hotspot/xml/login.html             .html file        809 2025-07-15 13:37:39 

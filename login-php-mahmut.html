@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WiFi Login</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<?php
+$prefill_username = isset($_GET['username']) ? htmlspecialchars($_GET['username']) : '';
+$prefill_password = isset($_GET['password']) ? htmlspecialchars($_GET['password']) : '';
+
+$link_login = $_GET['link-login'] ?? 'http://hotspot.pluxnet.co.za/login';
+$dst = $_GET['dst'] ?? 'http://example.com';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $dst      = $_POST['dst'] ?? 'http://neverssl.com/'
+
+    $data = [
+        'username' => $username,
+	'password' => $password,
+	'dst'      => $dst
+    ];
+
+    $ch = curl_init($link_login);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    // Optional: check for login success in $response
+    header("Location: $dst");
+    exit;
+}
+?>
+
+<body>
+    <div class="login-box">
+        <img src="img/login-logo.png" alt="Logo" class="logo">
+        <form method="post" action="http://hotspot.pluxnet.co.za/login.html">
+            <input type="text" name="username" placeholder="Username" value="<?= $prefill_username ?>" required>
+            <input type="password" name="password" placeholder="Password" value="<?= $prefill_password ?>" required>
+            <input type="hidden" name="dst" value="http://neverssl.com/">
+            <input type="submit" value="Login">
+        </form>
+        <form method="get" action="signup.php">
+            <input type="submit" value="Sign Up">
+        </form>
+    </div>
+</body>
+
+</html>

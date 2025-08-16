@@ -1,5 +1,7 @@
+"use server"
 // Must run Client side to use Browser's Fetch/Network to access Mikrotik Hotspot on the network
 import { parseMikroTikStatus } from "./mikrotik-lib";
+import { MikroTikResponseParser } from "./mikrotik-parser";
 // import { MikroTikResponseParser } from "./mikrotik-parser";
 import { LoginFormState, MikroTikData, RadiusDeskUsageResponse, StatusResponse, } from "./mikrotik-types";
 import { appConfig } from "@/lib/config";
@@ -8,12 +10,12 @@ const Default_Username = appConfig.mikrotik.defaultUsername;
 const Default_Password = appConfig.mikrotik.defaultPassword;
 const Default_MikrotikBaseUrl = appConfig.mikrotik.baseUrl;
 
-// interface MikroTikLoginResponse {
-//     logged_in?: string;
-//     error?: string;
-//     error_orig?: string;
-//     [key: string]: string | undefined;
-// }
+interface MikroTikLoginResponse {
+    logged_in?: string;
+    error?: string;
+    error_orig?: string;
+    [key: string]: string | undefined;
+}
 
 /**
  * Attempts to log in to a MikroTik Hotspot using provided credentials or a voucher code.
@@ -40,9 +42,10 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
     console.log("Credentials: ", { username, password });
     // Use provided Mikrotik login link and supply credentials
     const url = `${baseUrl}?${new URLSearchParams({ username, password })}`;
+    console.log("MT Login - GET...URL: ", url)
 
     try {
-        await fetch(url, {
+        const res = await fetch(url, {
             method: "GET",
             redirect: "follow",
             mode: "no-cors", // NECESSARY if using HTTPS in configs
@@ -52,65 +55,65 @@ export async function loginToHotspot(mikrotikData: MikroTikData, voucherCode?: s
             }
         });
         // const body = await res.body;
-        // const text = await res.text();
+        const text = await res.text();
 
-        // // console.log("Full Response:", res);
-        // console.log("Text response:", text);
-        // // console.log("Body Response: ", body);
+        // console.log("Full Response:", res);
+        console.log("MT Login - Text response:", text);
+        // console.log("Body Response: ", body);
 
-        // // PROBLEM AREA - We need some smart parsing
-        // const result = MikroTikResponseParser.parse(text);
-        // console.log("Parse result:", result);
-        // // Parse the MikroTik response - it's in a specific format like ({...})
-        // let parsedResponse: MikroTikLoginResponse | null = null;
-        // try {
-        //     // Remove the outer parentheses and parse as JavaScript object
-        //     const cleanedText = text.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '');
-        //     // Convert single quotes to double quotes for valid JSON
-        //     const jsonText = cleanedText.replace(/'/g, '"');
-        //     parsedResponse = JSON.parse(jsonText) as MikroTikLoginResponse;
-        //     console.log("Parsed response:", parsedResponse);
-        // } catch (parseError) {
-        //     console.error("Failed to parse MikroTik response:", parseError);
-        //     // Fallback to text analysis if JSON parsing fails
-        // }
-        // // if (MikroTikResponseParser.isLoggedIn(result)) {
-        // //     return { success: true };
-        // // } else {
-        // //     const errorMessage = MikroTikResponseParser.getErrorMessage(result);
-        // //     return { success: false, message: errorMessage };
-        // // }
-        // // Check for success based on parsed response or text content
-        // let success = false;
-        // let errorMessage = "Login failed. Please try again.";
-
-        // if (parsedResponse) {
-        //     // Check if logged_in is 'yes' and no error exists
-        //     success = parsedResponse.logged_in === 'yes' && !parsedResponse.error;
-
-        //     if (!success && parsedResponse.error) {
-        //         errorMessage = parsedResponse.error;
-        //     } else if (!success && parsedResponse.error_orig) {
-        //         errorMessage = parsedResponse.error_orig;
-        //     } else if (!success) {
-        //         errorMessage = "Authentication failed - not logged in";
-        //     }
+        // PROBLEM AREA - We need some smart parsing
+        const result = MikroTikResponseParser.parse(text);
+        console.log("MT Login - Parse result:", result);
+        // Parse the MikroTik response - it's in a specific format like ({...})
+        let parsedResponse: MikroTikLoginResponse | null = null;
+        try {
+            // Remove the outer parentheses and parse as JavaScript object
+            const cleanedText = text.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '');
+            // Convert single quotes to double quotes for valid JSON
+            const jsonText = cleanedText.replace(/'/g, '"');
+            parsedResponse = JSON.parse(jsonText) as MikroTikLoginResponse;
+            console.log("MT Login - Parsed response:", parsedResponse);
+        } catch (parseError) {
+            console.error("MT Login - Failed to parse MikroTik response:", parseError);
+            // Fallback to text analysis if JSON parsing fails
+        }
+        // if (MikroTikResponseParser.isLoggedIn(result)) {
+        //     return { success: true };
         // } else {
-        //     // Fallback to text analysis
-        //     success = res.ok && /logged_in['"]*:\s*['"]*yes/i.test(text) && !/error['"]*:\s*['"]*[^'"]+/i.test(text);
-
-        //     if (!success) {
-        //         // Try to extract error message from response
-        //         const errorMatch = text.match(/error['"]*:\s*['"]*([^'",\n}]+)/i);
-        //         if (errorMatch) {
-        //             errorMessage = errorMatch[1].trim();
-        //         }
-        //     }
-        // }
-
-        // if (!success) {
+        //     const errorMessage = MikroTikResponseParser.getErrorMessage(result);
         //     return { success: false, message: errorMessage };
         // }
+        // Check for success based on parsed response or text content
+        let success = false;
+        let errorMessage = "MT Login - Login failed. Please try again.";
+
+        if (parsedResponse) {
+            // Check if logged_in is 'yes' and no error exists
+            success = parsedResponse.logged_in === 'yes' && !parsedResponse.error;
+
+            if (!success && parsedResponse.error) {
+                errorMessage = parsedResponse.error;
+            } else if (!success && parsedResponse.error_orig) {
+                errorMessage = parsedResponse.error_orig;
+            } else if (!success) {
+                errorMessage = "Authentication failed - not logged in";
+            }
+        } else {
+            // Fallback to text analysis
+            success = res.ok && /logged_in['"]*:\s*['"]*yes/i.test(text) && !/error['"]*:\s*['"]*[^'"]+/i.test(text);
+
+            if (!success) {
+                // Try to extract error message from response
+                const errorMatch = text.match(/error['"]*:\s*['"]*([^'",\n}]+)/i);
+                if (errorMatch) {
+                    errorMessage = errorMatch[1].trim();
+                }
+            }
+        }
+
+        if (!success) {
+            return { success: false, message: errorMessage };
+        }
 
         // console.log("Login result: ", success);
         return { success: true };
@@ -142,7 +145,10 @@ export async function getUserSession(mikrotikData?: MikroTikData): Promise<Statu
 
 
     try {
+        // url = "https://gateway.pluxnet.co.za/status"
         const res = await fetch(url.toString(), { method: "GET" });
+        // To Hotspot Directly not the MT (.129)
+        // const res2 = await fetch("https://10.5.0.1/status", { method: "GET" })
         // const body = await res.body()
         const rawText = await res.text();
 

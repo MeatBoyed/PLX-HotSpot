@@ -1,0 +1,30 @@
+<html>
+
+<head>
+  <script type="text/javascript">
+    var loginResponse = {
+      'logged_in': '$(logged-in)',
+      'link_login_only': '$(link-login-only)'
+    };
+
+    // Expose it to parent if in iframe (optional)
+    window.loginResponse = loginResponse;
+
+    // Redirect if logged in
+    if (loginResponse.logged_in === "yes") {
+      window.location.href = "https://hotspot.pluxnet.co.za/dashboard.php";
+    }
+
+    // Output JSON to console or for debug (optional)
+    console.log("Login response:", loginResponse);
+  </script>
+</head>
+
+<body>
+  $(var)({
+  'logged_in' : '$(logged-in)',
+  'link_login_only' : '$(link-login-only)'
+  })
+</body>
+
+</html>
