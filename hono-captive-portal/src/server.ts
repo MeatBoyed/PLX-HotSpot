@@ -40,7 +40,7 @@ app.get('/api/usage', async (c) => {
 
   const response = {
     status: 'success' as const,
-    // params: { nasipaddress, username: username || null },
+    params: { nasipaddress, username: username || null },
     data: {
       session: result.session,
       profile: result.profile,
@@ -61,7 +61,7 @@ app.get('/api/usage', async (c) => {
 })
 
 // Check if a given username+mac is depleted according to RadiusDesk Cake4
-// MAC Address must be in URL Format!
+// MAC Address must be in URL Format (%%%)!
 app.get('/api/depleted', async (c) => {
   const { DATABASE_URL } = env<{ DATABASE_URL: string }>(c)
   const query = c.req.query()

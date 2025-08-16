@@ -15,8 +15,9 @@ $link_login = $_GET['link-login'] ?? $DEFAULT_LINK_LOGIN;
 $dst =  $DEFAULT_DST;
 
 // Helpers to resolve client IP and MAC (best-effort; ARP table if L2-adjacent)
-function get_client_ip(): ?string {
-    $keys = ['HTTP_X_FORWARDED_FOR','HTTP_CLIENT_IP','REMOTE_ADDR'];
+function get_client_ip(): ?string
+{
+    $keys = ['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'];
     foreach ($keys as $k) {
         if (!empty($_SERVER[$k])) {
             $val = $_SERVER[$k];
@@ -31,7 +32,8 @@ function get_client_ip(): ?string {
     }
     return null;
 }
-function try_get_mac_from_arp(?string $ip): ?string {
+function try_get_mac_from_arp(?string $ip): ?string
+{
     if (!$ip) return null;
     $path = '/proc/net/arp';
     if (!is_readable($path)) return null;
@@ -59,19 +61,23 @@ $incoming_mac = $incoming_mac_norm ?: (is_string($client_mac) ? $client_mac : ''
 
 // Optionally query RadiusDesk Cake4 for depleted flag (server-side hint)
 $server_depleted = null; // null = unknown
-if ($incoming_username && $incoming_mac) {
-    $cake_url = $RADIUS_DESK_BASE_URL . '/cake4/rd_cake/radaccts/get-usage.json?username=' . urlencode($incoming_username) . '&mac=' . urlencode($incoming_mac);
+// Use hotspot API instead of Cake4. If no username from MT, default to the profile const (mahmut1).
+$api_username = $incoming_username ?: $MIKROTIK_DEFAULT_USERNAME;
+if ($api_username && $incoming_mac) {
+    $hotspot_url = 'https://hotspot.pluxnet.co.za/api/depleted?username=' . urlencode($api_username) . '&mac=' . urlencode($incoming_mac);
     try {
-        $ch = curl_init($cake_url);
+        $ch = curl_init($hotspot_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 4);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        // Optional: identify this caller
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: PLX-Portal/1.0']);
         $resp = curl_exec($ch);
         $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($resp !== false && $http >= 200 && $http < 300) {
             $json = json_decode($resp, true);
-            if (is_array($json) && !empty($json['success']) && isset($json['data']['depleted'])) {
+            if (is_array($json) && isset($json['data']) && array_key_exists('depleted', $json['data'])) {
                 $server_depleted = (bool)$json['data']['depleted'];
             }
         }
@@ -200,25 +206,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     continue</label>
                             </div>
                         </div>
-                        <!-- Login form (auto-submitted after video if terms accepted) -->
-                        <!-- <form id="loginForm" method="post" action="https://gateway.pluxnet.co.za/login.html"> -->
-                        <form id="loginForm" method="post" action="https://gateway.pluxnet.co.za/login.html">
-                            <!-- Shown only when usage is depleted -->
-                            <div id="voucher-group" class="form-group pnt-pb-16" style="display:none;">
-                                <input type="text" class="form-control" name="voucher" id="voucher" placeholder="Enter Voucher Code" autocomplete="off">
-                            </div>
-                            <!-- Credentials will be set just-in-time before submit -->
-                            <input type="hidden" name="username" id="username" value="">
-                            <input type="hidden" name="password" id="password" value="">
-                            <input type="hidden" name="depleted" id="depleted" value="0">
+                        <!-- Login form: rendered based on server-side depleted flag -->
+                        <form id="loginForm" method="post" action="<?php echo htmlspecialchars($link_login); ?>">
+                            <?php
+                            // Decide behaviour: if depleted is true, ask user for credentials.
+                            // If depleted is false or unknown, use default profile credentials.
+                            $is_depleted = ($server_depleted === true);
+                            if ($is_depleted): ?>
+                                <div class="form-group pnt-pb-16">
+                                    <input type="text" class="form-control" name="username" placeholder="Username" autocomplete="off" required>
+                                </div>
+                                <div class="form-group pnt-pb-16">
+                                    <input type="password" class="form-control" name="password" placeholder="Password" autocomplete="off" required>
+                                </div>
+                            <?php else: ?>
+                                <!-- Non-depleted: use default credentials silently -->
+                                <input type="hidden" name="username" value="<?php echo htmlspecialchars($MIKROTIK_DEFAULT_USERNAME); ?>">
+                                <input type="hidden" name="password" value="<?php echo htmlspecialchars($MIKROTIK_DEFAULT_PASSWORD); ?>">
+                            <?php endif; ?>
                             <input type="hidden" name="dst" value="<?php echo htmlspecialchars($dst); ?>">
+                            <div class="pnt-pt-16">
+                                <button type="submit" class="btn btn-primary w-100"><?php echo $is_depleted ? 'Login' : 'Connect Now'; ?></button>
+                            </div>
                         </form>
                         <!-- <h3 class="title-head font-body-xs pnt-pb-24">Accept terms & conditions to continue</h3> -->
-                        <button type="submit" id="openVideo" class="btn btn-secondary w-100">
+                        <!-- <button type="submit" id="openVideo" class="btn btn-secondary w-100">
                             <span class="btn-icon">
                                 <img src="assets/images/watch-video-icon.svg" alt="watch video">
                             </span>
-                            Watch video to claim</button>
+                            Watch video to claim</button> -->
                         <!-- <button type="submit" class="btn btn-primary">
                             Select
                         </button> -->
@@ -367,204 +383,257 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="assets/js/custom/slider.js"></script>
-        <script src="assets/js/custom/video.js"></script>
-        <script>
-            // Simple hardcoded config used on the client
-            const appConfig = {
-                mikrotik: {
-                    radiusDeskBaseUrl: 'https://radiusdesk.pluxnet.co.za',
-                },
-                mac: (window.serverUsageCtx && window.serverUsageCtx.mac) || '',
-                username: (window.serverUsageCtx && window.serverUsageCtx.username) || <?php echo json_encode($MIKROTIK_DEFAULT_USERNAME); ?>,
-                clientIp: (window.serverUsageCtx && window.serverUsageCtx.clientIp) || ''
+    <script src="assets/js/custom/video.js"></script>
+    <script>
+        // Simple hardcoded config used on the client
+        const appConfig = {
+            mikrotik: {
+                radiusDeskBaseUrl: 'https://radiusdesk.pluxnet.co.za',
+            },
+            mac: (window.serverUsageCtx && window.serverUsageCtx.mac) || '',
+            username: (window.serverUsageCtx && window.serverUsageCtx.username) || <?php echo json_encode($MIKROTIK_DEFAULT_USERNAME); ?>,
+            clientIp: (window.serverUsageCtx && window.serverUsageCtx.clientIp) || ''
+        };
+        try {
+            console.debug('serverUsageCtx:', window.serverUsageCtx, 'appConfig:', appConfig);
+        } catch (e) {}
+
+        $(function() {
+            var isDepleted = (window.serverUsageCtx && typeof window.serverUsageCtx.depleted === 'boolean') ? window.serverUsageCtx.depleted : false;
+            var submitted = false;
+
+            // Default creds for non-depleted flow (must match server config)
+            const loginDefaults = {
+                username: 'mahmut1',
+                password: '1234'
             };
-            try { console.debug('serverUsageCtx:', window.serverUsageCtx, 'appConfig:', appConfig); } catch (e) {}
 
-            $(function () {
-                var isDepleted = (window.serverUsageCtx && typeof window.serverUsageCtx.depleted === 'boolean') ? window.serverUsageCtx.depleted : false;
-                var submitted = false;
+            function updateUI() {
+                if (isDepleted) {
+                    $('#voucher-group').show();
+                    $('#depleted').val('1');
+                } else {
+                    $('#voucher-group').hide();
+                    $('#depleted').val('0');
+                }
+            }
 
-                // Default creds for non-depleted flow (must match server config)
-                const loginDefaults = {
-                    username: 'mahmut1',
-                    password: '1234'
-                };
+            async function ensureIdentity() {
+                // If we already have username and MAC, nothing to do
+                if (appConfig.username && appConfig.mac) return;
+                // Try derive via usage.php using client IP
+                try {
+                    if (!appConfig.clientIp) return;
+                    const usageUrl = `${appConfig.mikrotik.radiusDeskBaseUrl}/api/user/usage.php?nasipaddress=${encodeURIComponent(appConfig.clientIp)}`;
+                    const r = await fetch(usageUrl, {
+                        credentials: 'omit',
+                        cache: 'no-store',
+                        mode: 'cors'
+                    });
+                    const text = await r.text();
+                    if (!r.ok) return;
+                    const payload = JSON.parse(text);
+                    if (!payload || payload.status !== 'success') return;
+                    const session = payload.data && payload.data.session ? payload.data.session : {};
+                    const sUser = session && (session.username || session.user_name || session.name || session.UserName || session.USERNAME);
+                    const sMac = session && (session.callingstationid || session.calling_station_id || session.mac || session.mac_address || session.MAC);
+                    if (!appConfig.username && sUser) appConfig.username = String(sUser);
+                    if (!appConfig.mac && sMac) appConfig.mac = String(sMac).replace(/-/g, ':').toUpperCase();
+                    try {
+                        console.debug('Resolved identity from usage.php', {
+                            username: appConfig.username,
+                            mac: appConfig.mac
+                        });
+                    } catch (e) {}
+                } catch (e) {
+                    // ignore
+                }
+            }
 
-                function updateUI() {
-                    if (isDepleted) {
-                        $('#voucher-group').show();
-                        $('#depleted').val('1');
+            async function fetchUsage() {
+                try {
+                    await ensureIdentity();
+                    if (!appConfig.mac || !appConfig.username) {
+                        updateUI();
+                        return;
+                    }
+                    const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
+                    url.searchParams.set('mac', String(appConfig.mac).replace(/-/g, ':').toUpperCase());
+                    url.searchParams.set('username', appConfig.username);
+                    try {
+                        console.debug('Fetching Cake4 usage:', url.toString());
+                    } catch (e) {}
+                    const res = await fetch(url.toString(), {
+                        credentials: 'omit',
+                        mode: 'cors',
+                        cache: 'no-store'
+                    });
+                    const resp = await res.json();
+                    try {
+                        console.debug('Cake4 response:', resp);
+                    } catch (e) {}
+                    if (resp && resp.success && resp.data && resp.data.depleted === true) {
+                        isDepleted = true;
                     } else {
-                        $('#voucher-group').hide();
-                        $('#depleted').val('0');
+                        isDepleted = false;
                     }
-                }
-
-                async function ensureIdentity() {
-                    // If we already have username and MAC, nothing to do
-                    if (appConfig.username && appConfig.mac) return;
-                    // Try derive via usage.php using client IP
+                    updateUI();
+                } catch (e) {
                     try {
-                        if (!appConfig.clientIp) return;
-                        const usageUrl = `${appConfig.mikrotik.radiusDeskBaseUrl}/api/user/usage.php?nasipaddress=${encodeURIComponent(appConfig.clientIp)}`;
-                        const r = await fetch(usageUrl, { credentials: 'omit', cache: 'no-store', mode: 'cors' });
-                        const text = await r.text();
-                        if (!r.ok) return;
-                        const payload = JSON.parse(text);
-                        if (!payload || payload.status !== 'success') return;
-                        const session = payload.data && payload.data.session ? payload.data.session : {};
-                        const sUser = session && (session.username || session.user_name || session.name || session.UserName || session.USERNAME);
-                        const sMac = session && (session.callingstationid || session.calling_station_id || session.mac || session.mac_address || session.MAC);
-                        if (!appConfig.username && sUser) appConfig.username = String(sUser);
-                        if (!appConfig.mac && sMac) appConfig.mac = String(sMac).replace(/-/g, ':').toUpperCase();
-                        try { console.debug('Resolved identity from usage.php', { username: appConfig.username, mac: appConfig.mac }); } catch (e) {}
-                    } catch (e) {
-                        // ignore
-                    }
+                        console.warn('Usage fetch failed', e);
+                    } catch (x) {}
+                    updateUI();
                 }
+            }
 
-                async function fetchUsage() {
-                    try {
-                        await ensureIdentity();
-                        if (!appConfig.mac || !appConfig.username) { updateUI(); return; }
-                        const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
-                        url.searchParams.set('mac', String(appConfig.mac).replace(/-/g, ':').toUpperCase());
-                        url.searchParams.set('username', appConfig.username);
-                        try { console.debug('Fetching Cake4 usage:', url.toString()); } catch (e) {}
-                        const res = await fetch(url.toString(), { credentials: 'omit', mode: 'cors', cache: 'no-store' });
-                        const resp = await res.json();
-                        try { console.debug('Cake4 response:', resp); } catch (e) {}
-                        if (resp && resp.success && resp.data && resp.data.depleted === true) {
-                            isDepleted = true;
-                        } else {
-                            isDepleted = false;
-                        }
-                        updateUI();
-                    } catch (e) {
-                        try { console.warn('Usage fetch failed', e); } catch (x) {}
-                        updateUI();
-                    }
-                }
+            // Initialize UI based on server hint, then confirm with client fetch
+            updateUI();
+            fetchUsage();
 
-                // Initialize UI based on server hint, then confirm with client fetch
-                updateUI();
-                fetchUsage();
+            function termsAccepted() {
+                return $('#check-1').is(':checked');
+            }
 
-                function termsAccepted() { return $('#check-1').is(':checked'); }
-                function hasVoucher() { return ($('#voucher').val() || '').length > 0; }
+            function hasVoucher() {
+                return ($('#voucher').val() || '').length > 0;
+            }
 
-                // Minimal VAST2 handler: fetch VAST XML via local proxy, pick an MP4 MediaFile, play it
-                let vastLoaded = false;
-                const VAST_URL = 'https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615';
-                const vastVideoEl = document.getElementById('vastVideo');
-                const vastStatusEl = document.getElementById('vastStatus');
+            // Minimal VAST2 handler: fetch VAST XML via local proxy, pick an MP4 MediaFile, play it
+            let vastLoaded = false;
+            const VAST_URL = 'https://servedby.revive-adserver.net/fc.php?script=apVideo:vast2&zoneid=24615';
+            const vastVideoEl = document.getElementById('vastVideo');
+            const vastStatusEl = document.getElementById('vastStatus');
 
-                function setVastStatus(msg) {
-                    if (vastStatusEl) vastStatusEl.textContent = msg || '';
-                }
+            function setVastStatus(msg) {
+                if (vastStatusEl) vastStatusEl.textContent = msg || '';
+            }
 
-                async function fetchVastXml() {
-                    const proxied = `vast-proxy.php?url=${encodeURIComponent(VAST_URL)}`;
-                    const res = await fetch(proxied, { credentials: 'omit', cache: 'no-store' });
-                    if (!res.ok) throw new Error(`VAST fetch failed: ${res.status}`);
-                    return await res.text();
-                }
+            async function fetchVastXml() {
+                const proxied = `vast-proxy.php?url=${encodeURIComponent(VAST_URL)}`;
+                const res = await fetch(proxied, {
+                    credentials: 'omit',
+                    cache: 'no-store'
+                });
+                if (!res.ok) throw new Error(`VAST fetch failed: ${res.status}`);
+                return await res.text();
+            }
 
-                function parseVastForMp4(vastXmlString) {
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(vastXmlString, 'application/xml');
-                    const errorNode = xml.querySelector('parsererror');
-                    if (errorNode) throw new Error('Invalid VAST XML');
+            function parseVastForMp4(vastXmlString) {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(vastXmlString, 'application/xml');
+                const errorNode = xml.querySelector('parsererror');
+                if (errorNode) throw new Error('Invalid VAST XML');
 
-                    // Collect impression trackers
-                    const impressions = Array.from(xml.querySelectorAll('Impression'))
-                        .map(n => n.textContent?.trim())
-                        .filter(Boolean);
+                // Collect impression trackers
+                const impressions = Array.from(xml.querySelectorAll('Impression'))
+                    .map(n => n.textContent?.trim())
+                    .filter(Boolean);
 
-                    // Collect linear tracking URLs
-                    const tracking = {};
-                    Array.from(xml.querySelectorAll('Tracking')).forEach(t => {
-                        const ev = t.getAttribute('event') || 'other';
-                        const url = t.textContent?.trim();
-                        if (!url) return;
-                        if (!tracking[ev]) tracking[ev] = [];
-                        tracking[ev].push(url);
-                    });
-
-                    // Pick first MP4 MediaFile
-                    const mediaFiles = Array.from(xml.querySelectorAll('MediaFile'));
-                    const mp4 = mediaFiles.find(m => (m.getAttribute('type') || '').toLowerCase().includes('mp4'));
-                    const src = mp4 ? (mp4.textContent || '').trim() : '';
-                    if (!src) throw new Error('No MP4 MediaFile found in VAST');
-
-                    return { src, impressions, tracking };
-                }
-
-                function pingUrls(urls = []) {
-                    urls.forEach(u => {
-                        try { fetch(u, { mode: 'no-cors' }); } catch {}
-                    });
-                }
-
-                async function loadAndPlayVastOnce() {
-                    if (vastLoaded) return;
-                    vastLoaded = true;
-                    try {
-                        setVastStatus('Loading ad…');
-                        const xml = await fetchVastXml();
-                        const { src, impressions, tracking } = parseVastForMp4(xml);
-
-                        // Fire impressions
-                        pingUrls(impressions);
-
-                        // Wire basic tracking
-                        if (vastVideoEl) {
-                            vastVideoEl.src = src;
-                            vastVideoEl.onplay = () => { pingUrls(tracking['start']); };
-                            vastVideoEl.onended = () => { pingUrls(tracking['complete']); };
-                            vastVideoEl.onerror = () => { setVastStatus('Ad failed to play'); };
-                            vastVideoEl.load();
-                            // slight delay to ensure element is visible
-                            setTimeout(() => vastVideoEl.play().catch(() => setVastStatus('Click to play ad')), 150);
-                        }
-                        setVastStatus('');
-                    } catch (e) {
-                        console.error(e);
-                        setVastStatus('Unable to load ad');
-                    }
-                }
-
-                $('#openVideo').on('click', function (e) {
-                    if (!termsAccepted()) {
-                        e.preventDefault();
-                        alert('Please accept terms & conditions to continue.');
-                        return false;
-                    }
-                    if (isDepleted && !hasVoucher()) {
-                        e.preventDefault();
-                        alert('Please enter your voucher code.');
-                        $('#voucher').focus();
-                        return false;
-                    }
-                    // video.js shows popup; start VAST load after popup is shown
-                    loadAndPlayVastOnce();
+                // Collect linear tracking URLs
+                const tracking = {};
+                Array.from(xml.querySelectorAll('Tracking')).forEach(t => {
+                    const ev = t.getAttribute('event') || 'other';
+                    const url = t.textContent?.trim();
+                    if (!url) return;
+                    if (!tracking[ev]) tracking[ev] = [];
+                    tracking[ev].push(url);
                 });
 
-                $('#showVideoPopupClose').on('click', function () {
-                    if (submitted) return;
-                    if (!termsAccepted()) return;
-                    if (isDepleted && !hasVoucher()) { $('#voucher').focus(); return; }
-                    // Set credentials based on depletion/voucher before submit
-                    const voucherVal = ($('#voucher').val() || '').trim();
-                    const userVal = isDepleted ? voucherVal : loginDefaults.username;
-                    const passVal = isDepleted ? voucherVal : loginDefaults.password;
-                    $('#username').val(userVal);
-                    $('#password').val(passVal);
-                    submitted = true;
-                    $('#loginForm').trigger('submit');
+                // Pick first MP4 MediaFile
+                const mediaFiles = Array.from(xml.querySelectorAll('MediaFile'));
+                const mp4 = mediaFiles.find(m => (m.getAttribute('type') || '').toLowerCase().includes('mp4'));
+                const src = mp4 ? (mp4.textContent || '').trim() : '';
+                if (!src) throw new Error('No MP4 MediaFile found in VAST');
+
+                return {
+                    src,
+                    impressions,
+                    tracking
+                };
+            }
+
+            function pingUrls(urls = []) {
+                urls.forEach(u => {
+                    try {
+                        fetch(u, {
+                            mode: 'no-cors'
+                        });
+                    } catch {}
                 });
+            }
+
+            async function loadAndPlayVastOnce() {
+                if (vastLoaded) return;
+                vastLoaded = true;
+                try {
+                    setVastStatus('Loading ad…');
+                    const xml = await fetchVastXml();
+                    const {
+                        src,
+                        impressions,
+                        tracking
+                    } = parseVastForMp4(xml);
+
+                    // Fire impressions
+                    pingUrls(impressions);
+
+                    // Wire basic tracking
+                    if (vastVideoEl) {
+                        vastVideoEl.src = src;
+                        vastVideoEl.onplay = () => {
+                            pingUrls(tracking['start']);
+                        };
+                        vastVideoEl.onended = () => {
+                            pingUrls(tracking['complete']);
+                        };
+                        vastVideoEl.onerror = () => {
+                            setVastStatus('Ad failed to play');
+                        };
+                        vastVideoEl.load();
+                        // slight delay to ensure element is visible
+                        setTimeout(() => vastVideoEl.play().catch(() => setVastStatus('Click to play ad')), 150);
+                    }
+                    setVastStatus('');
+                } catch (e) {
+                    console.error(e);
+                    setVastStatus('Unable to load ad');
+                }
+            }
+
+            $('#openVideo').on('click', function(e) {
+                if (!termsAccepted()) {
+                    e.preventDefault();
+                    alert('Please accept terms & conditions to continue.');
+                    return false;
+                }
+                if (isDepleted && !hasVoucher()) {
+                    e.preventDefault();
+                    alert('Please enter your voucher code.');
+                    $('#voucher').focus();
+                    return false;
+                }
+                // video.js shows popup; start VAST load after popup is shown
+                loadAndPlayVastOnce();
             });
-        </script>
+
+            $('#showVideoPopupClose').on('click', function() {
+                if (submitted) return;
+                if (!termsAccepted()) return;
+                if (isDepleted && !hasVoucher()) {
+                    $('#voucher').focus();
+                    return;
+                }
+                // Set credentials based on depletion/voucher before submit
+                const voucherVal = ($('#voucher').val() || '').trim();
+                const userVal = isDepleted ? voucherVal : loginDefaults.username;
+                const passVal = isDepleted ? voucherVal : loginDefaults.password;
+                $('#username').val(userVal);
+                $('#password').val(passVal);
+                submitted = true;
+                $('#loginForm').trigger('submit');
+            });
+        });
+    </script>
 </body>
 
 </html>

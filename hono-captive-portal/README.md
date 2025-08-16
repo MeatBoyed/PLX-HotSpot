@@ -18,8 +18,9 @@ I've created a plx-captiveportal@<ip of hotspot.pluxnet.co.za> db user in maria 
 1. Close all ports (expect for necessary) on Radiusdesk vm & whitelist hotspot.pluxnet.co.za (ip) to access
 DB Port only.
 2. Disable/remove the radiusdesk.pluxnet.co.za/api/users/usage endpoint
+3. Remove NASIPaddress from usage params, don't expose where it comes from....
 
 
 # Frontend...
-1. Dashboard page must GET the Usage data from Hotspot.pluxnet.co.za/api/usage
-2. Login page must 
+1. Dashboard page must GET the Usage data from Hotspot.pluxnet.co.za/api/usage?nasipaddress=
+2. Login page must  GET depleted data from hotspot.pluxnet.co.za/api/depelted?username=..&mac=...
