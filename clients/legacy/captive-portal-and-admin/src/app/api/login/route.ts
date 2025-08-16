@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { voucherCode } = body;
 
+        console.log("Login Request Reached Backend.... Voucher Code: ", voucherCode)
+
         const result = await authenticateUser(voucherCode);
         return NextResponse.json(result);
     } catch (error) {

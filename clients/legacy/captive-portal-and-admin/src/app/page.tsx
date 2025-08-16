@@ -1,31 +1,31 @@
 // Must be Client side to ensure all requests from auth are client side (Less auth, more client side)
-"use client"
+// "use client"
 
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { NewsCarousel } from '@/components/home-page/news-carousel';
-import { AuthState, requireAuth } from '@/lib/auth/auth-service';
+import { requireAuth } from '@/lib/auth/auth-service';
 import { seedAuthState } from '@/lib/seed';
 import { appConfig } from '@/lib/config';
 import Head from '@/components/home-page/head';
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 
-export default function Home() {
+export default async function Home() {
   // Get auth state and redirect if needed
   // const [authState, setAuthState] = useState<AuthState>()
   console.log("Use Theme: ", appConfig.theme);
 
-  // let authState = null
-  // if (appConfig.useSeedData) {
-  //   authState = seedAuthState;
-  // } else {
-  //   authState = await requireAuth();
-  // }
+  let authState = null
+  if (appConfig.useSeedData) {
+    authState = seedAuthState;
+  } else {
+    authState = await requireAuth();
+  }
 
-  // if (authState.isAuthenticated) {
-  //   const { redirect } = await import('next/navigation');
-  //   redirect("/welcome");
-  // }
+  if (authState.isAuthenticated) {
+    const { redirect } = await import('next/navigation');
+    redirect("/welcome");
+  }
 
 
 
@@ -35,40 +35,40 @@ export default function Home() {
 
   // console.log("Auth state: ", authState);
 
-  const [authState, setAuthState] = useState<AuthState | null>(null);
+  // const [authState, setAuthState] = useState<AuthState | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  // useEffect(() => {
+  //   let isMounted = true;
 
-    async function checkAuth() {
-      let state: AuthState;
-      if (appConfig.useSeedData) {
-        state = seedAuthState;
-      } else {
-        state = await requireAuth();
-      }
+  //   async function checkAuth() {
+  //     let state: AuthState;
+  //     if (appConfig.useSeedData) {
+  //       state = seedAuthState;
+  //     } else {
+  //       state = await requireAuth();
+  //     }
 
-      if (!isMounted) return;
+  //     if (!isMounted) return;
 
-      setAuthState(state);
+  //     setAuthState(state);
 
-      if (state.isAuthenticated) {
-        const { redirect } = await import('next/navigation');
-        redirect("/welcome");
-      }
-    }
+  //     if (state.isAuthenticated) {
+  //       const { redirect } = await import('next/navigation');
+  //       redirect("/welcome");
+  //     }
+  //   }
 
-    checkAuth();
+  //   checkAuth();
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, []);
 
   console.log("Use Theme: ", appConfig.theme);
 
   // Prevent rendering until authState is set
-  if (!authState) return null;
+  // if (!authState) return null;
 
   return (
     <>
@@ -78,7 +78,8 @@ export default function Home() {
       <main className="flex items-center justify-center">
         <div className="p-4 w-full space-y-6 max-w-md">
           {/* Iframe-based Connect Card */}
-          <ConnectProvider userUsage={authState.userUsage ?? undefined} mikrotikLoginUrl={authState.mikrotikData?.loginlink}>
+          {/* <ConnectProvider userUsage={authState.userUsage ?? undefined} mikrotikLoginUrl={authState.mikrotikData?.loginlink}> */}
+          <ConnectProvider userUsage={authState.userUsage ?? undefined} >
             <ConnectCard />
           </ConnectProvider>
 

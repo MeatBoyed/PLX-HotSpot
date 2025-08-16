@@ -1,7 +1,8 @@
-// "use server";
+"use server";
 
 import { getMikroTikDataFromCookie } from '@/lib/mikrotik/mikrotik-lib';
-import { getUserSession, checkUserUsage, loginToHotspot } from '@/lib/mikrotik/mikrotik-service';
+import { checkUserUsage, loginToHotspot } from '@/lib/mikrotik/mikrotik-service';
+import { getUserSessionFromCookie } from '@/lib/mikrotik/mikrotik-service-cookie';
 import { MikroTikData, StatusResponse, RadiusDeskUsageResponse, LoginFormState } from '@/lib/mikrotik/mikrotik-types';
 import { redirect } from 'next/navigation';
 import { appConfig } from "@/lib/config";
@@ -18,6 +19,7 @@ export async function getAuthState(): Promise<AuthState> {
     try {
         // Get mikrotik data from cookie
         const mikrotikData = await getMikroTikDataFromCookie();
+        const sessionResult = await getUserSessionFromCookie();
 
         if (!mikrotikData) {
             return {
@@ -29,8 +31,7 @@ export async function getAuthState(): Promise<AuthState> {
             };
         }
 
-        // Check current session status
-        const sessionResult = await getUserSession(mikrotikData);
+        // Still fetch usage data if needed
         const usageResult = await checkUserUsage(mikrotikData);
 
         return {
@@ -89,35 +90,35 @@ export async function authenticateUser(voucherCode?: string): Promise<LoginFormS
         // Wait a moment for the session to be established
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Verify the session was actually created
-        // const sessionVerification = await getUserSession(mikrotikData);
+        // Verify the session was actually created using the cookie data
+        // const statusData = await getMikrotikStatusDataFromCookie();
 
-        // if (!sessionVerification.success || !sessionVerification.data) {
-        //     console.error('Session verification failed:', sessionVerification.message);
+        // if (!statusData) {
+        //     console.error('Session verification failed: No status data in cookie');
         //     return {
         //         success: false,
         //         message: 'Login appeared successful but session not established. Please try again.'
         //     };
         // }
 
-        // console.log('Session verified successfully:', sessionVerification.data);
+        // console.log('Session verified successfully from cookie:', statusData);
 
         // Additional connectivity test - try to reach an external endpoint
-        // try {
-        //     const connectivityTest = await fetch('https://www.google.com/favicon.ico', {
-        //         method: 'HEAD',
-        //         signal: AbortSignal.timeout(5000)
-        //     });
+        try {
+            const connectivityTest = await fetch('https://www.google.com/favicon.ico', {
+                method: 'HEAD',
+                signal: AbortSignal.timeout(5000)
+            });
 
-        //     if (!connectivityTest.ok) {
-        //         console.warn('Internet connectivity test failed, but session exists');
-        //     } else {
-        //         console.log('Internet connectivity confirmed');
-        //     }
-        // } catch (connectivityError) {
-        //     console.warn('Connectivity test failed:', connectivityError);
-        //     // Don't fail auth if connectivity test fails, session might still be valid
-        // }
+            if (!connectivityTest.ok) {
+                console.warn('Internet connectivity test failed, but session exists');
+            } else {
+                console.log('Internet connectivity confirmed');
+            }
+        } catch (connectivityError) {
+            console.warn('Connectivity test failed:', connectivityError);
+            // Don't fail auth if connectivity test fails, session might still be valid
+        }
 
         return { success: true, message: 'Successfully authenticated' };
     } catch (error) {
