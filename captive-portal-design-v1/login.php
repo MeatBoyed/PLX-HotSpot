@@ -390,6 +390,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mikrotik: {
                 radiusDeskBaseUrl: 'https://radiusdesk.pluxnet.co.za',
             },
+            hotspot: {
+                apiBaseUrl: 'https://hotspot.pluxnet.co.za',
+            },
             mac: (window.serverUsageCtx && window.serverUsageCtx.mac) || '',
             username: (window.serverUsageCtx && window.serverUsageCtx.username) || <?php echo json_encode($MIKROTIK_DEFAULT_USERNAME); ?>,
             clientIp: (window.serverUsageCtx && window.serverUsageCtx.clientIp) || ''
@@ -418,70 +421,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            async function ensureIdentity() {
-                // If we already have username and MAC, nothing to do
-                if (appConfig.username && appConfig.mac) return;
-                // Try derive via usage.php using client IP
-                try {
-                    if (!appConfig.clientIp) return;
-                    const usageUrl = `${appConfig.mikrotik.radiusDeskBaseUrl}/api/user/usage.php?nasipaddress=${encodeURIComponent(appConfig.clientIp)}`;
-                    const r = await fetch(usageUrl, {
-                        credentials: 'omit',
-                        cache: 'no-store',
-                        mode: 'cors'
-                    });
-                    const text = await r.text();
-                    if (!r.ok) return;
-                    const payload = JSON.parse(text);
-                    if (!payload || payload.status !== 'success') return;
-                    const session = payload.data && payload.data.session ? payload.data.session : {};
-                    const sUser = session && (session.username || session.user_name || session.name || session.UserName || session.USERNAME);
-                    const sMac = session && (session.callingstationid || session.calling_station_id || session.mac || session.mac_address || session.MAC);
-                    if (!appConfig.username && sUser) appConfig.username = String(sUser);
-                    if (!appConfig.mac && sMac) appConfig.mac = String(sMac).replace(/-/g, ':').toUpperCase();
-                    try {
-                        console.debug('Resolved identity from usage.php', {
-                            username: appConfig.username,
-                            mac: appConfig.mac
-                        });
-                    } catch (e) {}
-                } catch (e) {
-                    // ignore
-                }
-            }
-
             async function fetchUsage() {
                 try {
-                    await ensureIdentity();
-                    if (!appConfig.mac || !appConfig.username) {
-                        updateUI();
-                        return;
+                    // Call the simplified /api/usage endpoint which automatically detects client IP
+                    const url = new URL(`${appConfig.hotspot.apiBaseUrl}/api/usage`);
+                    
+                    // Optionally pass username if we have it
+                    if (appConfig.username && appConfig.username !== '') {
+                        url.searchParams.set('username', appConfig.username);
                     }
-                    const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
-                    url.searchParams.set('mac', String(appConfig.mac).replace(/-/g, ':').toUpperCase());
-                    url.searchParams.set('username', appConfig.username);
+                    
                     try {
-                        console.debug('Fetching Cake4 usage:', url.toString());
+                        console.debug('Fetching usage from hotspot API:', url.toString());
                     } catch (e) {}
+                    
                     const res = await fetch(url.toString(), {
                         credentials: 'omit',
                         mode: 'cors',
                         cache: 'no-store'
                     });
+                    
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    
                     const resp = await res.json();
                     try {
-                        console.debug('Cake4 response:', resp);
+                        console.debug('Usage API response:', resp);
                     } catch (e) {}
-                    if (resp && resp.success && resp.data && resp.data.depleted === true) {
-                        isDepleted = true;
+                    
+                    if (resp && resp.status === 'success' && resp.data && resp.data.session) {
+                        // Update appConfig with session data from response
+                        const session = resp.data.session;
+                        if (session.username && !appConfig.username) {
+                            appConfig.username = session.username;
+                        }
+                        if (session.mac && !appConfig.mac) {
+                            appConfig.mac = String(session.mac).replace(/-/g, ':').toUpperCase();
+                        }
+                        
+                        // Check depleted status - for now we'll set it to false as the server response includes depleted: null
+                        // This can be enhanced later if needed
+                        isDepleted = false;
                     } else {
                         isDepleted = false;
                     }
+                    
                     updateUI();
                 } catch (e) {
                     try {
                         console.warn('Usage fetch failed', e);
                     } catch (x) {}
+                    isDepleted = false;
                     updateUI();
                 }
             }

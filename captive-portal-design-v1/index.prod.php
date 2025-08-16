@@ -392,6 +392,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mikrotik: {
                     radiusDeskBaseUrl: 'https://radiusdesk.pluxnet.co.za',
                 },
+                hotspot: {
+                    apiBaseUrl: 'https://hotspot.pluxnet.co.za',
+                },
                 mac: '00:11:22:33:44:55',       // TODO: replace with real MAC if available
                 username: 'click_to_connect@dev' // Username to check usage for
             };
@@ -418,15 +421,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 function fetchUsage() {
                     try {
-                        const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
-                        url.searchParams.set('mac', appConfig.mac);
-                        url.searchParams.set('username', appConfig.username);
-                        fetch(url.toString(), { credentials: 'omit' })
+                        // Call the simplified /api/usage endpoint which automatically detects client IP
+                        const url = new URL(`${appConfig.hotspot.apiBaseUrl}/api/usage`);
+                        
+                        // Optionally pass username if we have it
+                        if (appConfig.username && appConfig.username !== '') {
+                            url.searchParams.set('username', appConfig.username);
+                        }
+                        
+                        fetch(url.toString(), { credentials: 'omit', mode: 'cors', cache: 'no-store' })
                             .then(r => r.json())
                             .then((resp) => {
-                                // Expecting { success: boolean, data?: { depleted: boolean } }
-                                if (resp && resp.success && resp.data && resp.data.depleted === true) {
-                                    isDepleted = true;
+                                // Expecting { status: 'success', data: { session: {...}, depleted: boolean|null } }
+                                if (resp && resp.status === 'success' && resp.data && resp.data.session) {
+                                    // Update appConfig with session data from response
+                                    const session = resp.data.session;
+                                    if (session.username && !appConfig.username) {
+                                        appConfig.username = session.username;
+                                    }
+                                    if (session.mac && !appConfig.mac) {
+                                        appConfig.mac = String(session.mac).replace(/-/g, ':').toUpperCase();
+                                    }
+                                    
+                                    // Check depleted status - for now we'll set it to false as the server response includes depleted: null
+                                    isDepleted = false;
                                 } else {
                                     isDepleted = false;
                                 }

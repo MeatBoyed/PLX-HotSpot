@@ -32,8 +32,16 @@ app.get('/api/usage', async (c) => {
     return c.json({ status: 'error', errors: parsed.error.flatten() }, 400)
   }
 
+  // Extract nasipaddress from params or client IP from headers
+  let { nasipaddress, username } = parsed.data
+  if (!nasipaddress) {
+    nasipaddress = c.req.header('x-real-ip') || c.req.header('x-forwarded-for') || c.req.raw.headers.get('x-forwarded-for') || c.req.raw.headers.get('x-real-ip') || ''
+    if (!nasipaddress) {
+      return c.json({ status: 'error', message: 'Unable to determine client IP address' }, 400)
+    }
+  }
+
   // Extract and Fetch Usage data
-  const { nasipaddress, username } = parsed.data
   const service = new AccountingService(DATABASE_URL)
   const result = await service.fetchUsage(nasipaddress, username)
   logApp({ event: 'usage.result', params: { nasipaddress, username }, result })
