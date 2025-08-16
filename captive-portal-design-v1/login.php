@@ -421,10 +421,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             async function ensureIdentity() {
                 // If we already have username and MAC, nothing to do
                 if (appConfig.username && appConfig.mac) return;
-                // Try derive via usage.php using client IP
+                // Try derive via hotspot API using client IP (will auto-detect)
                 try {
-                    if (!appConfig.clientIp) return;
-                    const usageUrl = `${appConfig.mikrotik.radiusDeskBaseUrl}/api/user/usage.php?nasipaddress=${encodeURIComponent(appConfig.clientIp)}`;
+                    const usageUrl = `https://hotspot.pluxnet.co.za/api/usage`;
                     const r = await fetch(usageUrl, {
                         credentials: 'omit',
                         cache: 'no-store',
@@ -440,7 +439,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!appConfig.username && sUser) appConfig.username = String(sUser);
                     if (!appConfig.mac && sMac) appConfig.mac = String(sMac).replace(/-/g, ':').toUpperCase();
                     try {
-                        console.debug('Resolved identity from usage.php', {
+                        console.debug('Resolved identity from hotspot API', {
                             username: appConfig.username,
                             mac: appConfig.mac
                         });

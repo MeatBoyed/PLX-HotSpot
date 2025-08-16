@@ -32,15 +32,25 @@ app.get('/api/usage', async (c) => {
     return c.json({ status: 'error', errors: parsed.error.flatten() }, 400)
   }
 
-  // Extract and Fetch Usage data
+  // Extract client IP from request headers (same logic as logging middleware)
+  const clientIp = c.req.header('x-real-ip') || c.req.header('x-forwarded-for') || c.req.raw.headers.get('x-forwarded-for') || c.req.raw.headers.get('x-real-ip') || ''
+  
+  // Use provided nasipaddress if available, otherwise use client IP
   const { nasipaddress, username } = parsed.data
+  const effectiveNasIpAddress = nasipaddress || clientIp
+
+  if (!effectiveNasIpAddress) {
+    return c.json({ status: 'error', message: 'Unable to determine client IP address' }, 400)
+  }
+
+  // Extract and Fetch Usage data
   const service = new AccountingService(DATABASE_URL)
-  const result = await service.fetchUsage(nasipaddress, username)
-  logApp({ event: 'usage.result', params: { nasipaddress, username }, result })
+  const result = await service.fetchUsage(effectiveNasIpAddress, username)
+  logApp({ event: 'usage.result', params: { nasipaddress: effectiveNasIpAddress, username }, result })
 
   const response = {
     status: 'success' as const,
-    params: { nasipaddress, username: username || null },
+    params: { nasipaddress: effectiveNasIpAddress, username: username || null },
     data: {
       session: result.session,
       profile: result.profile,

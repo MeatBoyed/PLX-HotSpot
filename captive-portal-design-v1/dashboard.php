@@ -57,54 +57,52 @@ $usage_used_formatted = '—';
 $usage_limit_formatted = 'Loading…';
 $usage_error = '';
 $user_profile = "Free Plan";
-if ($client_ip) {
-    $qs = ['nasipaddress' => $client_ip];
-    if ($initial_username !== '') $qs['username'] = $initial_username;
-    // Call local API container published on 127.0.0.1:3000 (bypass Nginx ACL)
-    $usage_url = 'https://hotspot.pluxnet.co.za/api/usage?' . http_build_query($qs);
-    try {
-        $ch = curl_init($usage_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: PLX-Dashboard/1.0']);
-        $resp = curl_exec($ch);
-        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($resp !== false && $http >= 200 && $http < 300) {
-            $json = json_decode($resp, true);
-            if (is_array($json) && isset($json['status']) && $json['status'] === 'success') {
-                $session = $json['data']['session'] ?? null;
-                $limits = $json['data']['limits'] ?? null;
-                $bytesOut = isset($session['bytes_out']) ? (int)$session['bytes_out'] : null;
-                $capBytes = isset($limits['data_cap_bytes']) && $limits['data_cap_bytes'] !== null ? (int)$limits['data_cap_bytes'] : null;
-                // Format helpers (simple)
-                $fmt = function (?int $bytes): string {
-                    if ($bytes === null) return '-';
-                    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-                    $i = 0;
-                    $val = (float)$bytes;
-                    while ($val >= 1024 && $i < count($units) - 1) {
-                        $val /= 1024;
-                        $i++;
-                    }
-                    return ($i === 0 ? (string)round($val) : number_format($val, 2)) . ' ' . $units[$i];
-                };
-                $usage_used_formatted = $fmt($bytesOut);
-                $usage_limit_formatted = ($capBytes === null ? 'Unlimited' : $fmt($capBytes));
-                // its in json.data.profile.name
-                $user_profile = $json['data']['profile']['name'] ?? 'asdkajsd';
-            } else {
-                $usage_error = 'API returned a non-success status';
-            }
+$qs = [];
+if ($initial_username !== '') $qs['username'] = $initial_username;
+// Call API via public endpoint since API access is now opened - API will auto-detect client IP
+$usage_url = 'https://hotspot.pluxnet.co.za/api/usage' . (!empty($qs) ? '?' . http_build_query($qs) : '');
+
+// Try to fetch usage data - API will auto-detect client IP from request headers
+try {
+    $ch = curl_init($usage_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: PLX-Dashboard/1.0']);
+    $resp = curl_exec($ch);
+    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($resp !== false && $http >= 200 && $http < 300) {
+        $json = json_decode($resp, true);
+        if (is_array($json) && isset($json['status']) && $json['status'] === 'success') {
+            $session = $json['data']['session'] ?? null;
+            $limits = $json['data']['limits'] ?? null;
+            $bytesOut = isset($session['bytes_out']) ? (int)$session['bytes_out'] : null;
+            $capBytes = isset($limits['data_cap_bytes']) && $limits['data_cap_bytes'] !== null ? (int)$limits['data_cap_bytes'] : null;
+            // Format helpers (simple)
+            $fmt = function (?int $bytes): string {
+                if ($bytes === null) return '-';
+                $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                $i = 0;
+                $val = (float)$bytes;
+                while ($val >= 1024 && $i < count($units) - 1) {
+                    $val /= 1024;
+                    $i++;
+                }
+                return ($i === 0 ? (string)round($val) : number_format($val, 2)) . ' ' . $units[$i];
+            };
+            $usage_used_formatted = $fmt($bytesOut);
+            $usage_limit_formatted = ($capBytes === null ? 'Unlimited' : $fmt($capBytes));
+            // its in json.data.profile.name
+            $user_profile = $json['data']['profile']['name'] ?? 'asdkajsd';
         } else {
-            $usage_error = 'API unreachable';
+            $usage_error = 'API returned a non-success status';
         }
-    } catch (Throwable $e) {
-        $usage_error = 'Failed to query usage';
+    } else {
+        $usage_error = 'API unreachable';
     }
-} else {
-    $usage_error = 'Missing client IP';
+} catch (Throwable $e) {
+    $usage_error = 'Failed to query usage';
 }
 
 ?>
@@ -283,7 +281,7 @@ if ($client_ip) {
 
             async function fetchAndRender() {
                 if (!usageUrl) {
-                    showPlanError('Missing client IP for usage lookup');
+                    showPlanError('Missing usage API URL');
                     return;
                 }
                 try {
