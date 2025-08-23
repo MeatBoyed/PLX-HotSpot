@@ -21,7 +21,7 @@ $incoming_mac = strtoupper(str_replace('-', ':', $incoming_mac_raw));
 // Optionally query RadiusDesk Cake4 for depleted flag (server-side hint)
 $server_depleted = null; // null = unknown
 // Use hotspot API instead of Cake4. If no username from MT, default to the profile const (mahmut1).
-// $api_username = $incoming_username ?: $MIKROTIK_DEFAULT_USERNAME;
+// $api_username = $incomig_username ?: $MIKROTIK_DEFAULT_USERNAME;
 if ($incoming_mac) {
     // $hotspot_url = 'https://hotspot.pluxnet.co.za/api/depleted?username=' . urlencode($api_username) . '&mac=' . urlencode($incoming_mac);
     $hotspot_url = 'https://hotspot.pluxnet.co.za/api/depleted?mac=' . urlencode($incoming_mac);

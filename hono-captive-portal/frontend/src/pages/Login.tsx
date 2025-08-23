@@ -14,12 +14,6 @@ declare global {
     }
 }
 
-// Query param helper
-function getQueryParam(name: string): string | undefined {
-    if (typeof window === 'undefined') return undefined;
-    return new URLSearchParams(window.location.search).get(name) || undefined;
-}
-
 export default function LoginPage() {
     // Defaults scoped to component per request
     const DEFAULTS = {
