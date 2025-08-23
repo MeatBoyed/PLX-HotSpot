@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch server/app.ts",
+    "dev:frontend": "cd frontend/ && npm run dev",
     "build:frontend": "cd frontend/ && npm run build",
     "build:server": "tsc -p server/",
     "build": "npm run build:frontend && npm run build:server",

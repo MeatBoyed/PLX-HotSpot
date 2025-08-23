@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
 export const UsageQuerySchema = z.object({
-    nasipaddress: z.string().min(1),
+    nasipaddress: z.string().min(1).optional(),
     username: z.string().optional().default(''),
+    mac: z.string().min(1)
     // debug: z.coerce.number().int().min(0).max(1).optional().default(0),
 })
 export type UsageQuery = z.infer<typeof UsageQuerySchema>

@@ -98,7 +98,7 @@ app.post("/api/hook/login", async (c) => {
   `);
     // return c.json({ status: 'success', headers, req })
 });
-app.use('*', serveStatic({ root: './frontend/dist' }));
+app.get('*', serveStatic({ root: './frontend/dist' }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
 serve({
     fetch: app.fetch,

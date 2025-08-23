@@ -12,7 +12,7 @@ export class AccountingService {
         this.db = createDb(dbUrl)
     }
 
-    async fetchUsage(nasipaddress: string, username?: string, debug = 0): Promise<FetchUsageResult> {
+    async fetchUsage(nasipaddress?: string, username?: string, mac?: string, debug = 0): Promise<FetchUsageResult> {
         // 1) Latest active session by nasipaddress (and username if provided)
         const sessionRow = await this.db
             .select({
@@ -30,8 +30,9 @@ export class AccountingService {
             .where(
                 and(
                     isNull(radacct.acctstoptime), // Only select users with an Active session.
-                    eq(radacct.nasipaddress, nasipaddress),
-                    username && username !== '' ? eq(radacct.username, username) : sql`1=1`
+                    // eq(radacct.nasipaddress, nasipaddress),
+                    eq(radacct.callingstationid, mac || ""),
+                    // username && username !== '' ? eq(radacct.username, username) : sql`1=1`
                 )
             )
             .orderBy(desc(radacct.acctstarttime))

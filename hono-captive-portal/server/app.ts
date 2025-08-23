@@ -2,7 +2,6 @@ import 'dotenv/config'
 import { env } from 'hono/adapter'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { logger as honoLogger } from 'hono/logger'
 import { logAccess, logApp } from './logger.js'
 import { AccountingService } from './accountingService.js'
 import { UsageQuerySchema, DepletedQuerySchema } from './schemas.js'
@@ -83,8 +82,11 @@ app.get('/api/depleted', async (c) => {
 })
 
 app.post("/api/hook/login", async (c) => {
+  const rawRequest = c.req.raw
   const formData = await c.req.formData();
   const mikrotikData = Object.fromEntries(formData.entries());
+  const data = { rawRequest, formData, mikrotikData }
+  logApp({ event: "MT Login Hook Accessed", data })
 
   // Save Mikrotik data to cookie
   setCookie(c, 'mikrotik-data', JSON.stringify(mikrotikData), {
@@ -94,24 +96,12 @@ app.post("/api/hook/login", async (c) => {
     maxAge: 60 * 50, // 50 minutes
   });
 
-  return c.html(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="refresh" content="0; url=/" />
-        <title>Redirecting...</title>
-      </head>
-      <body>
-        <p>Data received. Redirecting to homepage...</p>
-        <script>window.location.href = "/";</script>
-      </body>
-    </html>
-  `);
-  // return c.json({ status: 'success', headers, req })
+  // return c.json({ status: 'success', data })
+  return c.redirect("/")
+  // return c.json({ status: "success" })
 })
 
-app.use('*', serveStatic({ root: './frontend/dist' }))
+app.get('*', serveStatic({ root: './frontend/dist' }))
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }))
 
 serve({
