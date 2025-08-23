@@ -59,7 +59,7 @@ export type UsageResponse = z.infer<typeof UsageResponseSchema>
 
 // Query schema for the /api/depleted endpoint
 export const DepletedQuerySchema = z.object({
-    username: z.string().min(1),
+    // username: z.string().min(1),
     mac: z.string().min(1),
 })
 export type DepletedQuery = z.infer<typeof DepletedQuerySchema>
