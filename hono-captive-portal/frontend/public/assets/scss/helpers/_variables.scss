@@ -1,0 +1,15 @@
+html {
+  --font-size-base: 1rem;
+  --reset-rem-size: 16px;
+}
+
+$browser-context: 16;
+
+// image path
+$image-path: '../images';
+
+$customScrollSize: 8px;
+$row-gutter: 12px;
+
+// border radius
+$border-radius: 6px;

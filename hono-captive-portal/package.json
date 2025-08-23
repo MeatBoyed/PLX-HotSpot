@@ -2,9 +2,9 @@
   "name": "hono-captive-portal",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch server/app.ts",
     "build": "tsc",
-    "start": "node dist/src/server.js"
+    "start": "node dist/server/app.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.18.1",

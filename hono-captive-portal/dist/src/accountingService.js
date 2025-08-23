@@ -21,7 +21,8 @@ export class AccountingService {
             acctsessiontime: radacct.acctsessiontime,
         })
             .from(radacct)
-            .where(and(isNull(radacct.acctstoptime), eq(radacct.nasipaddress, nasipaddress), username && username !== '' ? eq(radacct.username, username) : sql `1=1`))
+            .where(and(isNull(radacct.acctstoptime), // Only select users with an Active session.
+        eq(radacct.nasipaddress, nasipaddress), username && username !== '' ? eq(radacct.username, username) : sql `1=1`))
             .orderBy(desc(radacct.acctstarttime))
             .limit(1)
             .then((rows) => rows[0] ?? null);
@@ -83,5 +84,32 @@ export class AccountingService {
             limits.raw = rows;
         }
         return { session: sessionRow, profile, profile_id: profileId, limits };
+    }
+    /**
+     * Query RadiusDesk Cake4 endpoint for depleted flag (boolean) for a given username and MAC.
+     * Returns true/false if available, or null if unknown/error.
+     */
+    async fetchServerDepleted(username, mac, baseUrl = 'https://radiusdesk.pluxnet.co.za') {
+        if (!username || !mac)
+            return null;
+        const url = `${baseUrl}/cake4/rd_cake/radaccts/get-usage.json?username=${encodeURIComponent(username)}&mac=${encodeURIComponent(mac)}`;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+        try {
+            const res = await fetch(url, { method: 'GET', signal: controller.signal });
+            if (!res.ok)
+                return null;
+            const data = await res.json().catch(() => null);
+            if (data && data.success && data.data && typeof data.data.depleted !== 'undefined') {
+                return Boolean(data.data.depleted);
+            }
+            return null;
+        }
+        catch (_e) {
+            return null;
+        }
+        finally {
+            clearTimeout(timeout);
+        }
     }
 }

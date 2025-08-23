@@ -14,9 +14,50 @@ $link_login = $_GET['link-login'] ?? $DEFAULT_LINK_LOGIN;
 // $dst = $_GET['dst'] ?? $DEFAULT_DST;
 $dst =  $DEFAULT_DST;
 
-// Extract MAC from incoming POST only (gateway callback), normalize to AA:BB:CC:DD:EE:FF
-$incoming_mac_raw = isset($_POST['mac']) ? trim((string)$_POST['mac']) : '';
-$incoming_mac = strtoupper(str_replace('-', ':', $incoming_mac_raw));
+// Helpers to resolve client IP and MAC (best-effort; ARP table if L2-adjacent)
+function get_client_ip(): ?string
+{
+    $keys = ['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'];
+    foreach ($keys as $k) {
+        if (!empty($_SERVER[$k])) {
+            $val = $_SERVER[$k];
+            if ($k === 'HTTP_X_FORWARDED_FOR') {
+                $parts = array_map('trim', explode(',', $val));
+                $val = $parts[0] ?? $val;
+            }
+            if (filter_var($val, FILTER_VALIDATE_IP)) {
+                return $val;
+            }
+        }
+    }
+    return null;
+}
+function try_get_mac_from_arp(?string $ip): ?string
+{
+    if (!$ip) return null;
+    $path = '/proc/net/arp';
+    if (!is_readable($path)) return null;
+    $rows = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (!$rows || count($rows) < 2) return null;
+    for ($i = 1; $i < count($rows); $i++) {
+        $cols = preg_split('/\s+/', trim($rows[$i]));
+        if (count($cols) >= 4 && $cols[0] === $ip) {
+            $mac = $cols[3];
+            if (preg_match('/^([0-9A-Fa-f]{2}[:\-]){5}([0-9A-Fa-f]{2})$/', $mac)) {
+                return strtoupper(str_replace('-', ':', $mac));
+            }
+        }
+    }
+    return null;
+}
+$client_ip  = get_client_ip();
+$client_mac = try_get_mac_from_arp($client_ip);
+
+// Extract username & MAC from MT request (prefer POST > GET), normalize MAC
+// $incoming_username = isset($_POST['username']) ? trim((string)$_POST['username']) : (isset($_GET['username']) ? trim((string)$_GET['username']) : $MIKROTIK_DEFAULT_USERNAME);
+$incoming_mac_raw = isset($_POST['mac']) ? trim((string)$_POST['mac']) : (isset($_GET['mac']) ? trim((string)$_GET['mac']) : '');
+$incoming_mac_norm = strtoupper(str_replace('-', ':', $incoming_mac_raw));
+$incoming_mac = $incoming_mac_norm ?: (is_string($client_mac) ? $client_mac : '');
 
 // Optionally query RadiusDesk Cake4 for depleted flag (server-side hint)
 $server_depleted = null; // null = unknown
@@ -130,10 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         // Expose server-derived context to the client
         window.serverUsageCtx = {
-            username: <?php echo json_encode($MIKROTIK_DEFAULT_USERNAME, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
+            username: <?php echo json_encode($incoming_username, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
             mac: <?php echo json_encode($incoming_mac, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
             depleted: <?php echo $server_depleted === null ? 'null' : ($server_depleted ? 'true' : 'false'); ?>,
-            clientIp: null
+            clientIp: <?php echo json_encode($client_ip, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>
         };
     </script>
 
@@ -364,8 +405,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Default creds for non-depleted flow (must match server config)
             const loginDefaults = {
-                username: 'click_to_connect',
-                password: 'click_to_connect'
+                username: 'mahmut1',
+                password: '1234'
             };
 
             function updateUI() {
@@ -378,8 +419,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Initialize UI based on server hint only
+            async function ensureIdentity() {
+                // If we already have username and MAC, nothing to do
+                if (appConfig.username && appConfig.mac) return;
+                // Try derive via usage.php using client IP
+                try {
+                    if (!appConfig.clientIp) return;
+                    const usageUrl = `${appConfig.mikrotik.radiusDeskBaseUrl}/api/user/usage.php?nasipaddress=${encodeURIComponent(appConfig.clientIp)}`;
+                    const r = await fetch(usageUrl, {
+                        credentials: 'omit',
+                        cache: 'no-store',
+                        mode: 'cors'
+                    });
+                    const text = await r.text();
+                    if (!r.ok) return;
+                    const payload = JSON.parse(text);
+                    if (!payload || payload.status !== 'success') return;
+                    const session = payload.data && payload.data.session ? payload.data.session : {};
+                    const sUser = session && (session.username || session.user_name || session.name || session.UserName || session.USERNAME);
+                    const sMac = session && (session.callingstationid || session.calling_station_id || session.mac || session.mac_address || session.MAC);
+                    if (!appConfig.username && sUser) appConfig.username = String(sUser);
+                    if (!appConfig.mac && sMac) appConfig.mac = String(sMac).replace(/-/g, ':').toUpperCase();
+                    try {
+                        console.debug('Resolved identity from usage.php', {
+                            username: appConfig.username,
+                            mac: appConfig.mac
+                        });
+                    } catch (e) {}
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            async function fetchUsage() {
+                try {
+                    await ensureIdentity();
+                    if (!appConfig.mac || !appConfig.username) {
+                        updateUI();
+                        return;
+                    }
+                    const url = new URL(`${appConfig.mikrotik.radiusDeskBaseUrl}/cake4/rd_cake/radaccts/get-usage.json`);
+                    url.searchParams.set('mac', String(appConfig.mac).replace(/-/g, ':').toUpperCase());
+                    url.searchParams.set('username', appConfig.username);
+                    try {
+                        console.debug('Fetching Cake4 usage:', url.toString());
+                    } catch (e) {}
+                    const res = await fetch(url.toString(), {
+                        credentials: 'omit',
+                        mode: 'cors',
+                        cache: 'no-store'
+                    });
+                    const resp = await res.json();
+                    try {
+                        console.debug('Cake4 response:', resp);
+                    } catch (e) {}
+                    if (resp && resp.success && resp.data && resp.data.depleted === true) {
+                        isDepleted = true;
+                    } else {
+                        isDepleted = false;
+                    }
+                    updateUI();
+                } catch (e) {
+                    try {
+                        console.warn('Usage fetch failed', e);
+                    } catch (x) {}
+                    updateUI();
+                }
+            }
+
+            // Initialize UI based on server hint, then confirm with client fetch
             updateUI();
+            fetchUsage();
 
             function termsAccepted() {
                 return $('#check-1').is(':checked');
