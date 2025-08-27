@@ -1,10 +1,10 @@
-import { and, desc, eq, isNull, like, sql } from 'drizzle-orm'
+import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
-import { createRadiusDb } from './db/index.js'
-import { profiles, radacct, radgroupcheck, vouchers } from './db/radius-schema.js'
-import type { FetchUsageResult } from './types.js'
+import { createRadiusDb } from '../db/index.js'
+import { profiles, radacct, radgroupcheck, vouchers } from '../db/radius-schema.js'
+import type { FetchUsageResult } from '../types.js'
 
-
+// Encapsulates all radius accounting related data access
 export class AccountingService {
     private db: MySql2Database
 
@@ -12,8 +12,7 @@ export class AccountingService {
         this.db = createRadiusDb(dbUrl)
     }
 
-    async fetchUsage(nasipaddress?: string, username?: string, mac?: string, debug = 0): Promise<FetchUsageResult> {
-        // 1) Latest active session by nasipaddress (and username if provided)
+    async fetchUsage(nasipaddress?: string, username?: string, mac?: string): Promise<FetchUsageResult> {
         const sessionRow = await this.db
             .select({
                 username: radacct.username,
@@ -29,17 +28,14 @@ export class AccountingService {
             .from(radacct)
             .where(
                 and(
-                    isNull(radacct.acctstoptime), // Only select users with an Active session.
-                    // eq(radacct.nasipaddress, nasipaddress),
-                    eq(radacct.callingstationid, mac || ""),
-                    // username && username !== '' ? eq(radacct.username, username) : sql`1=1`
+                    isNull(radacct.acctstoptime),
+                    eq(radacct.callingstationid, mac || ''),
                 )
             )
             .orderBy(desc(radacct.acctstarttime))
             .limit(1)
             .then((rows) => rows[0] ?? null)
 
-        // 2) Voucher lookup by username
         const effectiveUsername = username && username !== '' ? username : sessionRow?.username ?? ''
         let voucherProfileId: number | null = null
         if (effectiveUsername !== '') {
@@ -51,7 +47,6 @@ export class AccountingService {
             voucherProfileId = v[0]?.profile_id ?? null
         }
 
-        // 3 & 4) Resolve profile and limits
         let profile: FetchUsageResult['profile'] = null
         let profileId: number | null = null
 
@@ -85,15 +80,10 @@ export class AccountingService {
                 .orderBy(radgroupcheck.id)
 
             for (const r of rows) {
-                if (r.attribute === 'Rd-Total-Data') {
-                    limits.data_cap_bytes = r.value ? Number(r.value) : null
-                } else if (r.attribute === 'Rd-Reset-Type-Data') {
-                    limits.reset_type = r.value ?? null
-                } else if (r.attribute === 'Rd-Cap-Type-Data') {
-                    limits.cap_type = r.value ?? null
-                } else if (r.attribute === 'Rd-Mac-Counter-Data') {
-                    limits.mac_counter = r.value ?? null
-                }
+                if (r.attribute === 'Rd-Total-Data') limits.data_cap_bytes = r.value ? Number(r.value) : null
+                else if (r.attribute === 'Rd-Reset-Type-Data') limits.reset_type = r.value ?? null
+                else if (r.attribute === 'Rd-Cap-Type-Data') limits.cap_type = r.value ?? null
+                else if (r.attribute === 'Rd-Mac-Counter-Data') limits.mac_counter = r.value ?? null
             }
             limits.raw = rows as any
         }
@@ -101,10 +91,6 @@ export class AccountingService {
         return { session: sessionRow as any, profile, profile_id: profileId, limits }
     }
 
-    /**
-     * Query RadiusDesk Cake4 endpoint for depleted flag (boolean) for a given username and MAC.
-     * Returns true/false if available, or null if unknown/error.
-     */
     async fetchServerDepleted(
         username?: string,
         mac?: string,

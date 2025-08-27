@@ -7,20 +7,27 @@
     "build:frontend": "cd frontend/ && npm run build",
     "build:server": "tsc -p server/",
     "build": "npm run build:frontend && npm run build:server",
-    "start": "node dist/server/app.js"
+    "start": "node dist/server/app.js",
+    "app:migrate": "npm run drizzle:generate && npm run drizzle:migrate",
+    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:migrate": "drizzle-kit migrate",
+    "drizzle:radius:generate": "drizzle-kit generate --config=drizzle.radius.config.ts",
+    "drizzle:radius:migrate": "drizzle-kit migrate --config=drizzle.radius.config.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.18.1",
     "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.4",
+    "drizzle-orm": "^0.44.5",
     "hono": "^4.9.0",
     "mysql2": "^3.14.3",
+    "pg": "^8.16.3",
     "zod": "^4.0.17"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.4",
-    "tsx": "^4.20.4",
+    "tsx": "^4.20.5",
     "typescript": "^5.8.3"
   }
 }
