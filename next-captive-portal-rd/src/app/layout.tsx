@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   description: appConfig.site.description,
 };
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,13 +44,11 @@ export default function RootLayout({
             {appConfig.useSeedData && (
               <ThemeSwitcher />
             )}
-
-            {/* Logo / Navbar */}
             {children}
-            {/* Ads Manager */}
+            {/* Make Static and fixed to bottm */}
             <AdBanner />
-            <Toaster position="top-center" richColors />
           </div>
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>
     </html>

@@ -16,6 +16,7 @@ declare global {
 
 export interface BrandTheme {
   name: string;
+
   colors: {
     // Primary brand colors
     brandPrimary: string;
@@ -54,6 +55,65 @@ export interface BrandTheme {
     bannerOverlay?: string;
     favicon?: string;
   };
+}
+
+interface colours {
+  // Primary brand colors
+  brandPrimary: string;
+  brandPrimaryHover: string;
+  brandSecondary: string;
+  brandAccent: string;
+
+  // Text colors
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  textMuted: string;
+
+  // Surface colors
+  surfaceCard: string;
+  surfaceWhite: string;
+  surfaceBorder: string;
+
+  // Button colors
+  buttonPrimary: string;
+  buttonPrimaryHover: string;
+  buttonSecondary: string;
+  buttonSecondaryHover: string;
+};
+interface ConnectCardStyle {
+  heading: string
+  buttonText: string
+  connectCardBackground: string;
+}
+
+interface DashboardHeadStyle {
+  heading: string
+  subheading: string
+  bannerOverlay?: string;
+}
+
+interface AdProfile {
+  zoneId: string
+  reviveId: string
+  videoVASTUrl: string
+}
+
+interface BrandProfile {
+  name: string;
+  logo: string;
+  logoWhite: string;
+  favicon?: string;
+  termsLinks: string
+}
+
+export interface ApplicationProfile {
+  brandProfile: BrandProfile
+  adProfile: AdProfile
+  colours: colours
+  connectCardStyle: ConnectCardStyle
+  dashboardHeadStyle: DashboardHeadStyle
+  
 }
 
 // Default PluxNet theme

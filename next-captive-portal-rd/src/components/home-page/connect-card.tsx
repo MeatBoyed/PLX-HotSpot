@@ -9,6 +9,7 @@ import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
 import { appConfig } from "@/lib/config";
 import { useTheme } from "../theme-provider";
+import { PlayCircle } from "lucide-react";
 
 interface ConnectCardProps {
     backgroundImage?: string;
@@ -21,7 +22,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useActionState(handleSubmit, initialState);
-    const { currentTheme } = useTheme();
+    const { theme } = useTheme();
 
 
     async function handleSubmit(): Promise<LoginFormState> {
@@ -37,10 +38,10 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
             {showAd && (
                 <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
-            <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                {(backgroundImage || currentTheme.images.connectCardBackground) && (
+            <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: theme.colors.brandPrimary }}>
+                {(backgroundImage || theme.images.connectCardBackground) && (
                     <img
-                        src={backgroundImage || currentTheme.images.connectCardBackground || "/placeholder.svg"}
+                        src={backgroundImage || theme.images.connectCardBackground || "/placeholder.svg"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
                     />
@@ -88,14 +89,15 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         <Button
                             className="w-full rounded-4xl font-medium py-6 text-base hover:cursor-pointer"
                             style={{
-                                backgroundColor: 'var(--button-secondary)',
-                                color: 'var(--button-secondary-text)',
-                                '--tw-hover-bg': 'var(--button-secondary-hover)'
-                            } as React.CSSProperties}
+                                backgroundColor: theme.colors.buttonSecondary,
+                                color: theme.colors.buttonSecondaryText,
+                                // : theme.colors.buttonSecondaryHover,
+                            }}
                             type="submit"
                             disabled={state.success}
                         >
-                            <img src="watch-video-icon.svg" alt="watch video" width="auth" height="auto" />
+                            {/* <img src="watch-video-icon.svg" alt="watch video" width="auth" height="auto" style={{ fill: theme.colors.brandPrimary }} /> */}
+                            <PlayCircle style={{ width: "32px", height: "32px" }} color={"black"} />
                             Watch video to claim
                         </Button>
                     </Form>

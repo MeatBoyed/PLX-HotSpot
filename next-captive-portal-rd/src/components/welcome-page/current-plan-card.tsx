@@ -1,10 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { appConfig } from "@/lib/config";
+import { useTheme } from "@/components/theme-provider"; // Adjust the import based on your project structure
 
 
 export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: string, bytes_limit: string }) {
+    const { theme } = useTheme()
     return (
-        <Card className="w-full" style={{ backgroundColor: 'var(--surface-card)' }}>
+        <Card className="w-full" style={{ backgroundColor: theme.colors.surfaceCard }}>
             <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                     {appConfig.messages.currentPlanTitle}
