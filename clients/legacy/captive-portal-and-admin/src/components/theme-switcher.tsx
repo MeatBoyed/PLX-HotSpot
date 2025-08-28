@@ -1,47 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useTheme } from './theme-provider';
+import { pluxnetTheme, CityOfJbhTheme, exampleBusinessTheme } from '@/lib/theme';
 import Link from 'next/link';
 
 const availableThemes = [
-  { id: 'pluxnet', name: 'PluxNet' },
-  { id: 'city-of-jbh', name: 'City of Johannesburg' },
-  { id: 'example-business', name: 'Example Business' },
+  { id: 'pluxnet', name: 'PluxNet', theme: pluxnetTheme },
+  { id: 'city-of-jbh', name: 'City of Johannesburg', theme: CityOfJbhTheme },
+  { id: 'example-business', name: 'Example Business', theme: exampleBusinessTheme },
 ];
 
 export function ThemeSwitcher() {
-  const { switchCSSTheme } = useTheme();
-  const [currentDataTheme, setCurrentDataTheme] = useState('pluxnet');
+  const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'pluxnet';
-    setCurrentDataTheme(currentTheme);
-  }, []);
-
-  const handleThemeSwitch = (themeId: string) => {
-    switchCSSTheme(themeId);
-    setCurrentDataTheme(themeId);
+  const handleThemeSwitch = (newTheme: typeof pluxnetTheme) => {
+    setTheme(newTheme);
   };
 
   return (
     <div className="flex gap-2 p-2">
-      <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Theme:</span>
-      {availableThemes.map((theme) => (
+      <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Theme:</span>
+      {availableThemes.map(({ id, name, theme: themeObj }) => (
         <button
-          key={theme.id}
-          onClick={() => handleThemeSwitch(theme.id)}
-          className={`px-3 py-1 text-sm rounded border transition-colors ${currentDataTheme === theme.id
+          key={id}
+          onClick={() => handleThemeSwitch(themeObj)}
+          className={`px-3 py-1 text-sm rounded border transition-colors ${theme.name === themeObj.name
             ? 'border-2 font-semibold'
             : 'border hover:bg-gray-100'
             }`}
           style={{
-            backgroundColor: currentDataTheme === theme.id ? 'var(--brand-primary)' : 'var(--surface-white)',
-            color: currentDataTheme === theme.id ? 'var(--button-primary-text)' : 'var(--text-secondary)',
-            borderColor: 'var(--surface-border)'
+            backgroundColor: theme.name === themeObj.name ? theme.colors.brandPrimary : theme.colors.surfaceWhite,
+            color: theme.name === themeObj.name ? theme.colors.buttonPrimaryText : theme.colors.textSecondary,
+            borderColor: theme.colors.surfaceBorder,
           }}
         >
-          {theme.name}
+          {name}
         </button>
       ))}
       <Link href="/welcome">View Dashboard</Link>

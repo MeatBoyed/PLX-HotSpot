@@ -72,10 +72,10 @@ export const myBrandTheme: BrandTheme = {
 import { useTheme } from '@/components/theme-provider';
 
 function MyComponent() {
-  const { currentTheme } = useTheme();
+  const { theme } = useTheme();
   
   return (
-    <img src={currentTheme.images.logo} alt="Brand logo" />
+    <img src={theme.images.logo} alt="Brand logo" />
   );
 }
 ```

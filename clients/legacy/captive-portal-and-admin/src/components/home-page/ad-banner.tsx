@@ -1,19 +1,13 @@
 "use client"
 import ReviveAd from '@/lib/revive-ad';
-import { usePathname } from 'next/navigation';
 import { appConfig } from '@/lib/config';
 
 export default function AdBanner() {
-    const path = usePathname();
     // Only apply bg color if not on the home page
-    const isHomePage = path === '/';
 
     return (
-        <section className="w-full flex items-center justify-center"
-            style={{ backgroundColor: isHomePage ? '' : 'var(--brand-primary)' }}
-        >
+        <section className="w-full flex items-center justify-center">
             <div className="w-full max-w-md">
-
                 <div className="w-full relative">
                     <ReviveAd
                         zoneId={appConfig.ads.zoneId}
