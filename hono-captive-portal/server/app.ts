@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { serve } from '@hono/node-server'
 import { OpenAPIHono } from '@hono/zod-openapi'
+import { cors } from 'hono/cors'
 import { logAccess, logApp } from './logger.js'
 // Routes
 import { accountingRoute } from './AccountingService/route.js'
@@ -8,6 +9,24 @@ import { portalRoute } from './PortalService/route.js'
 import { serveStatic } from '@hono/node-server/serve-static'
 
 const app = new OpenAPIHono()
+
+// CORS (allow local dev frontend and optionally additional origins via env)
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3001')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean)
+
+app.use('/api/*', cors({
+  origin: (origin) => {
+    if (!origin) return origin // non-browser / same-origin
+    return allowedOrigins.includes(origin) ? origin : ''
+  },
+  allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length'],
+  credentials: true,
+  maxAge: 600,
+}))
 
 // Access logging to file and console
 app.use('*', async (c: any, next: any) => {
