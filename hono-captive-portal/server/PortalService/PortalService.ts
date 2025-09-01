@@ -52,4 +52,41 @@ export class PortalService {
         }
         return normalized
     }
+
+    /**
+     * Partially update a branding_config row identified by ssid.
+     * Only defined fields in the updates object are sent so DB defaults / triggers remain intact.
+     * Returns the full updated BrandingConfig (normalized timestamps).
+     */
+    async updateBrandingConfig(ssid: string, updates: Partial<BrandingConfigCreateInput>): Promise<BrandingConfig> {
+        if (!ssid || ssid.length === 0) throw new Error('Invalid ssid')
+        if (!updates || Object.keys(updates).length === 0) {
+            // No updates requested: just return current record
+            return this.getBrandingConfig(ssid)
+        }
+
+        // Filter out undefined so we do not overwrite with NULL unintentionally
+        const values: Record<string, any> = {}
+        for (const [k, v] of Object.entries(updates)) {
+            if (v !== undefined) values[k] = v
+        }
+        if (Object.keys(values).length === 0) {
+            return this.getBrandingConfig(ssid)
+        }
+
+        const rows = await this.db
+            .update(brandingConfig)
+            .set(values as any)
+            .where(eq(brandingConfig.ssid, ssid))
+            .returning()
+
+        if (!rows[0]) throw new Error('Branding config not found or update failed')
+        const row = rows[0] as any
+        const normalized: BrandingConfig = {
+            ...row,
+            createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : undefined,
+            updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined,
+        }
+        return normalized
+    }
 }

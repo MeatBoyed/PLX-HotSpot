@@ -68,6 +68,34 @@ const getBrandingRoute = createRoute({
     }
 })
 
+// PATCH /config?ssid=SSID - partial update
+const updateBrandingRoute = createRoute({
+    method: 'patch',
+    path: '/config',
+    tags: ['Branding'],
+    request: {
+        query: GetBrandingConfigQuery,
+        body: {
+            content: {
+                'application/json': { schema: brandingConfigCreateSchema.partial().openapi('BrandingConfigUpdateBody') }
+            },
+            required: true
+        }
+    },
+    responses: {
+        200: {
+            description: 'Branding config updated',
+            content: {
+                'application/json': {
+                    schema: z.object({ res: brandingConfigSchema })
+                }
+            }
+        },
+        400: { description: 'Validation error' },
+        404: { description: 'Not found' }
+    }
+})
+
 portalRoute.openapi(createBrandingRoute, async (c: any) => {
     const body = await c.req.json()
     const parsed = brandingConfigCreateSchema.safeParse(body)
@@ -92,6 +120,39 @@ portalRoute.openapi(getBrandingRoute, async (c: any) => {
     const portalService = new PortalService(APP_DATABASE_URL)
     try {
         const res = await portalService.getBrandingConfig(ssid)
+        return c.json({ res })
+    } catch {
+        return c.json({ error: 'Not found' }, 404)
+    }
+})
+
+portalRoute.openapi(updateBrandingRoute, async (c: any) => {
+    // Validate query (ssid)
+    const query = c.req.query()
+    const parsedQuery = GetBrandingConfigQuery.safeParse(query)
+    if (!parsedQuery.success) {
+        return c.json({ status: 'error', errors: parsedQuery.error }, 400)
+    }
+    const { ssid } = parsedQuery.data
+
+    // Validate body (partial)
+    let body: any
+    try {
+        body = await c.req.json()
+    } catch {
+        return c.json({ status: 'error', error: 'Invalid JSON body' }, 400)
+    }
+    const partialSchema = brandingConfigCreateSchema.partial()
+    const parsedBody = partialSchema.safeParse(body)
+    if (!parsedBody.success) {
+        return c.json({ status: 'error', errors: parsedBody.error.flatten() }, 400)
+    }
+
+    const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
+    const portalService = new PortalService(APP_DATABASE_URL)
+    try {
+        const res = await portalService.updateBrandingConfig(ssid, parsedBody.data)
+        logApp({ event: 'Branding Config Updated', data: { ssid } })
         return c.json({ res })
     } catch {
         return c.json({ error: 'Not found' }, 404)
