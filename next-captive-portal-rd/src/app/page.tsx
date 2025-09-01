@@ -2,9 +2,16 @@ import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
 import { appConfig } from '@/lib/config';
 import Head from '@/components/home-page/head';
+import { hotspotAPI } from '@/lib/hotspotAPI';
+
+async function getBrandConfig() {
+  return await hotspotAPI.getApiportalconfig({ queries: { ssid: "randburg-taxi" } });
+}
 
 export default async function Home() {
   // Get auth state and redirect if needed
+  const results = await getBrandConfig();
+  console.log("Results: ", results)
   console.log("Use Theme: ", appConfig.theme);
 
   return (
