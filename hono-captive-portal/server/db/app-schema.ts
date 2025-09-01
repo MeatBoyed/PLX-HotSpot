@@ -35,6 +35,12 @@ export const brandingConfig = pgTable('branding_config', {
     bannerOverlay: varchar('banner_overlay', { length: 255 }),
     favicon: varchar('favicon', { length: 255 }),
 
+    // Advertising / Revive / VAST (all optional & nullable, no defaults)
+    adsReviveServerUrl: varchar('ads_revive_server_url', { length: 255 }),
+    adsZoneId: varchar('ads_zone_id', { length: 255 }),
+    adsReviveId: varchar('ads_revive_id', { length: 255 }),
+    adsVastUrl: varchar('ads_vast_url', { length: 255 }),
+
     // Copywriting
     termsLinks: text('terms_links'),
     heading: varchar('heading', { length: 255 }),

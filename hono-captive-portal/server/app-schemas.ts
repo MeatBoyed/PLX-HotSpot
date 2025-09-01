@@ -59,6 +59,12 @@ export const brandingConfigSchema = z
 		bannerOverlay: optionalNullableVarchar255.openapi({ example: '/banner.png' }),
 		favicon: optionalNullableVarchar255.openapi({ example: '/favicon.ico' }),
 
+		// Advertising / Revive / VAST (optional / nullable)
+		adsReviveServerUrl: optionalNullableVarchar255.openapi({ example: 'https://servedby.revive-adserver.net/asyncjs.php' }),
+		adsZoneId: optionalNullableVarchar255.openapi({ example: '20641' }),
+		adsReviveId: optionalNullableVarchar255.openapi({ example: '727bec5e09208690b050ccfc6a45d384' }),
+		adsVastUrl: optionalNullableVarchar255.openapi({ example: 'https://example.com/vast.xml' }),
+
 		// Copywriting (nullable)
 		termsLinks: z.string().nullable().optional().openapi({ example: 'https://example.com/terms' }),
 		heading: optionalNullableVarchar255.openapi({ example: 'Connect to WiFi' }),
@@ -102,6 +108,10 @@ export const brandingConfigCreateSchema = z
 		connectCardBackground: varchar255().optional(),
 		bannerOverlay: nullableVarchar255.optional(),
 		favicon: nullableVarchar255.optional(),
+		adsReviveServerUrl: nullableVarchar255.optional(),
+		adsZoneId: nullableVarchar255.optional(),
+		adsReviveId: nullableVarchar255.optional(),
+		adsVastUrl: nullableVarchar255.optional(),
 		termsLinks: z.string().nullable().optional(),
 		heading: nullableVarchar255.optional(),
 		subheading: nullableVarchar255.optional(),
