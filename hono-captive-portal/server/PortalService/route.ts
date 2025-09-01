@@ -87,11 +87,11 @@ portalRoute.openapi(getBrandingRoute, async (c: any) => {
     if (!parsed.success) {
         return c.json({ status: 'error', errors: parsed.error }, 400)
     }
-    const { ssid, name } = parsed.data
+    const { ssid } = parsed.data
     const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
     const portalService = new PortalService(APP_DATABASE_URL)
     try {
-        const res = await portalService.getBrandingConfig(ssid, name)
+        const res = await portalService.getBrandingConfig(ssid)
         return c.json({ res })
     } catch {
         return c.json({ error: 'Not found' }, 404)
