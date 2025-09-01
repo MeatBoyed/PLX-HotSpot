@@ -1,6 +1,5 @@
-"use client"
-import ReviveAd from '@/lib/revive-ad';
-import { appConfig } from '@/lib/config';
+// "use client"
+// import ReviveAd from '@/lib/revive-ad';
 
 export default function AdBanner() {
     // Only apply bg color if not on the home page
@@ -9,10 +8,10 @@ export default function AdBanner() {
         <section className="w-full flex items-center justify-center">
             <div className="w-full max-w-md">
                 <div className="w-full relative">
-                    <ReviveAd
-                        zoneId={appConfig.ads.zoneId}
-                        reviveId={appConfig.ads.reviveId}
-                    />
+                    {/* <ReviveAd
+                        zoneId={env.ADS_ZONE_ID}
+                        reviveId={env.ADS_REVIVE_ID}
+                    /> */}
                     {/* <!-- Revive Adserver Hosted edition Javascript Tag - Generated with Revive Adserver v5.5.2 --> */}
 
                     {/* <img src="add-img-1.png" className="" width="100%" height="auto" alt="add image" /> */}

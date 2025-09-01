@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { appConfig } from "@/lib/config";
 import { useTheme } from "@/components/theme-provider"; // Adjust the import based on your project structure
 
 
@@ -9,7 +8,7 @@ export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: str
         <Card className="w-full" style={{ backgroundColor: theme.surfaceCard }}>
             <CardHeader>
                 <CardTitle className="font-bold text-2xl">
-                    {appConfig.messages.currentPlanTitle}
+                    {'Hotspot usage'}
                 </CardTitle>
                 {/* <CardTitle className="text-[#F60031] font-bold text-2xl">
                     You&apos;re out of internet!

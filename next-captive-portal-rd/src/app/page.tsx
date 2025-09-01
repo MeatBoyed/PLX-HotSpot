@@ -1,6 +1,5 @@
 import ConnectCard from '@/components/home-page/connect-card';
 import { ConnectProvider } from '@/components/home-page/ConnectContext';
-import { appConfig } from '@/lib/config';
 import Head from '@/components/home-page/head';
 
 
@@ -13,9 +12,9 @@ export default async function Home() {
       </nav>
       <main className="flex items-center justify-center">
         <div className="p-4 w-full space-y-6 max-w-md">
-          {/* <ConnectProvider userUsage={undefined} >
+          <ConnectProvider userUsage={undefined} >
             <ConnectCard />
-          </ConnectProvider> */}
+          </ConnectProvider>
 
           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
             {/* <h4 className="flex items-center justify-between w-full">

@@ -5,7 +5,7 @@ import AdBanner from "@/components/home-page/ad-banner";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { appConfig } from "@/lib/config";
+import { env } from "@/env";
 import { hotspotAPI } from "@/lib/hotspotAPI";
 
 // const geistSans = Geist({
@@ -19,11 +19,11 @@ import { hotspotAPI } from "@/lib/hotspotAPI";
 // });
 
 // Get theme from config - could be environment variable or build-time setting
-const theme = appConfig.theme.selectedTheme || 'pluxnet';
+const theme = env.SELECTED_THEME || 'pluxnet';
 
 export const metadata: Metadata = {
-  title: appConfig.site.title,
-  description: appConfig.site.description,
+  title: env.SITE_TITLE,
+  description: env.SITE_DESCRIPTION,
 };
 
 async function getBrandConfig() {
@@ -47,9 +47,7 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={results.res} >
           <div className="flex flex-col justify-between min-h-screen">
             {/* Theme Switcher for testing */}
-            {appConfig.useSeedData && (
-              <ThemeSwitcher />
-            )}
+            <ThemeSwitcher />
             {children}
             {/* Make Static and fixed to bottm */}
             <AdBanner />

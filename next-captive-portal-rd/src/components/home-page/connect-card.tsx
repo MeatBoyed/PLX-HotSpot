@@ -7,7 +7,6 @@ import Form from "next/form";
 // import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
-import { appConfig } from "@/lib/config";
 import { useTheme } from "../theme-provider";
 import { PlayCircle } from "lucide-react";
 
@@ -55,7 +54,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
 
                     <div className="text-center mb-10">
                         <h2 className="text-xl font-bold leading-tight">
-                            {appConfig.hotspot.welcomeMessage}
+                            {/* {env.HOTSPOT_WELCOME_MESSAGE} */}
                         </h2>
                     </div>
 
@@ -63,7 +62,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         {/* Conditionally Rendered if User's Usage is depleted */}
                         {isDepleted && (
                             <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-white rounded-lg text-black" style={{ borderColor: 'var(--surface-border)', borderWidth: '1px' }}>
-                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder={appConfig.messages.voucherPlaceholder} value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
+                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder={'Enter voucher code'} value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
                                 {/* <button type="button" className="text-base font-semibold text-[#5B3393]" onClick={() => {
 
                                 }} >
