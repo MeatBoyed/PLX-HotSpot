@@ -1,15 +1,15 @@
 "use client";
 
 import React from "react";
-import { appConfig } from "@/lib/config";
+import { env } from "@/env";
 
 interface PureHtmlConnectCardProps {
     backgroundImage?: string;
     mikrotikLoginUrl?: string; // Pass this as a prop from the parent
 }
 
-const Default_Username = appConfig.mikrotik.defaultUsername;
-const Default_Password = appConfig.mikrotik.defaultPassword;
+const Default_Username = env.MIKROTIK_DEFAULT_USERNAME;
+const Default_Password = env.MIKROTIK_DEFAULT_PASSWORD;
 
 export default function PureHtmlConnectCard({ backgroundImage, mikrotikLoginUrl }: PureHtmlConnectCardProps) {
     // Fallback URL if not provided

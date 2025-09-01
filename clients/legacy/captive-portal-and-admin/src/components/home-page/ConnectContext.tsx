@@ -2,10 +2,8 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { toast } from "sonner";
-// import { LoginFormState, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
-import { appConfig } from "@/lib/config";
-// import { clientLoginToHotspot } from "@/lib/mikrotik/mikrotik-client";
 import { useRouter } from "next/navigation"
+import { RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
 
 export type LoginFormState = { success: boolean, message: string };
 
@@ -61,7 +59,8 @@ export function ConnectProvider({ children, userUsage }: { children: ReactNode, 
     const doLogin = async (voucherCode?: string): Promise<LoginFormState> => {
         setIsLoading(true);
 
-        const loadingToast = toast.loading(appConfig.messages.loadingConnect);
+        const loadingToast = toast.loading('Connecting to PluxNet Fibre Hotspot...');
+        console.log("vouchercode", voucherCode)
 
         try {
             // Determine credentials
@@ -84,7 +83,7 @@ export function ConnectProvider({ children, userUsage }: { children: ReactNode, 
 
             // Show appropirate toast based on actual result
             // if (result.success) {
-            toast.success(appConfig.messages.successConnect);
+            toast.success('Successfully connected to PluxNet Fibre Hotspot!');
 
             // Small delay then navigate
             await new Promise(resolve => setTimeout(resolve, 1000));

@@ -1,6 +1,6 @@
 "use client"
 import { useEffect } from 'react';
-import { appConfig } from '@/lib/config';
+import { env } from '@/env';
 
 interface ReviveAdProps {
   zoneId: string;
@@ -10,13 +10,11 @@ interface ReviveAdProps {
 const ReviveAd = ({ zoneId, reviveId }: ReviveAdProps) => {
   useEffect(() => {
     // Only inject script once per mount
-    const existingScript = document.querySelector(
-      `script[src="${appConfig.ads.reviveServerUrl}"]`
-    );
+    const existingScript = document.querySelector(`script[src="${env.ADS_REVIVE_SERVER_URL}"]`);
 
     if (!existingScript) {
       const script = document.createElement('script');
-      script.src = appConfig.ads.reviveServerUrl;
+      script.src = env.ADS_REVIVE_SERVER_URL;
       script.async = true;
       document.body.appendChild(script);
     }
