@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import Form from "next/form";
 // import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
-import VideoAd from "@/lib/revive-video-ad";
+import AdVideo from "@/components/revive/ad-video";
 import { useTheme } from "../theme-provider";
 import { PlayCircle } from "lucide-react";
 
@@ -36,7 +36,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     return (
         <>
             {showAd && (
-                <VideoAd vastUrl={theme?.adsVastUrl || ""} onComplete={onAdComplete} />
+                <AdVideo vastUrl={theme?.adsVastUrl || ""} onComplete={onAdComplete} />
             )}
             <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: theme.brandPrimary }}>
                 {(backgroundImage || theme.connectCardBackground) && (

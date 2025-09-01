@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 // import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AdBanner from "@/components/home-page/ad-banner";
+import AdSection from "@/components/ad-section";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
@@ -37,7 +37,7 @@ export default async function RootLayout({
           <div className="flex flex-col justify-between min-h-screen">
             {children}
             {/* Make Static and fixed to bottm */}
-            <AdBanner />
+            <AdSection />
             <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
               <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
               <img

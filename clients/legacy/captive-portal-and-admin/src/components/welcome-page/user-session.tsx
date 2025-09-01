@@ -1,5 +1,6 @@
 "use client"
 
+import CurrentPlanCard from "./current-plan-card";
 // import { MikroTikStatus, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
 import PlanCard from "./plan-card";
 
@@ -25,10 +26,10 @@ export default function UserSession() {
             {/* Current Plan */}
             <div className="flex flex-col items-start justify-start gap-4 w-full">
                 <h4 className="text-lg font-bold" style={{ color: 'var(--text-tertiary)' }}>Current plan</h4>
-                {/* <CurrentPlanCard
-                    bytesIn={status?.bytes_out_nice || ""}
-                    bytes_limit={userUsage?.data?.data_cap ? `${(userUsage.data.data_cap / (1024 * 1024)).toFixed(1)} MB` : "Unknown"}
-                /> */}
+                <CurrentPlanCard
+                    bytesIn={""}
+                    bytes_limit={"Unknown"}
+                />
             </div>
 
             {/* Available Plans */}
