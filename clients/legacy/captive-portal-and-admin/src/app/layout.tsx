@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { appConfig } from "@/lib/config";
+import { hotspotAPI } from "@/lib/hotspotAPI";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -25,20 +26,25 @@ export const metadata: Metadata = {
   description: appConfig.site.description,
 };
 
+async function getBrandConfig() {
+  // TODO: Load SSID from .env
+  return await hotspotAPI.getApiportalconfig({ queries: { ssid: "Jozi-wifi" } });
+}
 
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const results = await getBrandConfig();
+  // console.log("Results: ", results)
 
   return (
     <html lang="en" data-theme={theme} >
       <body
         className={`antialiased min-h-screen bg-gray-50`}
       >
-        <ThemeProvider>
+        <ThemeProvider initialTheme={results.res} >
           <div className="flex flex-col justify-between min-h-screen">
             {/* Theme Switcher for testing */}
             {appConfig.useSeedData && (

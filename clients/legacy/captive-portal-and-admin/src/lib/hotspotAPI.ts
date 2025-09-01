@@ -373,3 +373,5 @@ export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);
 }
+
+export type BrandingConfig = z.infer<typeof BrandingConfig>

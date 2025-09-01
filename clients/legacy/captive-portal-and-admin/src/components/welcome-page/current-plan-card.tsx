@@ -6,7 +6,7 @@ import { useTheme } from "@/components/theme-provider"; // Adjust the import bas
 export default function CurrentPlanCard({ bytesIn, bytes_limit }: { bytesIn: string, bytes_limit: string }) {
     const { theme } = useTheme()
     return (
-        <Card className="w-full" style={{ backgroundColor: theme.colors.surfaceCard }}>
+        <Card className="w-full" style={{ backgroundColor: theme.surfaceCard }}>
             <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                     {appConfig.messages.currentPlanTitle}

@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { toast } from "sonner";
-import { LoginFormState, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
+// import { LoginFormState, RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
 import { appConfig } from "@/lib/config";
-import { clientLoginToHotspot } from "@/lib/mikrotik/mikrotik-client";
+// import { clientLoginToHotspot } from "@/lib/mikrotik/mikrotik-client";
 import { useRouter } from "next/navigation"
+
+export type LoginFormState = { success: boolean, message: string };
 
 interface ConnectContextType {
     connect: (voucherCode?: string) => Promise<LoginFormState>;
@@ -75,22 +77,22 @@ export function ConnectProvider({ children, userUsage }: { children: ReactNode, 
 
 
             // Step 1: Make API Request to "/api/login" to redirect Login request to MT
-            const result = await clientLoginToHotspot(voucherCode)
+            // const result = await clientLoginToHotspot(voucherCode)
 
             // Dismiss loading toast before navigation
             toast.dismiss(loadingToast);
 
             // Show appropirate toast based on actual result
-            if (result.success) {
-                toast.success(appConfig.messages.successConnect);
+            // if (result.success) {
+            toast.success(appConfig.messages.successConnect);
 
-                // Small delay then navigate
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                router.push("/welcome")
-                // window.location.href = finalUrl;
-            } else {
-                toast.error(result.message || appConfig.messages.errorConnect);
-            }
+            // Small delay then navigate
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            router.push("/welcome")
+            // window.location.href = finalUrl;
+            // } else {
+            //     toast.error(result.message || appConfig.messages.errorConnect);
+            // }
 
 
             return { success: true, message: "Redirecting to authentication..." };

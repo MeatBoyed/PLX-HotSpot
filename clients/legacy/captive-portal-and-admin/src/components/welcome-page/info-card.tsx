@@ -6,10 +6,10 @@ export default function InfoCard() {
     const { theme } = useTheme();
 
     return (
-        <section className="relative w-full text-white" style={{ background: theme.colors.brandPrimary }}>
+        <section className="relative w-full text-white" style={{ background: theme.brandPrimary }}>
             {/* eslint-disable @next/next/no-img-element  */}
             {/* <img
-                src={theme.images.bannerOverlay || "banner-overlay.png"}
+                src={theme.bannerOverlay || "banner-overlay.png"}
                 alt="Background overlay"
                 className="absolute inset-0 w-full h-full bg-top-right object-cover bg-no-repeat "
             /> */}
@@ -18,7 +18,7 @@ export default function InfoCard() {
                     <Link href={"/"} className="logo d-flex align-items-center">
                         {/*  eslint-disable @next/next/no-img-element  */}
                         <img
-                            src={theme.images.logoWhite}
+                            src={theme.logoWhite}
                             alt="Brand logo"
                             width="auto"
                             height="auto"

@@ -4,7 +4,7 @@ import React, { useActionState, useState } from "react";
 import { Button } from "../ui/button";
 // import { useFormState } from "react-dom";
 import Form from "next/form";
-import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
+// import { LoginFormState } from "@/lib/mikrotik/mikrotik-types";
 import { useConnect } from "./ConnectContext";
 import VideoAd from "@/lib/revive-video-ad";
 import { appConfig } from "@/lib/config";
@@ -16,6 +16,7 @@ interface ConnectCardProps {
     // mikrotikData?: MikroTikData;
 }
 
+export type LoginFormState = { success: boolean, message: string };
 const initialState: LoginFormState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
@@ -38,10 +39,10 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
             {showAd && (
                 <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
             )}
-            <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: theme.colors.brandPrimary }}>
-                {(backgroundImage || theme.images.connectCardBackground) && (
+            <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: theme.brandPrimary }}>
+                {(backgroundImage || theme.connectCardBackground) && (
                     <img
-                        src={backgroundImage || theme.images.connectCardBackground || "/placeholder.svg"}
+                        src={backgroundImage || theme.connectCardBackground || "/placeholder.svg"}
                         alt="Background overlay"
                         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
                     />
@@ -89,14 +90,13 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         <Button
                             className="w-full rounded-4xl font-medium py-6 text-base hover:cursor-pointer"
                             style={{
-                                backgroundColor: theme.colors.buttonSecondary,
-                                color: theme.colors.buttonSecondaryText,
-                                // : theme.colors.buttonSecondaryHover,
+                                backgroundColor: theme.buttonSecondary,
+                                color: theme.buttonSecondaryText,
                             }}
                             type="submit"
                             disabled={state.success}
                         >
-                            {/* <img src="watch-video-icon.svg" alt="watch video" width="auth" height="auto" style={{ fill: theme.colors.brandPrimary }} /> */}
+                            {/* Icon (optional) */}
                             <PlayCircle style={{ width: "32px", height: "32px" }} color={"black"} />
                             Watch video to claim
                         </Button>
