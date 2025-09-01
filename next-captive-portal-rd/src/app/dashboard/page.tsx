@@ -1,14 +1,8 @@
-"use client"
 // Must run on Server otherwise RadiusDesk requests fails
 import UserSession from '@/components/welcome-page/user-session';
 import InfoCard from '@/components/welcome-page/info-card';
 
-export default function WelcomePage() {
-    // Ensure user is authenticated, redirect if not
-    // const authState = appConfig.useSeedData ? seedAuthState : await requireAuthenticated();
-    // const authState = seedAuthState;
-    // console.log("Welcome page auth state:", authState);
-
+export default function DashboardPage() {
 
     return (
         <div className="w-full flex flex-col">

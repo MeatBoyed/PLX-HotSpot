@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { cn } from './utils';
+import { cn } from '../../lib/utils';
 
 export interface VastAdData {
     mediaFileUrl: string;
@@ -11,13 +11,13 @@ export interface VastAdData {
     title?: string;
 }
 
-interface VideoAdProps {
+interface AdVideoProps {
     vastUrl: string;
     onComplete?: () => void;
     className?: string;
 }
 
-export default function VideoAd({ vastUrl, onComplete, className }: VideoAdProps) {
+export default function AdVideo({ vastUrl, onComplete, className }: AdVideoProps) {
     const [adData, setAdData] = useState<VastAdData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

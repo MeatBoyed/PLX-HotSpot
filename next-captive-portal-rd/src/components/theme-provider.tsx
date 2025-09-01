@@ -7,6 +7,8 @@ import { BrandingConfig } from '@/lib/types';
 import { hotspotAPI } from '@/lib/hotspotAPI';
 
 const THEME_STORAGE_KEY = 'BrandingConfig';
+const BRAND_CACHE_COOKIE_PREFIX = 'branding_fetch_'; // branding_fetch_<ssid>=1 cookie means fresh within TTL
+const BRAND_CACHE_MAX_AGE_SEC = 180; // 3 minutes
 
 interface ThemeContextType {
   theme: BrandingConfig;
@@ -73,17 +75,44 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     } catch { /* noop */ }
   };
 
-  const fetchTheme = async () => {
+  const brandingCookieName = `${BRAND_CACHE_COOKIE_PREFIX}${ssid}`;
+
+  const hasValidBrandingCache = (): boolean => {
+    if (typeof document === 'undefined') return false;
+    const cookies = document.cookie.split(';').map(c => c.trim());
+    return cookies.some(c => c.startsWith(`${brandingCookieName}=`));
+  };
+
+  const setBrandingCacheCookie = () => {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${brandingCookieName}=1; Max-Age=${BRAND_CACHE_MAX_AGE_SEC}; Path=/`;
+  };
+
+  const fetchTheme = async (force = false) => {
     if (fetchingRef.current) return;
+    // Skip fetch if cache valid and not forced
+    if (!force && hasValidBrandingCache()) {
+      setLoading(false);
+      return;
+    }
     fetchingRef.current = true;
     setError(null);
     try {
       const apiRes = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
       const incoming: BrandingConfig | undefined = (apiRes as any).res || (apiRes as any).data || apiRes;
       applyThemeIfChanged(incoming);
+      // Persist latest theme to localStorage explicitly after fetch
+      if (incoming) {
+        try { localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(incoming)); } catch { /* ignore */ }
+      }
+      setBrandingCacheCookie();
     } catch (e: any) {
       setError(e?.message || 'Failed to load branding config');
       console.log("ThemeProvider Error (Failed to fetch theme): ", e?.message || "Failed to load branding config");
+      // If no stored theme available fallback to pluxnet
+      if (!getStoredTheme()) {
+        setThemeState(pluxnetTheme);
+      }
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -92,7 +121,11 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
 
   // Initial fetch (always perform at least one client refresh so backend changes propagate even if server supplied initialTheme)
   useEffect(() => {
-    fetchTheme();
+    // If stored theme's ssid mismatches current ssid, force fetch ignoring cache cookie
+    const stored = getStoredTheme();
+    const storedSsid = (stored as any)?.ssid;
+    const force = storedSsid && storedSsid !== ssid;
+    fetchTheme(force);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ssid]);
 
@@ -100,7 +133,7 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   const setTheme = (newTheme: BrandingConfig) => setThemeState(newTheme || pluxnetTheme);
 
   // Manual refresh function (exposed)
-  const refreshTheme = async () => { await fetchTheme(); };
+  const refreshTheme = async () => { await fetchTheme(true); };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, refreshTheme, loading, error }}>

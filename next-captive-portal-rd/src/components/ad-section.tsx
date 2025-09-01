@@ -1,11 +1,11 @@
-import ReviveAd from '@/lib/revive-ad';
+import AdBanner from '@/components/revive/ad-banner';
 
-export default function AdBanner() {
+export default function AdSection() {
     return (
         <section className="w-full flex items-center justify-center">
             <div className="w-full max-w-md">
                 <div className="w-full relative">
-                    <ReviveAd />
+                    <AdBanner />
                     {/* <!-- Revive Adserver Hosted edition Javascript Tag - Generated with Revive Adserver v5.5.2 --> */}
 
                     {/* <img src="add-img-1.png" className="" width="100%" height="auto" alt="add image" /> */}

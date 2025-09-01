@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useTheme } from "@/components/theme-provider"
 
-const ReviveAd = () => {
+const AdBanner = () => {
   const { theme } = useTheme()
   const src = theme?.adsReviveServerUrl?.replace("https:", "") || ""
   console.log("Revive Server URL: ", src)
@@ -29,4 +29,4 @@ const ReviveAd = () => {
   );
 };
 
-export default ReviveAd;
+export default AdBanner;
