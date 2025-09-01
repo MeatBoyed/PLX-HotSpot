@@ -95,6 +95,10 @@ const BrandingConfigCreate = z
     connectCardBackground: z.string().min(1).max(255).optional(),
     bannerOverlay: z.string().max(255).nullish(),
     favicon: z.string().max(255).nullish(),
+    adsReviveServerUrl: z.string().max(255).nullish(),
+    adsZoneId: z.string().max(255).nullish(),
+    adsReviveId: z.string().max(255).nullish(),
+    adsVastUrl: z.string().max(255).nullish(),
     termsLinks: z.string().nullish(),
     heading: z.string().max(255).nullish(),
     subheading: z.string().max(255).nullish(),
@@ -183,6 +187,10 @@ const BrandingConfig = z
     connectCardBackground: z.string().min(1).max(255),
     bannerOverlay: z.string().max(255).nullish(),
     favicon: z.string().max(255).nullish(),
+    adsReviveServerUrl: z.string().max(255).nullish(),
+    adsZoneId: z.string().max(255).nullish(),
+    adsReviveId: z.string().max(255).nullish(),
+    adsVastUrl: z.string().max(255).nullish(),
     termsLinks: z.string().nullish(),
     heading: z.string().max(255).nullish(),
     subheading: z.string().max(255).nullish(),
@@ -269,6 +277,10 @@ const BrandingConfigUpdateBody = z
     connectCardBackground: z.string().min(1).max(255),
     bannerOverlay: z.string().max(255).nullable(),
     favicon: z.string().max(255).nullable(),
+    adsReviveServerUrl: z.string().max(255).nullable(),
+    adsZoneId: z.string().max(255).nullable(),
+    adsReviveId: z.string().max(255).nullable(),
+    adsVastUrl: z.string().max(255).nullable(),
     termsLinks: z.string().nullable(),
     heading: z.string().max(255).nullable(),
     subheading: z.string().max(255).nullable(),
@@ -373,5 +385,3 @@ export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);
 }
-
-export type BrandingConfig = z.infer<typeof BrandingConfig>

@@ -1,5 +1,6 @@
 // New flat branding config exports using generated API type
-import type { BrandingConfig } from '@/lib/hotspotAPI';
+
+import { BrandingConfig } from "./types";
 
 export const pluxnetTheme: BrandingConfig = {
   id: 0,

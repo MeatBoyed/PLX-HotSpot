@@ -12,6 +12,7 @@ export default async function Home() {
       </nav>
       <main className="flex items-center justify-center">
         <div className="p-4 w-full space-y-6 max-w-md">
+          {/* Convert to Pure HTML (FORM) implemenation */}
           <ConnectProvider userUsage={undefined} >
             <ConnectCard />
           </ConnectProvider>
