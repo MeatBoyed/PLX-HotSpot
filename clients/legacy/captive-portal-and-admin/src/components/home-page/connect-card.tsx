@@ -19,7 +19,7 @@ export type LoginFormState = { success: boolean, message: string };
 const initialState: LoginFormState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
-    const { connect, showAd, adUrl, onAdComplete, isDepleted } = useConnect();
+    const { connect, showAd, onAdComplete, isDepleted } = useConnect();
     const [voucherCode, setVoucherCode] = useState<string>("");
     const [state, formAction] = useActionState(handleSubmit, initialState);
     const { theme } = useTheme();
@@ -36,7 +36,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
     return (
         <>
             {showAd && (
-                <VideoAd vastUrl={adUrl} onComplete={onAdComplete} />
+                <VideoAd vastUrl={theme?.adsVastUrl || ""} onComplete={onAdComplete} />
             )}
             <div className="relative rounded-3xl w-full max-w-md mx-auto" style={{ backgroundColor: theme.brandPrimary }}>
                 {(backgroundImage || theme.connectCardBackground) && (
@@ -54,7 +54,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
 
                     <div className="text-center mb-10">
                         <h2 className="text-xl font-bold leading-tight">
-                            {/* {env.HOTSPOT_WELCOME_MESSAGE} */}
+                            {theme.heading}
                         </h2>
                     </div>
 

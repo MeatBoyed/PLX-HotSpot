@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { pluxnetTheme } from '@/lib/theme';
-import { BrandingConfig } from '@/lib/hotspotAPI';
+import { BrandingConfig } from '@/lib/types';
 
 const THEME_STORAGE_KEY = 'BrandingConfig';
 

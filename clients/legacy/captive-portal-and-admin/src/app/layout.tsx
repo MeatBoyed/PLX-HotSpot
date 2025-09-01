@@ -4,7 +4,6 @@ import "./globals.css";
 import AdBanner from "@/components/home-page/ad-banner";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { env } from "@/env";
 import { hotspotAPI } from "@/lib/hotspotAPI";
 
@@ -17,9 +16,6 @@ import { hotspotAPI } from "@/lib/hotspotAPI";
 //   variable: "--font-geist-mono",
 //   subsets: ["latin"],
 // });
-
-// Get theme from config - could be environment variable or build-time setting
-const theme = env.SELECTED_THEME || 'pluxnet';
 
 export const metadata: Metadata = {
   title: env.SITE_TITLE,
@@ -40,14 +36,12 @@ export default async function RootLayout({
   // console.log("Results: ", results)
 
   return (
-    <html lang="en" data-theme={theme} >
+    <html lang="en" data-theme={"pluxnet"} >
       <body
         className={`antialiased min-h-screen bg-gray-50`}
       >
         <ThemeProvider initialTheme={results.res} >
           <div className="flex flex-col justify-between min-h-screen">
-            {/* Theme Switcher for testing */}
-            <ThemeSwitcher />
             {children}
             {/* Make Static and fixed to bottm */}
             <AdBanner />
