@@ -1,15 +1,19 @@
 'use client';
 
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { pluxnetTheme } from '@/lib/theme';
 import { BrandingConfig } from '@/lib/types';
+import { hotspotAPI } from '@/lib/hotspotAPI';
 
 const THEME_STORAGE_KEY = 'BrandingConfig';
 
 interface ThemeContextType {
   theme: BrandingConfig;
   setTheme: (theme: BrandingConfig) => void;
+  refreshTheme: () => Promise<void>;
+  loading: boolean;
+  error: string | null;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -24,7 +28,9 @@ export function useTheme() {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  initialTheme?: BrandingConfig;
+  initialTheme?: BrandingConfig; // optional fast paint
+  ssid: string; // branding identifier
+  showInitialSpinner?: boolean; // default true
 }
 
 function getStoredTheme(): BrandingConfig | null {
@@ -45,25 +51,83 @@ function storeTheme(theme: BrandingConfig) {
   } catch { }
 }
 
-export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
-  // Use initialTheme prop, localStorage, or fallback to PluxNet
-  const [theme, setThemeState] = useState<BrandingConfig>(() => {
-    return initialTheme || getStoredTheme() || pluxnetTheme;
-  });
+export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner = true }: ThemeProviderProps) {
+  // Track loading & error state
+  const [loading, setLoading] = useState<boolean>(() => !initialTheme && showInitialSpinner);
+  const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
+
+  // Use provided initialTheme, or stored theme, or fallback
+  const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme() || pluxnetTheme);
 
   // Persist theme to localStorage on change
-  useEffect(() => {
-    storeTheme(theme);
-  }, [theme]);
+  useEffect(() => { storeTheme(theme); }, [theme]);
 
-  // Expose setTheme for runtime theme changes
-  const setTheme = (newTheme: BrandingConfig) => {
-    setThemeState(newTheme || pluxnetTheme);
+  const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
+    if (!incoming) return;
+    try {
+      // Basic shallow diff on updatedAt or id+name
+      if ((theme as any)?.updatedAt !== (incoming as any).updatedAt || theme.id !== incoming.id) {
+        setThemeState(incoming);
+      }
+    } catch { /* noop */ }
   };
 
+  const fetchTheme = async () => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+    setError(null);
+    try {
+      const apiRes = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
+      const incoming: BrandingConfig | undefined = (apiRes as any).res || (apiRes as any).data || apiRes;
+      applyThemeIfChanged(incoming);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to load branding config');
+      console.log("ThemeProvider Error (Failed to fetch theme): ", e?.message || "Failed to load branding config");
+    } finally {
+      fetchingRef.current = false;
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch (always perform at least one client refresh so backend changes propagate even if server supplied initialTheme)
+  useEffect(() => {
+    fetchTheme();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ssid]);
+
+  // Manual setTheme exposed to consumers
+  const setTheme = (newTheme: BrandingConfig) => setThemeState(newTheme || pluxnetTheme);
+
+  // Manual refresh function (exposed)
+  const refreshTheme = async () => { await fetchTheme(); };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
+    <ThemeContext.Provider value={{ theme, setTheme, refreshTheme, loading, error }}>
+      {loading && showInitialSpinner ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Spinner />
+            <p className="text-sm text-gray-500">Loading theme…</p>
+            {/* {error && <p className="text-xs text-red-500">{error}</p>} */}
+          </div>
+        </div>
+      ) : (
+        <>
+          {error && (
+            <div className="fixed top-2 right-2 bg-red-100 border border-red-300 text-red-700 px-3 py-1 rounded text-xs shadow">
+              Theme load error: {error}
+            </div>
+          )}
+          {children}
+        </>
+      )}
     </ThemeContext.Provider>
+  );
+}
+
+function Spinner() {
+  return (
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-brandPrimary" aria-label="Loading" />
   );
 }
