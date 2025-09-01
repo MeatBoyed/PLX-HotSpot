@@ -5,7 +5,7 @@ import AdBanner from "@/components/home-page/ad-banner";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
-import { hotspotAPI } from "@/lib/hotspotAPI";
+// Removed server-side fetch; ThemeProvider will fetch client-side for runtime updates
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -22,29 +22,31 @@ export const metadata: Metadata = {
   description: env.SITE_DESCRIPTION,
 };
 
-async function getBrandConfig() {
-  // TODO: Load SSID from .env
-  return await hotspotAPI.getApiportalconfig({ queries: { ssid: "Jozi-wifi" } });
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const results = await getBrandConfig();
-  // console.log("Results: ", results)
-
+  // Theme will load client-side (with spinner) & poll for updates
   return (
     <html lang="en" data-theme={"pluxnet"} >
       <body
         className={`antialiased min-h-screen bg-gray-50`}
       >
-        <ThemeProvider initialTheme={results.res} >
+        <ThemeProvider ssid={env.SSID} showInitialSpinner>
           <div className="flex flex-col justify-between min-h-screen">
             {children}
             {/* Make Static and fixed to bottm */}
             <AdBanner />
+            <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
+              <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
+              <img
+                src="/pluxnet-logo.svg"
+                alt="PluxNet"
+                className="h-5 w-auto opacity-80"
+                draggable={false}
+              />
+            </footer>
           </div>
           <Toaster position="top-center" richColors />
         </ThemeProvider>
