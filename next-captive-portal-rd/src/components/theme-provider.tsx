@@ -2,13 +2,14 @@
 
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { pluxnetTheme, BrandTheme, } from '@/lib/theme';
+import { pluxnetTheme } from '@/lib/theme';
+import { BrandingConfig } from '@/lib/hotspotAPI';
 
-const THEME_STORAGE_KEY = 'brandTheme';
+const THEME_STORAGE_KEY = 'BrandingConfig';
 
 interface ThemeContextType {
-  theme: BrandTheme;
-  setTheme: (theme: BrandTheme) => void;
+  theme: BrandingConfig;
+  setTheme: (theme: BrandingConfig) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -23,10 +24,10 @@ export function useTheme() {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  initialTheme?: BrandTheme;
+  initialTheme?: BrandingConfig;
 }
 
-function getStoredTheme(): BrandTheme | null {
+function getStoredTheme(): BrandingConfig | null {
   if (typeof window === 'undefined') return null;
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -37,7 +38,7 @@ function getStoredTheme(): BrandTheme | null {
   return null;
 }
 
-function storeTheme(theme: BrandTheme) {
+function storeTheme(theme: BrandingConfig) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
@@ -46,7 +47,7 @@ function storeTheme(theme: BrandTheme) {
 
 export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
   // Use initialTheme prop, localStorage, or fallback to PluxNet
-  const [theme, setThemeState] = useState<BrandTheme>(() => {
+  const [theme, setThemeState] = useState<BrandingConfig>(() => {
     return initialTheme || getStoredTheme() || pluxnetTheme;
   });
 
@@ -56,7 +57,7 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
   }, [theme]);
 
   // Expose setTheme for runtime theme changes
-  const setTheme = (newTheme: BrandTheme) => {
+  const setTheme = (newTheme: BrandingConfig) => {
     setThemeState(newTheme || pluxnetTheme);
   };
 

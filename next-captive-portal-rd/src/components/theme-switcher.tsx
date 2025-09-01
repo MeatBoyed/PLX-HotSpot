@@ -19,7 +19,7 @@ export function ThemeSwitcher() {
 
   return (
     <div className="flex gap-2 p-2">
-      <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Theme:</span>
+      <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>Theme:</span>
       {availableThemes.map(({ id, name, theme: themeObj }) => (
         <button
           key={id}
@@ -29,9 +29,9 @@ export function ThemeSwitcher() {
             : 'border hover:bg-gray-100'
             }`}
           style={{
-            backgroundColor: theme.name === themeObj.name ? theme.colors.brandPrimary : theme.colors.surfaceWhite,
-            color: theme.name === themeObj.name ? theme.colors.buttonPrimaryText : theme.colors.textSecondary,
-            borderColor: theme.colors.surfaceBorder,
+            backgroundColor: theme.name === themeObj.name ? theme.brandPrimary : theme.surfaceWhite,
+            color: theme.name === themeObj.name ? theme.buttonPrimaryText : theme.textSecondary,
+            borderColor: theme.surfaceBorder,
           }}
         >
           {name}
