@@ -97,7 +97,8 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
                         >
                             {/* Icon (optional) */}
                             <PlayCircle style={{ width: "32px", height: "32px" }} color={"black"} />
-                            Watch video to claim
+                            {/* Watch video to claim */}
+                            {theme.buttonText}
                         </Button>
                     </Form>
                 </div>
