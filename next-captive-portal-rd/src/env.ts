@@ -23,12 +23,14 @@ export const env = createEnv({
     },
     client: {
         // Expose only safe public vars (prefix NEXT_PUBLIC_). Add as needed.
+        NEXT_PUBLIC_HOTSPOT_API_BASE_URL: z.string().url().default('http://localhost:3000'),
     },
     runtimeEnv: {
         SITE_TITLE: process.env.SITE_TITLE,
         SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
         BRAND_NAME: process.env.BRAND_NAME,
         SSID: process.env.SSID,
+        NEXT_PUBLIC_HOTSPOT_API_BASE_URL: process.env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL,
         MIKROTIK_DEFAULT_USERNAME: process.env.MIKROTIK_DEFAULT_USERNAME,
         MIKROTIK_DEFAULT_PASSWORD: process.env.MIKROTIK_DEFAULT_PASSWORD,
         MIKROTIK_RADIUS_DESK_BASE_URL: process.env.MIKROTIK_RADIUS_DESK_BASE_URL,

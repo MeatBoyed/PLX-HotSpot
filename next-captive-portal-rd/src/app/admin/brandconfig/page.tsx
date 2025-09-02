@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { hotspotAPI, schemas } from "@/lib/hotspotAPI";
 import { BrandingConfig, FormFieldConfig, FormSectionConfig } from "@/lib/types";
 import { CustomForm } from "@/components/ui/custom-form";
@@ -17,7 +17,8 @@ type UpdateInput = z.infer<typeof StripSchema>;
 // Field groups
 const brandingFields: FormFieldConfig[] = [
     { name: "name", label: "Display Name", type: "text", placeholder: "Venue WiFi" },
-    { name: "logo", label: "Logo Path", type: "text", placeholder: "/pluxnet-logo.svg" },
+    // Image fields will be rendered read-only path + upload widget via custom renderer
+    { name: "logo", label: "Logo", type: "text", placeholder: "/pluxnet-logo.svg" },
     { name: "logoWhite", label: "Logo (White)", type: "text", placeholder: "/pluxnet-logo-white.svg" },
     { name: "connectCardBackground", label: "Connect Card Background", type: "text", placeholder: "/internet-claim-bg.png" },
     { name: "bannerOverlay", label: "Banner Overlay", type: "text", placeholder: "/banner-overlay.png" },
@@ -74,6 +75,33 @@ export default function BrandConfigAdminPage() {
     const { theme, refreshTheme, setTheme } = useTheme();
     const [submitting, setSubmitting] = useState(false);
     const [initialValues, setInitialValues] = useState<Record<string, unknown> | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({});
+    const objectUrlsRef = useRef<Record<string, string>>({});
+
+    const imageFields = ["logo", "logoWhite", "connectCardBackground", "bannerOverlay", "favicon"] as const;
+    const allowedMime = new Set(["image/png", "image/jpeg", "image/webp"]);
+    const maxBytes = 20 * 1024 * 1024;
+
+    const handleFileChange = (field: string, file: File | undefined) => {
+        setSelectedFiles(prev => {
+            const next = { ...prev };
+            if (file) next[field] = file; else delete next[field];
+            return next;
+        });
+        // Manage object URL for preview
+        if (objectUrlsRef.current[field]) {
+            URL.revokeObjectURL(objectUrlsRef.current[field]);
+            delete objectUrlsRef.current[field];
+        }
+        if (file) {
+            objectUrlsRef.current[field] = URL.createObjectURL(file);
+        }
+    };
+
+    useEffect(() => () => {
+        // cleanup URLs on unmount
+        Object.values(objectUrlsRef.current).forEach(u => URL.revokeObjectURL(u));
+    }, []);
 
     // Build initial values from current theme (Zod will strip extras automatically)
     useEffect(() => {
@@ -108,12 +136,58 @@ export default function BrandConfigAdminPage() {
                 toast.error("Missing SSID context");
                 return;
             }
-
-            const response = await hotspotAPI.patchApiportalconfig(body, { queries: { ssid } });
-            const updated = (response as { res: BrandingConfig }).res;
-            setTheme(updated);
-            toast.success("Branding updated");
-            await refreshTheme();
+            // Decide JSON vs multipart
+            const hasFiles = Object.keys(selectedFiles).length > 0;
+            let updated: BrandingConfig | null = null;
+            if (!hasFiles) {
+                const response = await hotspotAPI.patchApiportalconfig(body, { queries: { ssid } });
+                updated = (response as { res: BrandingConfig }).res;
+            } else {
+                // Client-side file validation
+                for (const [field, file] of Object.entries(selectedFiles)) {
+                    if (!allowedMime.has(file.type)) {
+                        toast.error(`${field}: Unsupported file type`);
+                        return;
+                    }
+                    if (file.size > maxBytes) {
+                        toast.error(`${field}: File exceeds 20MB limit`);
+                        return;
+                    }
+                }
+                const formData = new FormData();
+                // Omit image path keys that have a file (backend will set path)
+                const jsonPayload: Record<string, unknown> = { ...body };
+                for (const f of Object.keys(selectedFiles)) {
+                    delete jsonPayload[f];
+                }
+                jsonPayload.ssid = ssid; // ensure
+                formData.append('json', JSON.stringify(jsonPayload));
+                for (const [field, file] of Object.entries(selectedFiles)) {
+                    formData.append(field, file, file.name);
+                }
+                const url = new URL(hotspotAPI.baseURL + '/api/portal/config');
+                url.searchParams.set('ssid', ssid);
+                const resp = await fetch(url.toString(), { method: 'PATCH', body: formData });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    if (err?.fileErrors) {
+                        toast.error('Some images failed');
+                        (err.fileErrors as any[]).forEach(f => toast.error(`${f.field}: ${f.reason}`));
+                    } else {
+                        toast.error(err.error || 'Upload failed');
+                    }
+                    return;
+                }
+                const json = await resp.json();
+                updated = (json as { res: BrandingConfig }).res;
+            }
+            if (updated) {
+                setTheme(updated);
+                toast.success("Branding updated");
+                await refreshTheme();
+                // Reset selected files after success
+                setSelectedFiles({});
+            }
         } catch (e) {
             const msg = e instanceof Error ? e.message : "Update failed";
             console.error("[BrandConfig] Update error", e);
@@ -122,10 +196,10 @@ export default function BrandConfigAdminPage() {
             setSubmitting(false);
             console.log(`[BrandConfig] Submit completed in ${(performance.now() - start).toFixed(0)}ms`);
         }
-    }, [StripSchema, theme, refreshTheme, setTheme]);
+    }, [StripSchema, theme, refreshTheme, setTheme, selectedFiles]);
 
     return (
-        <div className="max-w-5xl mx-auto py-8 space-y-8">
+        <div className="md:min-w-xl md:max-w-3xl mx-auto py-8 space-y-8">
             <nav className="flex items-center justify-center w-full">
                 <Head />
             </nav>
@@ -137,13 +211,72 @@ export default function BrandConfigAdminPage() {
             </div>
             {initialValues && (
                 <CustomForm
-                    sections={[{ title: "Hidden", description: "Technical", fields: hiddenFields }, ...sections]}
+                    sections={[...sections]}
                     schema={StripSchema}
                     onSubmit={onSubmit}
                     defaultValues={initialValues}
                     isSubmitting={submitting}
+                    fieldRenderers={{
+                        logo: ({ value }) => <ImageField name="logo" label="Logo" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                        logoWhite: ({ value }) => <ImageField name="logoWhite" label="Logo (White)" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                        connectCardBackground: ({ value }) => <ImageField name="connectCardBackground" label="Connect Card Background" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                        bannerOverlay: ({ value }) => <ImageField name="bannerOverlay" label="Banner Overlay" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                        favicon: ({ value }) => <ImageField name="favicon" label="Favicon" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                    }}
                 />
             )}
         </div>
     );
 }
+
+interface ImageFieldProps {
+    name: string;
+    label: string;
+    value: unknown;
+    onFile: (field: string, file: File | undefined) => void;
+    previewUrls: Record<string, string>;
+    readOnlyPath?: boolean;
+}
+
+const ImageField: React.FC<ImageFieldProps> = ({ name, label, value, onFile, previewUrls, readOnlyPath }) => {
+    const currentPath = typeof value === 'string' ? value : '';
+    const preview = previewUrls[name] || (currentPath ? (currentPath.startsWith('http') ? currentPath : currentPath) : '');
+    return (
+        <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center justify-between">
+                <span>{label}</span>
+            </label>
+            {readOnlyPath && (
+                <input
+                    type="text"
+                    value={currentPath}
+                    readOnly
+                    className="w-full text-xs bg-muted/40 border rounded px-2 py-1 font-mono"
+                    title={currentPath}
+                />
+            )}
+            <div className="flex items-start gap-4">
+                <div className="w-32 h-32 border rounded bg-muted/20 flex items-center justify-center overflow-hidden">
+                    {preview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={preview} alt={label} className="object-contain max-w-full max-h-full" />
+                    ) : (
+                        <span className="text-xs text-muted-foreground">No image</span>
+                    )}
+                </div>
+                <div className="flex flex-col gap-2 flex-1">
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            onFile(name, file);
+                        }}
+                        className="text-xs"
+                    />
+                    <p className="text-[10px] text-muted-foreground">PNG, JPEG, WEBP up to 20MB. Selecting a file will replace existing image after save.</p>
+                </div>
+            </div>
+        </div>
+    );
+};

@@ -32,6 +32,8 @@ interface CustomFormProps<TValues extends FieldValues = FieldValues> {
     onSubmit: (data: TValues) => void;
     defaultValues?: Partial<TValues>;
     isSubmitting?: boolean;
+    // Optional custom renderers keyed by field name
+    fieldRenderers?: Record<string, (ctx: { field: FormFieldConfig; form: UseFormReturn<TValues>; value: unknown }) => React.ReactNode>;
 }
 
 interface FormFieldProps<TValues extends FieldValues = FieldValues> {
@@ -311,7 +313,7 @@ function FormFieldComponent<TValues extends FieldValues>({ field, form, watchedV
     );
 }
 
-export function CustomForm<TValues extends FieldValues>({ sections, schema, onSubmit, defaultValues, isSubmitting = false }: CustomFormProps<TValues>) {
+export function CustomForm<TValues extends FieldValues>({ sections, schema, onSubmit, defaultValues, isSubmitting = false, fieldRenderers }: CustomFormProps<TValues>) {
     const [openSections, setOpenSections] = useState<Set<number>>(new Set([0])); // First section open by default
 
     const form = useForm<TValues>({
@@ -337,6 +339,16 @@ export function CustomForm<TValues extends FieldValues>({ sections, schema, onSu
     };
 
     const submitHandler: SubmitHandler<TValues> = (data) => handleSubmit(data);
+
+    // Autofocus first invalid field when errors appear
+    const firstErrorKey = Object.keys(form.formState.errors)[0];
+    React.useEffect(() => {
+        if (firstErrorKey) {
+            // react-hook-form setFocus
+            // @ts-ignore
+            form.setFocus(firstErrorKey as any);
+        }
+    }, [firstErrorKey]);
 
     return (
         <Form {...(form as unknown as UseFormReturn<TValues>)}>
@@ -384,18 +396,24 @@ export function CustomForm<TValues extends FieldValues>({ sections, schema, onSu
                             <CollapsibleContent>
                                 <CardContent className="pt-0">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                                        {section.fields.map((field, fieldIndex) => (
-                                            <div
-                                                key={fieldIndex}
-                                                className={(field.type === "textarea" || field.type === "multiselect") ? "md:col-span-2" : ""}
-                                            >
-                                                <FormFieldComponent
-                                                    field={field}
-                                                    form={form as unknown as UseFormReturn<TValues>}
-                                                    watchedValues={watchedValues as TValues}
-                                                />
-                                            </div>
-                                        ))}
+                                        {section.fields.map((field, fieldIndex) => {
+                                            const custom = fieldRenderers?.[field.name];
+                                            const value = (watchedValues as any)?.[field.name];
+                                            return (
+                                                <div
+                                                    key={fieldIndex}
+                                                    className={(field.type === "textarea" || field.type === "multiselect") ? "md:col-span-2" : ""}
+                                                >
+                                                    {custom ? custom({ field, form: form as unknown as UseFormReturn<TValues>, value }) : (
+                                                        <FormFieldComponent
+                                                            field={field}
+                                                            form={form as unknown as UseFormReturn<TValues>}
+                                                            watchedValues={watchedValues as TValues}
+                                                        />
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </CardContent>
                             </CollapsibleContent>
