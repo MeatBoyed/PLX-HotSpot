@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import VideoAd from "../components/revive-video-ad"
+import AdVideo from "../components/revive-video-ad"
 import logo from '../logo.svg'
 import Head from '@/components/head'
 import ConnectCard from '@/components/connect-card'
@@ -157,7 +157,7 @@ function App() {
                     </div>
                 </section>
             </main>
-            {/* <VideoAd vastUrl={adUrl} onComplete={onAdComplete} /> */}
+            {/* <AdVideo vastUrl={adUrl} onComplete={onAdComplete} /> */}
         </>
     );
 }

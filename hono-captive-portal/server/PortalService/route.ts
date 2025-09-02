@@ -3,6 +3,16 @@ import { logApp } from '../logger.js'
 import { setCookie } from 'hono/cookie'
 import { brandingConfigCreateSchema, GetBrandingConfigQuery, brandingConfigSchema } from '../app-schemas.js'
 import { PortalService } from './PortalService.js'
+import { Hono } from 'hono'
+import { buffer } from 'node:stream/consumers'
+
+const IMAGE_FIELDS = new Set(['logo', 'logoWhite', 'connectCardBackground', 'bannerOverlay', 'favicon'])
+const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp'])
+const MAX_FILE_BYTES = 20 * 1024 * 1024
+
+function validateSlug(slug: string): boolean {
+    return /^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)
+}
 import { env } from 'hono/adapter'
 
 export const portalRoute = new OpenAPIHono()
@@ -68,7 +78,17 @@ const getBrandingRoute = createRoute({
     }
 })
 
-// PATCH /config?ssid=SSID - partial update
+// Multipart form schema for update (json part + optional image files)
+const multipartBrandingUpdateSchema = z.object({
+    json: z.string().openapi({ description: 'Stringified JSON matching BrandingConfigUpdateBody' }),
+    logo: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Logo image (png/jpeg/webp)' }),
+    logoWhite: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'White logo image (png/jpeg/webp)' }),
+    connectCardBackground: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Background image (png/jpeg/webp)' }),
+    bannerOverlay: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Banner overlay (png/jpeg/webp)' }),
+    favicon: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Favicon (png/jpeg/webp)' })
+}).partial()
+
+// PATCH /config?ssid=SSID - partial update (JSON or multipart)
 const updateBrandingRoute = createRoute({
     method: 'patch',
     path: '/config',
@@ -77,7 +97,8 @@ const updateBrandingRoute = createRoute({
         query: GetBrandingConfigQuery,
         body: {
             content: {
-                'application/json': { schema: brandingConfigCreateSchema.partial().openapi('BrandingConfigUpdateBody') }
+                'application/json': { schema: brandingConfigCreateSchema.partial().openapi('BrandingConfigUpdateBody') },
+                'multipart/form-data': { schema: multipartBrandingUpdateSchema.openapi('BrandingConfigMultipartUpdate') }
             },
             required: true
         }
@@ -91,7 +112,31 @@ const updateBrandingRoute = createRoute({
                 }
             }
         },
-        400: { description: 'Validation error' },
+        400: { description: 'Validation or file processing error' },
+        404: { description: 'Not found' }
+    }
+})
+
+// GET image route spec
+const getBrandingImageRoute = createRoute({
+    method: 'get',
+    path: '/config/image/{ssid}/{slug}',
+    tags: ['Branding'],
+    request: {
+        params: z.object({
+            ssid: z.string().min(1).openapi({ example: 'my-venue-wifi' }),
+            slug: z.string().min(1).openapi({ example: 'logo' })
+        })
+    },
+    responses: {
+        200: {
+            description: 'Branding image binary',
+            content: {
+                'image/png': { schema: z.any() },
+                'image/jpeg': { schema: z.any() },
+                'image/webp': { schema: z.any() },
+            }
+        },
         404: { description: 'Not found' }
     }
 })
@@ -134,26 +179,95 @@ portalRoute.openapi(updateBrandingRoute, async (c: any) => {
         return c.json({ status: 'error', errors: parsedQuery.error }, 400)
     }
     const { ssid } = parsedQuery.data
-
-    // Validate body (partial)
-    let body: any
-    try {
-        body = await c.req.json()
-    } catch {
-        return c.json({ status: 'error', error: 'Invalid JSON body' }, 400)
-    }
+    const contentType = c.req.header('content-type') || ''
+    const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
+    const portalService = new PortalService(APP_DATABASE_URL)
     const partialSchema = brandingConfigCreateSchema.partial()
-    const parsedBody = partialSchema.safeParse(body)
-    if (!parsedBody.success) {
-        return c.json({ status: 'error', errors: parsedBody.error.flatten() }, 400)
-    }
 
+    if (contentType.startsWith('multipart/form-data')) {
+        // Multipart path
+        const form = await c.req.formData()
+        const jsonPart = form.get('json')
+        if (!jsonPart || typeof jsonPart !== 'string') {
+            return c.json({ status: 'error', error: 'Missing json part' }, 400)
+        }
+        let jsonData: any
+        try { jsonData = JSON.parse(jsonPart) } catch { return c.json({ status: 'error', error: 'Invalid json part' }, 400) }
+        const parsedBody = partialSchema.safeParse(jsonData)
+        if (!parsedBody.success) {
+            return c.json({ status: 'error', errors: parsedBody.error.flatten() }, 400)
+        }
+        const bodyUpdates = { ...parsedBody.data }
+        const fileErrors: any[] = []
+        // Iterate file entries
+        for (const [field, value] of form.entries()) {
+            if (field === 'json') continue
+            if (!(value instanceof File)) continue
+            if (!IMAGE_FIELDS.has(field)) continue // ignore unknown image fields silently
+            const file = value as File
+            if (!ALLOWED_MIME.has(file.type)) {
+                fileErrors.push({ field, reason: 'Unsupported mime type' }); continue
+            }
+            if (file.size > MAX_FILE_BYTES) {
+                fileErrors.push({ field, reason: 'File too large' }); continue
+            }
+            const arrayBuffer = await file.arrayBuffer()
+            const dataBuf = Buffer.from(arrayBuffer)
+            const slug = field // derive slug from field name
+            if (!validateSlug(slug)) {
+                fileErrors.push({ field, reason: 'Invalid derived slug' }); continue
+            }
+            try {
+                const stored = await portalService.upsertBrandingImage({ ssid, slug, mimeType: file.type, data: dataBuf })
+                    // Set field path in updates
+                    ; (bodyUpdates as any)[field] = stored.path
+            } catch (e: any) {
+                fileErrors.push({ field, reason: e.message || 'Store failed' })
+            }
+        }
+        if (fileErrors.length > 0) {
+            return c.json({ status: 'error', error: 'One or more files failed', fileErrors }, 400)
+        }
+        try {
+            const res = await portalService.updateBrandingConfig(ssid, bodyUpdates)
+            logApp({ event: 'Branding Config Updated (multipart)', data: { ssid } })
+            return c.json({ res })
+        } catch {
+            return c.json({ error: 'Not found' }, 404)
+        }
+    } else {
+        // JSON path (backwards compatible)
+        let body: any
+        try { body = await c.req.json() } catch { return c.json({ status: 'error', error: 'Invalid JSON body' }, 400) }
+        const parsedBody = partialSchema.safeParse(body)
+        if (!parsedBody.success) return c.json({ status: 'error', errors: parsedBody.error.flatten() }, 400)
+        try {
+            const res = await portalService.updateBrandingConfig(ssid, parsedBody.data)
+            logApp({ event: 'Branding Config Updated', data: { ssid } })
+            return c.json({ res })
+        } catch {
+            return c.json({ error: 'Not found' }, 404)
+        }
+    }
+})
+
+// Register image retrieval in OpenAPI
+portalRoute.openapi(getBrandingImageRoute, async (c: any) => {
+    const { ssid, slug } = c.req.param()
     const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
     const portalService = new PortalService(APP_DATABASE_URL)
     try {
-        const res = await portalService.updateBrandingConfig(ssid, parsedBody.data)
-        logApp({ event: 'Branding Config Updated', data: { ssid } })
-        return c.json({ res })
+        const { data, mimeType, size, hash, updatedAt } = await portalService.getBrandingImage(ssid, slug)
+        c.header('Content-Type', mimeType)
+        c.header('Content-Length', String(size))
+        c.header('ETag', `"sha256:${hash}"`)
+        if (updatedAt) c.header('Last-Modified', updatedAt.toUTCString())
+        c.header('Cache-Control', 'public, max-age=86400, immutable')
+        const ifNoneMatch = c.req.header('if-none-match')
+        if (ifNoneMatch && ifNoneMatch.replace(/\"/g, '') === `sha256:${hash}`) {
+            return c.body(null, 304)
+        }
+        return c.body(data)
     } catch {
         return c.json({ error: 'Not found' }, 404)
     }

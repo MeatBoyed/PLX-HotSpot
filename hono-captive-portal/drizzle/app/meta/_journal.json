@@ -15,6 +15,13 @@
       "when": 1756719936532,
       "tag": "0001_superb_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756843479291,
+      "tag": "0002_unusual_venus",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { pgTable, varchar, text, timestamp, serial, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, text, timestamp, serial, uniqueIndex, integer } from 'drizzle-orm/pg-core';
 
 // branding_config table mirrors initial provided SQL specification
 export const brandingConfig = pgTable('branding_config', {
@@ -51,4 +51,21 @@ export const brandingConfig = pgTable('branding_config', {
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (table) => ({
     ssidUnique: uniqueIndex('branding_config_ssid_unique').on(table.ssid),
+}));
+
+// Image storage table for branding assets (small images only; max 20MB enforced in API)
+// Stores raw bytes in Postgres for simplicity; can be moved to object storage later.
+export const brandingImage = pgTable('branding_image', {
+    id: serial('id').primaryKey(),
+    ssid: varchar('ssid', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(), // unique logical name per ssid
+    mimeType: varchar('mime_type', { length: 100 }).notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    sha256Hash: varchar('sha256_hash', { length: 64 }).notNull(),
+    // Store binary as base64 string temporarily (text) until native bytea helper is added
+    data: text('data').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
+}, (table) => ({
+    ssidSlugUnique: uniqueIndex('branding_image_ssid_slug_unique').on(table.ssid, table.slug),
 }));

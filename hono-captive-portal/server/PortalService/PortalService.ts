@@ -1,8 +1,9 @@
 import type { BrandingConfigCreateInput, BrandingConfig } from '../app-schemas.js'
 import { createAppDb } from '../db/index.js'
-import { brandingConfig } from '../db/app-schema.js'
+import { brandingConfig, brandingImage } from '../db/app-schema.js'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import crypto from 'crypto'
 
 // Portal related domain logic (branding, sessions, etc.)
 export class PortalService {
@@ -88,5 +89,35 @@ export class PortalService {
             updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined,
         }
         return normalized
+    }
+
+    /** Upsert (overwrite) a branding image by (ssid, slug). Returns stored metadata. */
+    async upsertBrandingImage(params: { ssid: string; slug: string; mimeType: string; data: Buffer }): Promise<{ slug: string; path: string; hash: string; size: number; mimeType: string; }> {
+        const { ssid, slug, mimeType, data } = params
+        if (!ssid) throw new Error('Missing ssid')
+        if (!slug) throw new Error('Missing slug')
+        if (!data || data.length === 0) throw new Error('Empty image data')
+        const size = data.length
+        const hash = crypto.createHash('sha256').update(data).digest('hex')
+        // Try update first (ON CONFLICT like behavior manually as drizzle lacks native upsert for PG < some version)
+        const existing = await this.db.select().from(brandingImage).where(and(eq(brandingImage.ssid, ssid), eq(brandingImage.slug, slug))).limit(1)
+        const base64 = data.toString('base64')
+        if (existing[0]) {
+            await this.db.update(brandingImage).set({ data: base64, mimeType, sizeBytes: size, sha256Hash: hash }).where(and(eq(brandingImage.ssid, ssid), eq(brandingImage.slug, slug)))
+        } else {
+            await this.db.insert(brandingImage).values({ ssid, slug, data: base64, mimeType, sizeBytes: size, sha256Hash: hash })
+        }
+        return { slug, path: `/${ssid}/${slug}`, hash, size, mimeType }
+    }
+
+    /** Fetch image binary by (ssid, slug) */
+    async getBrandingImage(ssid: string, slug: string): Promise<{ data: Buffer; mimeType: string; size: number; hash: string; updatedAt?: Date }> {
+        if (!ssid) throw new Error('Missing ssid')
+        if (!slug) throw new Error('Missing slug')
+        const rows = await this.db.select().from(brandingImage).where(and(eq(brandingImage.ssid, ssid), eq(brandingImage.slug, slug))).limit(1)
+        if (!rows[0]) throw new Error('Not found')
+        const row: any = rows[0]
+        const buf = Buffer.from(row.data, 'base64')
+        return { data: buf, mimeType: row.mimeType, size: row.sizeBytes, hash: row.sha256Hash, updatedAt: row.updatedAt }
     }
 }

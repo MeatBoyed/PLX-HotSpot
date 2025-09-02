@@ -6,6 +6,8 @@ import { logAccess, logApp } from './logger.js'
 // Routes
 import { accountingRoute } from './AccountingService/route.js'
 import { portalRoute } from './PortalService/route.js'
+import { PortalService } from './PortalService/PortalService.js'
+import { env } from 'hono/adapter'
 import { serveStatic } from '@hono/node-server/serve-static'
 
 const app = new OpenAPIHono()
