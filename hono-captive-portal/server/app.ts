@@ -56,9 +56,6 @@ app.doc('/api/spec', {
 })
 
 
-app.get('*', serveStatic({ root: './frontend/dist' }))
-app.get("*", serveStatic({ path: "./frontend/dist/index.html" }))
-
 serve({
   fetch: app.fetch,
   port: 3000

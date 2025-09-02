@@ -1,13 +1,13 @@
-import { and, desc, eq, isNull, like, sql } from 'drizzle-orm';
-import { createRadiusDb } from './db/index.js';
-import { profiles, radacct, radgroupcheck, vouchers } from './db/radius-schema.js';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { createRadiusDb } from '../db/index.js';
+import { profiles, radacct, radgroupcheck, vouchers } from '../db/radius-schema.js';
+// Encapsulates all radius accounting related data access
 export class AccountingService {
     db;
     constructor(dbUrl) {
         this.db = createRadiusDb(dbUrl);
     }
-    async fetchUsage(nasipaddress, username, mac, debug = 0) {
-        // 1) Latest active session by nasipaddress (and username if provided)
+    async fetchUsage(nasipaddress, username, mac) {
         const sessionRow = await this.db
             .select({
             username: radacct.username,
@@ -21,13 +21,10 @@ export class AccountingService {
             acctsessiontime: radacct.acctsessiontime,
         })
             .from(radacct)
-            .where(and(isNull(radacct.acctstoptime), // Only select users with an Active session.
-        // eq(radacct.nasipaddress, nasipaddress),
-        eq(radacct.callingstationid, mac || "")))
+            .where(and(isNull(radacct.acctstoptime), eq(radacct.callingstationid, mac || '')))
             .orderBy(desc(radacct.acctstarttime))
             .limit(1)
             .then((rows) => rows[0] ?? null);
-        // 2) Voucher lookup by username
         const effectiveUsername = username && username !== '' ? username : sessionRow?.username ?? '';
         let voucherProfileId = null;
         if (effectiveUsername !== '') {
@@ -38,7 +35,6 @@ export class AccountingService {
                 .limit(1);
             voucherProfileId = v[0]?.profile_id ?? null;
         }
-        // 3 & 4) Resolve profile and limits
         let profile = null;
         let profileId = null;
         if (voucherProfileId) {
@@ -69,27 +65,19 @@ export class AccountingService {
                 .where(eq(radgroupcheck.groupname, group))
                 .orderBy(radgroupcheck.id);
             for (const r of rows) {
-                if (r.attribute === 'Rd-Total-Data') {
+                if (r.attribute === 'Rd-Total-Data')
                     limits.data_cap_bytes = r.value ? Number(r.value) : null;
-                }
-                else if (r.attribute === 'Rd-Reset-Type-Data') {
+                else if (r.attribute === 'Rd-Reset-Type-Data')
                     limits.reset_type = r.value ?? null;
-                }
-                else if (r.attribute === 'Rd-Cap-Type-Data') {
+                else if (r.attribute === 'Rd-Cap-Type-Data')
                     limits.cap_type = r.value ?? null;
-                }
-                else if (r.attribute === 'Rd-Mac-Counter-Data') {
+                else if (r.attribute === 'Rd-Mac-Counter-Data')
                     limits.mac_counter = r.value ?? null;
-                }
             }
             limits.raw = rows;
         }
         return { session: sessionRow, profile, profile_id: profileId, limits };
     }
-    /**
-     * Query RadiusDesk Cake4 endpoint for depleted flag (boolean) for a given username and MAC.
-     * Returns true/false if available, or null if unknown/error.
-     */
     async fetchServerDepleted(username, mac, baseUrl = 'https://radiusdesk.pluxnet.co.za') {
         if (!username || !mac)
             return null;
