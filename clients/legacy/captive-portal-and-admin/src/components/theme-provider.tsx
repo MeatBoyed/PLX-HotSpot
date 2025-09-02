@@ -67,12 +67,10 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
 
   const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
     if (!incoming) return;
-    try {
-      // Basic shallow diff on updatedAt or id+name
-      if ((theme as any)?.updatedAt !== (incoming as any).updatedAt || theme.id !== incoming.id) {
-        setThemeState(incoming);
-      }
-    } catch { /* noop */ }
+    // Shallow diff on updatedAt or id
+    if (theme.updatedAt !== incoming.updatedAt || theme.id !== incoming.id) {
+      setThemeState(incoming);
+    }
   };
 
   const brandingCookieName = `${BRAND_CACHE_COOKIE_PREFIX}${ssid}`;
@@ -88,6 +86,26 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     document.cookie = `${brandingCookieName}=1; Max-Age=${BRAND_CACHE_MAX_AGE_SEC}; Path=/`;
   };
 
+  const normalizeBrandingResponse = (resp: unknown): BrandingConfig | undefined => {
+    if (!resp || typeof resp !== 'object') return undefined;
+    const obj = resp as Record<string, unknown>;
+    // Check nested keys first
+    const possibleNested = ['res', 'data'] as const;
+    for (const key of possibleNested) {
+      if (key in obj && obj[key] && typeof obj[key] === 'object') {
+        const nested = obj[key] as Record<string, unknown>;
+        if (typeof nested.ssid === 'string' && typeof nested.name === 'string') {
+          return nested as unknown as BrandingConfig;
+        }
+      }
+    }
+    // Direct shape fallback
+    if (typeof obj.ssid === 'string' && typeof obj.name === 'string') {
+      return obj as unknown as BrandingConfig;
+    }
+    return undefined;
+  };
+
   const fetchTheme = async (force = false) => {
     if (fetchingRef.current) return;
     // Skip fetch if cache valid and not forced
@@ -99,16 +117,17 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     setError(null);
     try {
       const apiRes = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
-      const incoming: BrandingConfig | undefined = (apiRes as any).res || (apiRes as any).data || apiRes;
+      const incoming = normalizeBrandingResponse(apiRes);
       applyThemeIfChanged(incoming);
       // Persist latest theme to localStorage explicitly after fetch
       if (incoming) {
         try { localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(incoming)); } catch { /* ignore */ }
       }
       setBrandingCacheCookie();
-    } catch (e: any) {
-      setError(e?.message || 'Failed to load branding config');
-      console.log("ThemeProvider Error (Failed to fetch theme): ", e?.message || "Failed to load branding config");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to load branding config';
+      setError(msg);
+      console.log("ThemeProvider Error (Failed to fetch theme): ", msg);
       // If no stored theme available fallback to pluxnet
       if (!getStoredTheme()) {
         setThemeState(pluxnetTheme);
@@ -123,8 +142,8 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   useEffect(() => {
     // If stored theme's ssid mismatches current ssid, force fetch ignoring cache cookie
     const stored = getStoredTheme();
-    const storedSsid = (stored as any)?.ssid;
-    const force = storedSsid && storedSsid !== ssid;
+    const storedSsid = stored?.ssid as string | undefined;
+    const force = !!(storedSsid && storedSsid !== ssid);
     fetchTheme(force);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ssid]);
