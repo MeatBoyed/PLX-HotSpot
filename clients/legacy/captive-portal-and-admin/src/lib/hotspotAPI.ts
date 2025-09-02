@@ -288,12 +288,25 @@ const BrandingConfigUpdateBody = z
   })
   .partial()
   .strict();
+const BrandingConfigMultipartUpdate = z
+  .object({
+    json: z.string(),
+    logo: z.instanceof(File),
+    logoWhite: z.instanceof(File),
+    connectCardBackground: z.instanceof(File),
+    bannerOverlay: z.instanceof(File),
+    favicon: z.instanceof(File),
+  })
+  .partial()
+  .strict()
+  .passthrough();
 
 export const schemas = {
   BrandingConfigCreate,
   BrandingConfigCreateResponse,
   BrandingConfig,
   BrandingConfigUpdateBody,
+  BrandingConfigMultipartUpdate,
 };
 
 const endpoints = makeApi([
@@ -368,9 +381,35 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Validation error`,
+        description: `Validation or file processing error`,
         schema: z.void(),
       },
+      {
+        status: 404,
+        description: `Not found`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/portal/config/image/:ssid/:slug",
+    alias: "getApiportalconfigimageSsidSlug",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "ssid",
+        type: "Path",
+        schema: z.string().min(1),
+      },
+      {
+        name: "slug",
+        type: "Path",
+        schema: z.string().min(1),
+      },
+    ],
+    response: z.void(),
+    errors: [
       {
         status: 404,
         description: `Not found`,
