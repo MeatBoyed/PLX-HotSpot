@@ -341,14 +341,14 @@ export function CustomForm<TValues extends FieldValues>({ sections, schema, onSu
     const submitHandler: SubmitHandler<TValues> = (data) => handleSubmit(data);
 
     // Autofocus first invalid field when errors appear
-    const firstErrorKey = Object.keys(form.formState.errors)[0];
+    const firstErrorKey = Object.keys(form.formState.errors)[0] as (keyof TValues & string) | undefined;
     React.useEffect(() => {
         if (firstErrorKey) {
-            // react-hook-form setFocus
-            // @ts-ignore
-            form.setFocus(firstErrorKey as any);
+            // react-hook-form setFocus – generics mismatch with dynamic key
+            // @ts-expect-error: dynamic key not narrowed to Path<TValues>
+            form.setFocus(firstErrorKey);
         }
-    }, [firstErrorKey]);
+    }, [firstErrorKey, form]);
 
     return (
         <Form {...(form as unknown as UseFormReturn<TValues>)}>
@@ -398,7 +398,8 @@ export function CustomForm<TValues extends FieldValues>({ sections, schema, onSu
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                         {section.fields.map((field, fieldIndex) => {
                                             const custom = fieldRenderers?.[field.name];
-                                            const value = (watchedValues as any)?.[field.name];
+                                            const watchedValuesRecord = watchedValues as unknown as Record<string, unknown>;
+                                            const value = watchedValuesRecord[field.name];
                                             return (
                                                 <div
                                                     key={fieldIndex}

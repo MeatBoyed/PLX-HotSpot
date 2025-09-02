@@ -59,11 +59,6 @@ const adFields: FormFieldConfig[] = [
     { name: "adsVastUrl", label: "VAST URL", type: "text", placeholder: "https://example.com/vast.xml" },
 ];
 
-// Hidden field (ssid only; id is not part of update body)
-const hiddenFields: FormFieldConfig[] = [
-    { name: "ssid", label: "ssid", type: "hidden" },
-];
-
 const sections: FormSectionConfig[] = [
     { title: "Brand Identity", description: "Logos, copy and assets.", fields: brandingFields },
     { title: "Colors", description: "Core palette.", fields: colorFields },
@@ -78,7 +73,8 @@ export default function BrandConfigAdminPage() {
     const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({});
     const objectUrlsRef = useRef<Record<string, string>>({});
 
-    const imageFields = ["logo", "logoWhite", "connectCardBackground", "bannerOverlay", "favicon"] as const;
+    // Image fields handled via custom fieldRenderers (list for reference only):
+    // logo, logoWhite, connectCardBackground, bannerOverlay, favicon
     const allowedMime = new Set(["image/png", "image/jpeg", "image/webp"]);
     const maxBytes = 20 * 1024 * 1024;
 
@@ -170,9 +166,10 @@ export default function BrandConfigAdminPage() {
                 const resp = await fetch(url.toString(), { method: 'PATCH', body: formData });
                 if (!resp.ok) {
                     const err = await resp.json().catch(() => ({}));
-                    if (err?.fileErrors) {
+                    if (Array.isArray(err?.fileErrors)) {
+                        type FileErr = { field: string; reason: string };
                         toast.error('Some images failed');
-                        (err.fileErrors as any[]).forEach(f => toast.error(`${f.field}: ${f.reason}`));
+                        (err.fileErrors as FileErr[]).forEach(f => toast.error(`${f.field}: ${f.reason}`));
                     } else {
                         toast.error(err.error || 'Upload failed');
                     }
@@ -196,7 +193,7 @@ export default function BrandConfigAdminPage() {
             setSubmitting(false);
             console.log(`[BrandConfig] Submit completed in ${(performance.now() - start).toFixed(0)}ms`);
         }
-    }, [StripSchema, theme, refreshTheme, setTheme, selectedFiles]);
+    }, [theme, refreshTheme, setTheme, selectedFiles, allowedMime, maxBytes]);
 
     return (
         <div className="md:min-w-xl md:max-w-3xl mx-auto py-8 space-y-8">
