@@ -1,12 +1,12 @@
 import { and, desc, eq, isNull, like, sql } from 'drizzle-orm';
-import { createDb } from './db/index.js';
-import { profiles, radacct, radgroupcheck, vouchers } from './db/schema.js';
+import { createRadiusDb } from './db/index.js';
+import { profiles, radacct, radgroupcheck, vouchers } from './db/radius-schema.js';
 export class AccountingService {
     db;
     constructor(dbUrl) {
-        this.db = createDb(dbUrl);
+        this.db = createRadiusDb(dbUrl);
     }
-    async fetchUsage(nasipaddress, username, debug = 0) {
+    async fetchUsage(nasipaddress, username, mac, debug = 0) {
         // 1) Latest active session by nasipaddress (and username if provided)
         const sessionRow = await this.db
             .select({
@@ -22,7 +22,8 @@ export class AccountingService {
         })
             .from(radacct)
             .where(and(isNull(radacct.acctstoptime), // Only select users with an Active session.
-        eq(radacct.nasipaddress, nasipaddress), username && username !== '' ? eq(radacct.username, username) : sql `1=1`))
+        // eq(radacct.nasipaddress, nasipaddress),
+        eq(radacct.callingstationid, mac || "")))
             .orderBy(desc(radacct.acctstarttime))
             .limit(1)
             .then((rows) => rows[0] ?? null);
