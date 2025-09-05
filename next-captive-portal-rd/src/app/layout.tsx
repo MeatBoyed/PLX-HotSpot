@@ -28,12 +28,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Theme will load client-side (with spinner) & poll for updates
+  console.log("RootLayout env.NEXT_PUBLIC_SSID: ", env.NEXT_PUBLIC_SSID);
   return (
-    <html lang="en" data-theme={"pluxnet"} >
+    <html lang="en">
       <body
         className={`antialiased min-h-screen bg-gray-50`}
       >
-        <ThemeProvider ssid={env.SSID} showInitialSpinner>
+        <ThemeProvider ssid={env.NEXT_PUBLIC_SSID} showInitialSpinner>
           <div className="flex flex-col justify-between min-h-screen">
             {children}
             {/* Make Static and fixed to bottm */}

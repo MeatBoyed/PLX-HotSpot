@@ -127,11 +127,12 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to load branding config';
       setError(msg);
+      setThemeState(pluxnetTheme);
       console.log("ThemeProvider Error (Failed to fetch theme): ", msg);
       // If no stored theme available fallback to pluxnet
-      if (!getStoredTheme()) {
-        setThemeState(pluxnetTheme);
-      }
+      // if (!getStoredTheme()) {
+      //   setThemeState(pluxnetTheme);
+      // }
     } finally {
       fetchingRef.current = false;
       setLoading(false);
