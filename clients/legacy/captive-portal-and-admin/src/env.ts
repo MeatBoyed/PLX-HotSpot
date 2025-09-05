@@ -9,8 +9,6 @@ export const env = createEnv({
         SITE_DESCRIPTION: z.string().min(1).default('PluxNet Fibre HotSpot'),
         BRAND_NAME: z.string().min(1).default('PluxNet'),
 
-        SSID: z.string().min(1).default('PluxNet'),
-
         // Mikrotik / networking
         MIKROTIK_DEFAULT_USERNAME: z.string().min(1).default('click_to_connect@dev'),
         MIKROTIK_DEFAULT_PASSWORD: z.string().min(1).default('click_to_connect'),
@@ -24,12 +22,13 @@ export const env = createEnv({
     client: {
         // Expose only safe public vars (prefix NEXT_PUBLIC_). Add as needed.
         NEXT_PUBLIC_HOTSPOT_API_BASE_URL: z.string().url().default('http://localhost:3000'),
+        NEXT_PUBLIC_SSID: z.string().min(1),
     },
     runtimeEnv: {
         SITE_TITLE: process.env.SITE_TITLE,
         SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
         BRAND_NAME: process.env.BRAND_NAME,
-        SSID: process.env.SSID,
+        NEXT_PUBLIC_SSID: process.env.NEXT_PUBLIC_SSID,
         NEXT_PUBLIC_HOTSPOT_API_BASE_URL: process.env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL,
         MIKROTIK_DEFAULT_USERNAME: process.env.MIKROTIK_DEFAULT_USERNAME,
         MIKROTIK_DEFAULT_PASSWORD: process.env.MIKROTIK_DEFAULT_PASSWORD,
