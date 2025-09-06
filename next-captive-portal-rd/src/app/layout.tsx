@@ -32,27 +32,27 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`antialiased min-h-screen bg-gray-50`}
+        className={`antialiased min-h-screen flex flex-col justify-between bg-gray-50`}
       >
         <ThemeProvider ssid={env.NEXT_PUBLIC_SSID} showInitialSpinner>
-          <div className="flex flex-col justify-between min-h-screen">
+          <div className="flex flex-col justify-center" >
             {children}
             {/* Make Static and fixed to bottm */}
-            <AdSection />
-            <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
-              <img
-                src="/pluxnet-logo.svg"
-                alt="PluxNet"
-                className="h-5 w-auto opacity-80"
-                draggable={false}
-              />
-            </footer>
+            {/* <AdSection /> */}
           </div>
+          <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
+            <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
+            <img
+              src="/pluxnet-logo.svg"
+              alt="PluxNet"
+              className="h-5 w-auto opacity-80"
+              draggable={false}
+            />
+          </footer>
           <Toaster position="top-center" richColors />
         </ThemeProvider>
-      </body>
-    </html>
+      </body >
+    </html >
 
   );
 }
