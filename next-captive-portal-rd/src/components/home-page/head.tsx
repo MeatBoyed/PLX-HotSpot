@@ -24,14 +24,21 @@ export default function Head() {
 }
 
 export function Navbar() {
+    const { theme } = useTheme();
     return (
         <div className="flex items-center justify-between px-5 pt-4">
             {/* Logo */}
             <div className="flex items-center gap-2">
-                <div className="bg-[#F55C7A] rounded-full w-6 h-6 flex items-center justify-center">
+                {/* <div className="bg-[#F55C7A] rounded-full w-6 h-6 flex items-center justify-center">
                     <span className="text-white font-bold">N</span>
                 </div>
-                <span className="text-white text-lg font-semibold">PluxNet</span>
+                <span className="text-white text-lg font-semibold">PluxNet</span> */}
+                <img
+                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.logo}`}
+                    alt="Brand logo"
+                    width="auto"
+                    height="auto"
+                />
             </div>
             <button className="border border-white rounded-full px-4 py-1 text-white text-sm">Connect Now</button>
             {/* Profile Icon */}

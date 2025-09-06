@@ -57,7 +57,7 @@ export default function Dashboard() {
                         <span className="font-semibold text-gray-700">$0.00</span>
                     </div>
                     <div className="text-2xl font-bold text-black">
-                        1.41 <span className="text-[#6F36C1] font-bold">GB</span>
+                        1.41 <span className=" font-bold">GB</span>
                     </div>
                     <div className="text-xs text-gray-500 mb-1">
                         left of 2.0 GB
@@ -78,72 +78,15 @@ export default function Dashboard() {
 
                 {/* Change Plan */}
                 <h2 className="text-gray-500 text-lg font-medium mb-2">Change your plan</h2>
-                <div className="flex gap-3 overflow-x-auto pb-3">
-
+                <div className="flex gap-3 overflow-x-auto pb-3 items-center">
                     <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' />
-                    <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' />
                 </div>
 
                 {/* Voucher Section */}
-                <VoucherCTA />
+                {/* <VoucherCTA /> */}
 
-                {/* Banner */}
-                <AdSection />
-
-                {/* Usage Section */}
-                <h2 className="text-gray-500 text-lg font-medium mb-2">Usage</h2>
-                <div className="flex flex-col items-center">
-                    <div className="w-full relative">
-                        {/* Simple usage chart - replace with chart lib if needed */}
-                        <svg width="100%" height="170" viewBox="0 0 340 170" className="mb-2">
-                            <defs>
-                                <linearGradient id="usageGradient" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#6F36C1" />
-                                    <stop offset="100%" stopColor="#fff" />
-                                </linearGradient>
-                            </defs>
-                            {/* Example usage curve */}
-                            <polyline
-                                fill="url(#usageGradient)"
-                                stroke="#6F36C1"
-                                strokeWidth="3"
-                                points="0,160 30,150 60,130 90,140 120,120 150,150 180,110 210,130 240,90 270,100 300,70 340,160"
-                            />
-                            {/* Axis lines */}
-                            <line x1="40" y1="10" x2="40" y2="160" stroke="#eee" strokeWidth="2" />
-                            <line x1="40" y1="160" x2="340" y2="160" stroke="#eee" strokeWidth="2" />
-                            {/* Tooltip simulation */}
-                            <rect x="110" y="40" width="120" height="35" rx="8" fill="#222" opacity="0.9" />
-                            <text x="120" y="60" fill="#fff" fontSize="12">04 Apr, 2025 - 12:00 am</text>
-                            <text x="120" y="75" fill="#fff" fontSize="14" fontWeight="bold">167.24 MB</text>
-                        </svg>
-                        {/* Y-axis labels (left) */}
-                        <div className="absolute left-0 top-3 text-xs text-gray-400 space-y-9">
-                            <div>500MB</div>
-                            <div>400MB</div>
-                            <div>300MB</div>
-                            <div>200MB</div>
-                            <div>100MB</div>
-                            <div>0</div>
-                        </div>
-                    </div>
-                    {/* Usage filter buttons */}
-                    <div className="flex gap-2 justify-center mt-2 mb-1">
-                        <button className="px-4 py-1 rounded-full bg-black text-white text-xs font-semibold">1 Day</button>
-                        <button className="px-4 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">1 Week</button>
-                        <button className="px-4 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">1 Month</button>
-                        <button className="px-4 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">All</button>
-                    </div>
-                    {/* Dots for slider */}
-                    <div className="flex justify-center mb-2">
-                        <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-gray-400 rounded-full inline-block" />
-                            <span className="w-2 h-2 bg-gray-200 rounded-full inline-block" />
-                            <span className="w-2 h-2 bg-gray-200 rounded-full inline-block" />
-                        </div>
-                    </div>
-                </div>
             </div>
+            <AdSection />
 
             {/* Bottom Nav */}
             {/* <nav className="fixed bottom-0 left-0 w-full bg-white border-t flex justify-between px-6 py-2">
