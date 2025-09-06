@@ -2,51 +2,12 @@
 import { PlanCard } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
+import VoucherCTA from '@/components/voucher-cta';
+import { Navbar } from '@/components/home-page/head';
 
 
-// export default async function Home() {
-//   // Get auth state and redirect if needed
-//   return (
-//     <div className="w-full flex flex-col">
-//       <nav className="flex items-center justify-center w-full">
-//         <Head />
-//       </nav>
-//       <main className="flex items-center justify-center">
-//         <div className="p-4 w-full space-y-6 max-w-md">
-//           {/* Convert to Pure HTML (FORM) implemenation */}
-//           <ConnectProvider userUsage={undefined} >
-//             <ConnectCard />
-//           </ConnectProvider>
 
-//           <section className="mt-2 flex flex-col justify-start items-center gap-3 w-full">
-//             {/* <h4 className="flex items-center justify-between w-full">
-//               <span className="text-base font-bold">Latest news</span>
-//               <a href="#" className="text-sm font-medium" style={{ color: theme.color.primary }}>View all</a>
-//             </h4> */}
-
-//           </section>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// }
-
-export function Navbar() {
-  return (
-    <div className="flex items-center justify-between px-5 pt-4">
-      {/* Logo */}
-      <div className="flex items-center gap-2">
-        <div className="bg-[#F55C7A] rounded-full w-6 h-6 flex items-center justify-center">
-          <span className="text-white font-bold">N</span>
-        </div>
-        <span className="text-white text-lg font-semibold">PluxNet</span>
-      </div>
-      <button className="border border-white rounded-full px-4 py-1 text-white text-sm">Log in</button>
-    </div>
-  )
-}
-
-export default function PluxNetWiFi() {
+export default function HomePage() {
   const { theme } = useTheme()
   return (
     <div style={{ background: theme.brandPrimary }}>
@@ -61,27 +22,18 @@ export default function PluxNetWiFi() {
       </div>
 
       {/* Main Card Section */}
-      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[60vh]">
+      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh]">
         {/* Plans */}
         <h2 className="text-gray-500 text-lg font-medium mb-4">
           Pick a plan to get started
         </h2>
-        <div className="flex gap-3 overflow-x-auto pb-3">
+
+        <div className="flex justify-center gap-3 overflow-x-auto pb-3">
           <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' />
-          <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' />
+          {/* <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' /> */}
         </div>
 
-        {/* Voucher Section */}
-        <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4">
-          <div className="flex items-center gap-2">
-            <div className={`text-white rounded-full p-2`} style={{ backgroundColor: theme.brandPrimary }}>
-              {/* Icon: use a placeholder */}
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" /></svg>
-            </div>
-            <span className="text-gray-700 text-sm font-medium">Got a voucher? Redeem now.</span>
-          </div>
-          <span className={`text-xl`} style={{ color: theme.brandPrimary }} >&#8594;</span>
-        </div>
+        {/* <VoucherCTA /> */}
 
         {/* Banner
         <div className="rounded-xl overflow-hidden">
@@ -94,8 +46,9 @@ export default function PluxNetWiFi() {
             <span className="text-white text-xs font-medium">Galaxy S25 Ultra <br /> Galaxy AI <span role="img" aria-label="star">✨</span></span>
           </div>
         </div> */}
-        <AdSection />
       </div>
+
+      <AdSection />
 
       {/* Bottom Nav */}
       {/* <nav className="fixed bottom-0 left-0 w-full bg-black border-t flex justify-between px-6 py-2">

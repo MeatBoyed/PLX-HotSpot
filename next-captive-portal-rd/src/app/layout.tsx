@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 // import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AdSection from "@/components/ad-section";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
+import Footer from "@/components/footer";
 // Removed server-side fetch; ThemeProvider will fetch client-side for runtime updates
 
 // const geistSans = Geist({
@@ -40,7 +40,8 @@ export default async function RootLayout({
             {/* Make Static and fixed to bottm */}
             {/* <AdSection /> */}
           </div>
-          <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
+          <Footer />
+          {/* <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center bg-gray-300">
             <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
             <img
               src="/pluxnet-logo.svg"
@@ -48,7 +49,7 @@ export default async function RootLayout({
               className="h-5 w-auto opacity-80"
               draggable={false}
             />
-          </footer>
+          </footer> */}
           <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body >
