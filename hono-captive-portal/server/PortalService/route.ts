@@ -141,6 +141,18 @@ const getBrandingImageRoute = createRoute({
     }
 })
 
+portalRoute.get("/config/all", async (c: any) => {
+    const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
+    const portalService = new PortalService(APP_DATABASE_URL)
+    try {
+        const res = await portalService.getAllBrandConfigs()
+        return c.json({ res })
+    } catch (e) {
+        console.error(e)
+        return c.json({ error: 'Internal server error' }, 500)
+    }
+})
+
 portalRoute.openapi(createBrandingRoute, async (c: any) => {
     const body = await c.req.json()
     const parsed = brandingConfigCreateSchema.safeParse(body)

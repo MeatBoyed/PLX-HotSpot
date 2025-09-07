@@ -55,6 +55,21 @@ export class PortalService {
     }
 
     /**
+     * Get all branding Config
+     */
+    async getAllBrandConfigs(): Promise<BrandingConfig[]> {
+        const rows = await this.db
+            .select()
+            .from(brandingConfig)
+        // Normalize timestamp fields to ISO strings for schema contract
+        const normalized: BrandingConfig[] = rows.map(row => ({
+            ...row,
+            createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : undefined,
+            updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined,
+        }))
+        return normalized
+    }
+    /**
      * Partially update a branding_config row identified by ssid.
      * Only defined fields in the updates object are sent so DB defaults / triggers remain intact.
      * Returns the full updated BrandingConfig (normalized timestamps).
