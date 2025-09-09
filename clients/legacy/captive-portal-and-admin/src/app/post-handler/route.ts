@@ -6,6 +6,8 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const mikrotikData = Object.fromEntries(formData.entries());
 
+  // console.log("Incomming Mikrotik Data: ", mikrotikData)
+
   // Save Mikrotik data to cookie
   (await cookies()).set('mikrotik-data', JSON.stringify(mikrotikData), {
     path: '/',

@@ -7,7 +7,6 @@ export default function InfoCard() {
 
     return (
         <section className="relative w-full text-white" style={{ background: theme.brandPrimary }}>
-            {/* eslint-disable @next/next/no-img-element  */}
             {/* <img
                 src={theme.bannerOverlay || "banner-overlay.png"}
                 alt="Background overlay"

@@ -2,7 +2,7 @@
 import { PlanCard } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
-import VoucherCTA from '@/components/voucher-cta';
+// import VoucherCTA from '@/components/voucher-cta';
 import { Navbar } from '@/components/home-page/head';
 
 
