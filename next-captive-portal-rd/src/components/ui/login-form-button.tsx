@@ -19,18 +19,19 @@ export function LoginFormButton({
     label = "Connect Now",
     style,
     className,
-    dst,
+    dst = "https://youtube.com",
 }: LoginFormButtonProps) {
     const action = `${env.NEXT_PUBLIC_MIKROTIK_BASE_URL}/login`;
+    const username = env.NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD
+    const password = env.NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD
     // const destVal = dst ?? env.MIKROTIK_REDIRECT_URL ?? "";
-    const destVal = ""
 
     return (
-        <form method="post" action={action} className="inline-block">
+        <form method="GET" action={action} className="inline-block">
             {/* Hidden required credentials */}
-            <input type="hidden" name="username" value={env.NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME} />
-            <input type="hidden" name="password" value={env.NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD} />
-            {destVal && <input type="hidden" name="dst" value={destVal} />}
+            <input type="hidden" name="username" value={username} />
+            <input type="hidden" name="password" value={password} />
+            {dst && <input type="hidden" name="dst" value={dst} />}
 
             {/* Only visible control */}
             <button

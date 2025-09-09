@@ -1,7 +1,6 @@
 "use client";
 import { useTheme } from "@/components/theme-provider";
 import { PlanCard } from '@/components/plan-card';
-import VoucherCTA from '@/components/voucher-cta';
 // Must run on Server otherwise RadiusDesk requests fails
 // import UserSession from '@/components/welcome-page/user-session';
 // import InfoCard from '@/components/welcome-page/info-card';
