@@ -1,20 +1,20 @@
 "use client"
-import { PlanCard } from '@/components/plan-card';
+import { FreePlanCard, PlanCard } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
 // import VoucherCTA from '@/components/voucher-cta';
 import { Navbar } from '@/components/home-page/head';
-
+import VoucherCTA from '@/components/voucher-cta';
 
 
 export default function HomePage() {
   const { theme } = useTheme()
   return (
-    <div style={{ background: theme.brandPrimary }}>
+    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-center flex-col max-w-sm" >
       <Navbar />
 
       {/* Welcome Text */}
-      <div className="flex flex-col items-center mt-8 mb-6">
+      <div className="flex flex-col items-center mt-8 mb-6 w-full">
         <h1 className="text-white text-2xl font-semibold text-center">
           {/* Welcome to Pluxnet <br /> Public WiFi */}
           {theme.heading}
@@ -22,18 +22,19 @@ export default function HomePage() {
       </div>
 
       {/* Main Card Section */}
-      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh]">
+      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full">
         {/* Plans */}
-        <h2 className="text-gray-500 text-lg font-medium mb-4">
+        <h2 className="text-gray-500 text-md font-medium mb-4">
           Pick a plan to get started
         </h2>
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
-          <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+          <FreePlanCard total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+          {/* <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' /> */}
           {/* <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' /> */}
         </div>
 
-        {/* <VoucherCTA /> */}
+        <VoucherCTA />
 
         {/* Banner
         <div className="rounded-xl overflow-hidden">

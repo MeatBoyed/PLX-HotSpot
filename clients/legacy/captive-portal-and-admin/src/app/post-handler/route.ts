@@ -23,12 +23,12 @@ export async function POST(request: Request) {
     <html>
       <head>
         <meta charset="UTF-8" />
-        <meta http-equiv="refresh" content="0; url=/" />
+        <meta http-equiv="refresh" content="0; url=/splash" />
         <title>Redirecting...</title>
       </head>
       <body>
-        <p>Data received. Redirecting to homepage...</p>
-        <script>window.location.href = "/";</script>
+        <p>Data received. Redirecting to captive portal...</p>
+        <script>window.location.href = "/splash";</script>
       </body>
     </html>
   `;

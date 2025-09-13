@@ -35,10 +35,8 @@ export default async function RootLayout({
         className={`antialiased min-h-screen flex flex-col justify-between bg-gray-50`}
       >
         <ThemeProvider ssid={env.NEXT_PUBLIC_SSID} showInitialSpinner>
-          <div className="flex flex-col justify-center" >
+          <div className="flex flex-col justify-center items-center " >
             {children}
-            {/* Make Static and fixed to bottm */}
-            {/* <AdSection /> */}
           </div>
           <Footer />
           {/* <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center bg-gray-300">
