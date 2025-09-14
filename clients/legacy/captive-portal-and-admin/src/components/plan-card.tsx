@@ -68,6 +68,7 @@ export function VoucherPlanCard() {
                     backgroundColor: theme.buttonPrimary,
                     color: theme.buttonPrimaryText,
                 }}
+                label="Redeem voucher"
                 className={`text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full`} />
         </div>
     )

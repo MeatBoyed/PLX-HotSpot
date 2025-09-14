@@ -1,6 +1,5 @@
 "use client"
 import { useTheme } from "@/components/theme-provider";
-import Link from "next/link";
 import React, { useState } from "react";
 
 export default function SplashPage() {
@@ -22,7 +21,7 @@ export default function SplashPage() {
             </div>
 
             {/* Splash content */}
-            <form method="GET" action="/" className="">
+            <form method="GET" action="/" className="max-w-md w-full flex flex-col justify-center items-center">
                 <div className="relative z-10 flex flex-col justify-end h-[90vh] px-6 pb-4">
                     <div className="mb-8">
                         <h1 className="text-white text-4xl font-bold mb-2">PluxNet</h1>

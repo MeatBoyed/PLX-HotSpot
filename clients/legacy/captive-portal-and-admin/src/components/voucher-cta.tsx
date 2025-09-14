@@ -9,7 +9,7 @@ export default function VoucherCTA() {
     return (
         <>
             {!showVoucherInput ? (
-                <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4" onClick={() => setShowVoucherInput(!showVoucherInput)} >
+                <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4 hover:cursor-pointer" onClick={() => setShowVoucherInput(!showVoucherInput)} >
                     <div className="flex items-center gap-2">
                         <div className={`text-white rounded-full p-2`} style={{ backgroundColor: theme.brandPrimary }}>
                             {/* Icon: use a placeholder */}

@@ -32,12 +32,12 @@ import { Navbar } from "@/components/home-page/head";
 export default function Dashboard() {
     const { theme } = useTheme()
     return (
-        <div style={{ background: theme.brandPrimary }}>
+        <div style={{ background: theme.brandPrimary }} className="flex flex-col items-center justify-center max-w-md w-full">
             {/* Top Bar */}
             <Navbar />
 
             {/* Welcome Text */}
-            <div className="flex flex-col items-center mt-8 mb-2">
+            <div className="flex flex-col items-center mt-8 mb-2 w-full">
                 <h1 className="text-white text-2xl font-semibold text-center">
                     Welcome back, Henry <span className="inline-block">👋</span>
                 </h1>
@@ -47,7 +47,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Card Section */}
-            <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[70vh]">
+            <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[70vh] w-full mt-5">
                 {/* Current Plan */}
                 <h2 className="text-gray-500 text-lg font-medium mb-2">Current plan</h2>
                 <div className="bg-gray-100 rounded-xl p-4 flex flex-col gap-2 mb-4">

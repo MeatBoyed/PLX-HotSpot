@@ -10,7 +10,7 @@ import VoucherCTA from '@/components/voucher-cta';
 export default function HomePage() {
   const { theme } = useTheme()
   return (
-    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-center flex-col max-w-sm" >
+    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-center flex-col max-w-md w-full" >
       <Navbar />
 
       {/* Welcome Text */}

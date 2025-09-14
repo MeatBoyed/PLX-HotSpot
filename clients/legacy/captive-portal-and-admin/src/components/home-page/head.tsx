@@ -34,13 +34,13 @@ export function Navbar() {
                 </div>
                 <span className="text-white text-lg font-semibold">PluxNet</span> */}
                 <img
-                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.logo}`}
+                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
                     alt="Brand logo"
                     width="auto"
                     height="auto"
                 />
             </div>
-            <button className="border border-white rounded-full px-4 py-1 text-white text-sm">Connect Now</button>
+            {/* <button className="border border-white rounded-full px-4 py-1 text-white text-sm">Connect Now</button> */}
             {/* Profile Icon */}
             {/* <div className="w-8 h-8 border-white border rounded-full flex items-center justify-center">
                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
