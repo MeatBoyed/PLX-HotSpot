@@ -34,7 +34,7 @@ export function FreeLoginFormButton({
             {/* Only visible control */}
             <button
                 type="submit"
-                className={cn("hover:cursor-pointer")}
+                className={cn("hover:cursor-pointer", className)}
                 style={style}
             >
                 {label}
@@ -58,7 +58,7 @@ export function VoucherLoginForm({
         <div className="inline-block w-full">
             <input type="text" className="w-full border border-gray-500 rounded p-2 mb-3" placeholder="Enter your voucher code" onChange={(e) => setVoucherCode(e.target.value)} />
             <form method="GET" action={action} className="inline-block w-full">
-                <span className="text-red-500 text-xs mb-2">Oops! That voucher code isn't valid. Please try again</span>
+                {/* <span className="text-red-500 text-xs mb-2">Oops! That voucher code isn't valid. Please try again</span> */}
                 {/* Hidden required credentials */}
                 <input type="hidden" name="username" value={voucherCode} />
                 <input type="hidden" name="password" value={voucherCode} />
