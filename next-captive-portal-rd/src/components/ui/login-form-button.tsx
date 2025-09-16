@@ -34,7 +34,7 @@ export function FreeLoginFormButton({
             {/* Only visible control */}
             <button
                 type="submit"
-                className={cn("hover:cursor-pointer", className)}
+                className={cn(className, "hover:cursor-pointer")}
                 style={style}
             >
                 {label}

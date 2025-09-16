@@ -18,7 +18,7 @@ export const env = createEnv({
     },
     client: {
         // Expose only safe public vars (prefix NEXT_PUBLIC_). Add as needed.
-        NEXT_PUBLIC_HOTSPOT_API_BASE_URL: z.string().url().default('http://localhost:3000'),
+        NEXT_PUBLIC_HOTSPOT_API_BASE_URL: z.string().url().default('https://hotspot.pluxnet.co.za'),
         NEXT_PUBLIC_SSID: z.string().min(1),
         NEXT_PUBLIC_MIKROTIK_BASE_URL: z.string().url().default('https://gateway.pluxnet.co.za'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME: z.string().min(1).default('click_to_connect@dev'),
