@@ -1,5 +1,5 @@
 "use client"
-import { FreePlanCard, PlanCard } from '@/components/plan-card';
+import { FreePlanCard, } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
 // import VoucherCTA from '@/components/voucher-cta';

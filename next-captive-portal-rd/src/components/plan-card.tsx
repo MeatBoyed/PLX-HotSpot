@@ -1,4 +1,5 @@
 "use client"
+import { XCircleIcon } from "lucide-react"
 import { useTheme } from "./theme-provider"
 import { FreeLoginFormButton, VoucherLoginForm } from "./ui/login-form-button"
 
@@ -56,11 +57,14 @@ export function FreePlanCard({ tag, total_data }: { tag: string, total_data: str
     )
 }
 
-export function VoucherPlanCard() {
+export function VoucherPlanCard({ setOpen }: { setOpen?: () => void }) {
     const { theme } = useTheme()
     return (
-        <div className="bg-gray-100 rounded-xl p-4 w-full flex flex-col items-start ">
-            <span className="mb-2 font-bold text-lg">Redeem your voucher</span>
+        <div className="rounded-xl w-full flex flex-col items-start ">
+            <div className="flex justify-between items-center w-full">
+                <span className="mb-2 font-bold text-lg">Redeem your voucher</span>
+                <XCircleIcon onClick={setOpen} size={20} />
+            </div>
             <span className="mb-2 text-sm">Please enter your voucher code to connect to the internet</span>
             {/* <span className="text-black font-bold text-xl mb-1">{price}</span> */}
             <VoucherLoginForm

@@ -34,7 +34,8 @@ export function Navbar() {
                 </div>
                 <span className="text-white text-lg font-semibold">PluxNet</span> */}
                 <img
-                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
+                    // src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
+                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.logo}`}
                     alt="Brand logo"
                     width="auto"
                     height="auto"
