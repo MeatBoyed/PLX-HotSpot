@@ -25,7 +25,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # RUN echo "Loaded env (public vars only):" && grep -E '^(NEXT_PUBLIC_|SITE_|BRAND_|USE_SEED_DATA|MIKROTIK_)' .env || true && npx next build
 
 # Accept build-time overrides (useful in CI) – defaults here if not provided.
-ARG NEXT_PUBLIC_SSID=Jozi-wifi
+# ARG NEXT_PUBLIC_SSID=Jozi-wifi
+ARG NEXT_PUBLIC_SSID=pluxnet-fibre
 ARG NEXT_PUBLIC_HOTSPOT_API_BASE_URL=http://localhost:3000/api/portal/config/image
 ENV NEXT_PUBLIC_SSID=${NEXT_PUBLIC_SSID} \
   NEXT_PUBLIC_HOTSPOT_API_BASE_URL=${NEXT_PUBLIC_HOTSPOT_API_BASE_URL}
