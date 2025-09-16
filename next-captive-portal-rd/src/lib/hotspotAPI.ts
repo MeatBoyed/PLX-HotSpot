@@ -419,8 +419,9 @@ const endpoints = makeApi([
   },
 ]);
 
-// const baseUrl = process.env.NODE_ENV === "production" ? "http://plx-hono-api:3000" : "http://localhost:3000";
-export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
+const baseUrl = process.env.NODE_ENV === "production" ? "https://hotspot.pluxnet.co.za" : "http://localhost:3000";
+// export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
+export const hotspotAPI = new Zodios(baseUrl, endpoints);
 
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);
