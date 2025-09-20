@@ -19,10 +19,11 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:30
   .filter(Boolean)
 
 app.use('/api/*', cors({
-  origin: (origin) => {
-    if (!origin) return origin // non-browser / same-origin
-    return allowedOrigins.includes(origin) ? origin : ''
-  },
+  // origin: (origin) => {
+  //   if (!origin) return origin // non-browser / same-origin
+  //   return allowedOrigins.includes(origin) ? origin : ''
+  // },
+  origin: ["http://localhost:3001", "http://localhost:3002", "*"],
   allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],

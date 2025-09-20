@@ -47,6 +47,13 @@ export const brandingConfig = pgTable('branding_config', {
     subheading: varchar('subheading', { length: 255 }),
     buttonText: varchar('button_text', { length: 255 }),
 
+    // Splash page fields
+    splashBackground: varchar('splash_background', { length: 255 }),
+    splashHeading: varchar('splash_heading', { length: 255 }),
+
+    // Authentication methods (array of strings)
+    authMethods: text('auth_methods').array().notNull().default(['free']),
+
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (table) => ({
