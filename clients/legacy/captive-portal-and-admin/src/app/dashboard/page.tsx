@@ -78,7 +78,9 @@ export default function Dashboard() {
                 {/* Change Plan */}
                 <h2 className="text-gray-500 text-lg font-medium mb-2">Change your plan</h2>
                 <div className="flex gap-3 overflow-x-auto pb-3 items-center">
-                    <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+                    {/* <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' /> */}
+                    <PlanCard price='R50' total_data='50 Hrs • 2GB' tag='Mini' />
+                    <PlanCard price='R100' total_data='100 Hrs • 100GB' tag='Mega' />
                 </div>
 
                 {/* Voucher Section */}
