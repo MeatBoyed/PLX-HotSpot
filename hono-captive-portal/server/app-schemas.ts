@@ -71,6 +71,15 @@ export const brandingConfigSchema = z
 		subheading: optionalNullableVarchar255.openapi({ example: 'Enjoy free internet access' }),
 		buttonText: optionalNullableVarchar255.openapi({ example: 'Connect' }),
 
+		// Splash (optional)
+		splashBackground: optionalNullableVarchar255.openapi({ example: '/splash-bg.png' }),
+		splashHeading: optionalNullableVarchar255.openapi({ example: 'Welcome to the hotspot' }),
+
+		// Authentication (array of allowed methods)
+		authMethods: z
+			.array(z.enum(['free', 'voucher']))
+			.openapi({ example: ['free', 'voucher'] }),
+
 		createdAt: z.string().datetime().optional().openapi({ example: '2025-01-01T00:00:00.000Z' }),
 		updatedAt: z.string().datetime().optional().openapi({ example: '2025-01-01T00:00:00.000Z' }),
 	})
@@ -116,6 +125,13 @@ export const brandingConfigCreateSchema = z
 		heading: nullableVarchar255.optional(),
 		subheading: nullableVarchar255.optional(),
 		buttonText: nullableVarchar255.optional(),
+
+		// Splash (optional)
+		splashBackground: nullableVarchar255.optional(),
+		splashHeading: nullableVarchar255.optional(),
+
+		// Authentication (optional; defaults to ["free"]) 
+		authMethods: z.array(z.enum(['free', 'voucher'])).optional(),
 	})
 	.strict()
 	.openapi('BrandingConfigCreate')

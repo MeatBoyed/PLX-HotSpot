@@ -103,6 +103,9 @@ const BrandingConfigCreate = z
     heading: z.string().max(255).nullish(),
     subheading: z.string().max(255).nullish(),
     buttonText: z.string().max(255).nullish(),
+    splashBackground: z.string().max(255).nullish(),
+    splashHeading: z.string().max(255).nullish(),
+    authMethods: z.array(z.enum(["free", "voucher"])).optional(),
   })
   .strict();
 const BrandingConfigCreateResponse = z
@@ -195,6 +198,9 @@ const BrandingConfig = z
     heading: z.string().max(255).nullish(),
     subheading: z.string().max(255).nullish(),
     buttonText: z.string().max(255).nullish(),
+    splashBackground: z.string().max(255).nullish(),
+    splashHeading: z.string().max(255).nullish(),
+    authMethods: z.array(z.enum(["free", "voucher"])),
     createdAt: z.string().datetime({ offset: true }).optional(),
     updatedAt: z.string().datetime({ offset: true }).optional(),
   })
@@ -285,6 +291,9 @@ const BrandingConfigUpdateBody = z
     heading: z.string().max(255).nullable(),
     subheading: z.string().max(255).nullable(),
     buttonText: z.string().max(255).nullable(),
+    splashBackground: z.string().max(255).nullable(),
+    splashHeading: z.string().max(255).nullable(),
+    authMethods: z.array(z.enum(["free", "voucher"])),
   })
   .partial()
   .strict();
@@ -419,9 +428,7 @@ const endpoints = makeApi([
   },
 ]);
 
-const baseUrl = process.env.NODE_ENV === "production" ? "https://hotspot.pluxnet.co.za" : "http://localhost:3000";
-// export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
-export const hotspotAPI = new Zodios(baseUrl, endpoints);
+export const hotspotAPI = new Zodios("http://localhost:3000", endpoints);
 
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);
