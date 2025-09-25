@@ -1,5 +1,5 @@
 "use client"
-import { FreePlanCard, } from '@/components/plan-card';
+import { PlanCard } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
 // import VoucherCTA from '@/components/voucher-cta';
@@ -30,7 +30,7 @@ export default function HomePage() {
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
           {theme.authMethods.includes("free") && (
-            <FreePlanCard total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+            <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
           )}
           {/* <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' /> */}
           {/* <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' /> */}
@@ -57,7 +57,7 @@ export default function HomePage() {
 
       {/* Bottom Nav */}
       {/* <nav className="fixed bottom-0 left-0 w-full bg-black border-t flex justify-between px-6 py-2">
-        <div className={`flex flex-col items-center text-[#${theme.buttonPrimary}]`} >
+        <div className="flex flex-col items-center" style={{ color: theme.brandPrimary }} >
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 3l9.5 8.5-1.42 1.42L12 5.84l-8.08 7.08L2.5 11.5z" fill="currentColor" /></svg>
           <span className="text-xs">Home</span>
         </div>

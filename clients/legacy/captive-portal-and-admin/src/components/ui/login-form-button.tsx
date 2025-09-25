@@ -4,7 +4,7 @@ import { useState, useRef, FormEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { AuthService } from '@/lib/services/auth-service';
 import { ConnectProvider, useConnect } from '@/components/home-page/ConnectContext';
-import { env } from '@/env';
+// (env import removed - not used)
 
 type BaseButtonProps = {
     label?: string;

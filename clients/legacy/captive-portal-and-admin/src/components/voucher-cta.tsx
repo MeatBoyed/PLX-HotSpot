@@ -1,5 +1,5 @@
 import { useTheme } from "@/components/theme-provider"
-import { VoucherPlanCard } from '@/components/plan-card';
+import { PlanCard } from '@/components/plan-card';
 import { useState } from "react";
 
 export default function VoucherCTA() {
@@ -20,7 +20,13 @@ export default function VoucherCTA() {
                         </div>
                         <span className={`text-xl`} style={{ color: theme.brandPrimary }} >&#8594;</span>
                     </div>
-                ) : <VoucherPlanCard setOpen={() => setShowVoucherInput(!showVoucherInput)} />}
+                ) : (
+                    <PlanCard
+                        variant="voucher"
+                        onDismiss={() => setShowVoucherInput(false)}
+                        className="w-full"
+                    />
+                )}
             </div>
         </>
     )
