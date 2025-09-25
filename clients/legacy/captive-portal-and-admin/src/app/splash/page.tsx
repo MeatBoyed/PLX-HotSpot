@@ -1,5 +1,6 @@
 "use client"
 import { useTheme } from "@/components/theme-provider";
+import { env } from "@/env";
 import Link from "next/dist/client/link";
 import React from "react";
 
@@ -13,7 +14,7 @@ export default function SplashPage() {
             {/* Background image */}
             <div className="fixed inset-0 z-0">
                 <img
-                    src={theme.splashBackground || ""}
+                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.splashBackground}`}
                     // src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                     alt=""
                     className="w-full h-full object-cover"
@@ -23,12 +24,12 @@ export default function SplashPage() {
             </div>
 
             {/* Splash content */}
-            <form method="GET" action="/" className="max-w-md w-full flex flex-col justify-center items-center">
+            <form method="POST" action="/" className="max-w-md w-full flex flex-col justify-center items-center">
                 <div className="relative z-10 flex flex-col justify-end h-[90vh] px-6 pb-4">
                     <div className="mb-8">
-                        <h1 className="text-white text-4xl font-bold mb-2">PluxNet</h1>
+                        {/* <h1 className="text-white text-4xl font-bold mb-2">PluxNet</h1> */}
                         <div className="text-white text-xl font-semibold">{theme.splashHeading}</div>
-                        <div className="text-white text-base">This service is provided by PluxNet</div>
+                        {/* <div className="text-white text-base">This service is provided by PluxNet</div> */}
                     </div>
                     {/* Terms */}
                     <label className="flex items-start gap-3 mb-6">

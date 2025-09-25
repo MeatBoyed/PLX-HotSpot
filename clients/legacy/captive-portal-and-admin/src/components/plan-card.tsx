@@ -24,7 +24,7 @@ export function PlanCard({ variant, tag, price, totalData, onDismiss, className 
 
     return (
         <div className={[
-            "bg-gray-100 rounded-xl p-4 flex flex-col",
+            "bg-gray-100 rounded-xl p-4 flex flex-col w-full",
             isVoucher ? "items-start w-full" : "items-center min-w-[140px]",
             className || ""
         ].join(" ").trim()}>
