@@ -1,5 +1,6 @@
 "use client"
 import { useTheme } from "@/components/theme-provider";
+import Link from "next/dist/client/link";
 import React from "react";
 
 export default function SplashPage() {
@@ -12,7 +13,8 @@ export default function SplashPage() {
             {/* Background image */}
             <div className="fixed inset-0 z-0">
                 <img
-                    src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+                    src={theme.splashBackground || ""}
+                    // src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                     alt=""
                     className="w-full h-full object-cover"
                 />
@@ -25,7 +27,7 @@ export default function SplashPage() {
                 <div className="relative z-10 flex flex-col justify-end h-[90vh] px-6 pb-4">
                     <div className="mb-8">
                         <h1 className="text-white text-4xl font-bold mb-2">PluxNet</h1>
-                        <div className="text-white text-xl font-semibold">Public hotspot</div>
+                        <div className="text-white text-xl font-semibold">{theme.splashHeading}</div>
                         <div className="text-white text-base">This service is provided by PluxNet</div>
                     </div>
                     {/* Terms */}
@@ -40,7 +42,7 @@ export default function SplashPage() {
                         </span>
                         <span className="text-white text-base">
                             Agree with the{" "}
-                            <a href="#" className={`text-[${theme.brandPrimary}] underline`}>terms and conditions</a>{" "}
+                            <Link href={theme.termsLinks || ""} className={`text-[${theme.brandPrimary}] underline`}>terms and conditions</Link>{" "}
                             related to the processing of data for commercial purposes.
                         </span>
                     </label>
