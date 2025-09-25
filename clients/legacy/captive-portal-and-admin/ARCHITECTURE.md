@@ -40,3 +40,41 @@ Client refresh errors are swallowed; last good theme retained.
 
 ### Security Considerations
 Only non-secret branding fields exposed client-side. Sensitive / administrative fields must not be added to `BrandingConfig` without review.
+
+---
+
+## Connect / Auth Button Embedding (MVP)
+
+### Goal
+Provide form-based hotspot login (free or voucher) with optional ad gating while keeping presentation components (`plan-card`) simple.
+
+### Layers
+| Layer                        | Responsibility                              |
+| ---------------------------- | ------------------------------------------- |
+| AuthService                  | Builds credentials + login URL (no network) |
+| ConnectProvider              | State machine (idle → ad → ready) + gating  |
+| login-form-button components | Embed provider and render forms / buttons   |
+
+### Flow (Free)
+1. User clicks Free button.
+2. If `adGateEnabled` and first attempt → state `ad`, disable button.
+3. After ad completion (`onAdComplete`) → credentials built, state `ready`.
+4. Second click (MVP) submits hidden credential form to Mikrotik.
+
+### Flow (Voucher)
+1. User enters voucher and submits.
+2. Same gating logic as free path.
+3. Credentials = voucher code for both username & password.
+
+### Design Choices
+- Provider embedded per button for simplicity (shared instance defer).
+- Programmatic form submit only when credentials ready.
+- No toasts or navigation in provider (hotspot redirect handles UX).
+
+### Extensibility
+| Feature              | Future Change                                            |
+| -------------------- | -------------------------------------------------------- |
+| Auto-submit after ad | Call `submit()` inside `onAdComplete` if credentials set |
+| Shared provider      | Hoist `<ConnectProvider>` around multiple buttons        |
+| API-based auth       | Add methods to AuthService without changing buttons      |
+

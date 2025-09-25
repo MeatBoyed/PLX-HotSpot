@@ -1,132 +1,92 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation"
-import { RadiusDeskUsageResponse } from "@/lib/mikrotik/mikrotik-types";
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { AuthMode, AuthService, AuthCredentials } from '@/lib/services/auth-service';
 
-export type LoginFormState = { success: boolean, message: string };
+// State machine types
+type ConnectState = 'idle' | 'ad' | 'ready';
 
-interface ConnectContextType {
-    connect: (voucherCode?: string) => Promise<LoginFormState>;
+interface ConnectContextValue {
+    state: ConnectState;
     showAd: boolean;
-    isDepleted: boolean;
-    isLoading: boolean;
+    credentials?: AuthCredentials;
+    pendingVoucher?: string;
+    connect: (voucherCode?: string) => ConnectAttemptResult;
     onAdComplete: () => void;
+    reset: () => void;
 }
 
-const ConnectContext = createContext<ConnectContextType | undefined>(undefined);
+interface ConnectProviderProps {
+    children: ReactNode;
+    enabledAuth: AuthMode[];
+    adGateEnabled?: boolean;
+    authService?: AuthService;
+}
+
+interface ConnectAttemptPending { pending: true }
+interface ConnectAttemptReady { pending: false; credentials: AuthCredentials }
+interface ConnectAttemptError { pending: false; error: string }
+export type ConnectAttemptResult = ConnectAttemptPending | ConnectAttemptReady | ConnectAttemptError;
+
+const ConnectContext = createContext<ConnectContextValue | undefined>(undefined);
 
 export function useConnect() {
-    const context = useContext(ConnectContext);
-    if (!context) {
-        throw new Error("useConnect must be used within ConnectProvider");
-    }
-    return context;
+    const ctx = useContext(ConnectContext);
+    if (!ctx) throw new Error('useConnect must be used within ConnectProvider');
+    return ctx;
 }
 
-// export function ConnectProvider({ children, userUsage, mikrotikLoginUrl }: { children: ReactNode, userUsage?: RadiusDeskUsageResponse, mikrotikLoginUrl?: string }) {
-export function ConnectProvider({ children, userUsage }: { children: ReactNode, userUsage?: RadiusDeskUsageResponse, }) {
+export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, authService }: ConnectProviderProps) {
+    const svc = authService || new AuthService();
+    const [state, setState] = useState<ConnectState>('idle');
     const [showAd, setShowAd] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [pendingVoucherCode, setPendingVoucherCode] = useState<string | undefined>(undefined);
-    const router = useRouter()
+    const [credentials, setCredentials] = useState<AuthCredentials | undefined>(undefined);
+    const [pendingVoucher, setPendingVoucher] = useState<string | undefined>(undefined);
+    const [gatedOnce, setGatedOnce] = useState(false);
 
-    const isDepleted = userUsage?.data?.depleted || false;
-    // const loginUrl = mikrotikLoginUrl || "http://10.5.50.1/login";
+    const connect = (voucherCode?: string): ConnectAttemptResult => {
+        // Reset previous credentials if any
+        setCredentials(undefined);
+        setPendingVoucher(voucherCode);
 
-    // Main Connect method - This method will handle the login process and show the ad if it's the first login
-    const connect = async (voucherCode?: string): Promise<LoginFormState> => {
-        if (isLoading) {
-            return { success: false, message: "Authentication in progress" };
-        }
-
-        // Store voucher code for later use
-        setPendingVoucherCode(voucherCode);
-
-        // IsDepleted False: User hasn't used up Free data (Show Ad), True: User has used up Free data (Don't Show Ad)
-        if (!isDepleted) {
+        const needsGate = adGateEnabled && !gatedOnce;
+        if (needsGate) {
             setShowAd(true);
-            return { success: false, message: "Waiting for ad to complete" };
+            setState('ad');
+            return { pending: true };
         }
 
-        return await doLogin(voucherCode);
+        const result = svc.buildCredentials({ voucherCode, enabledAuth });
+        if (!result.ok) return { pending: false, error: result.error };
+        setCredentials(result.credentials);
+        setState('ready');
+        return { pending: false, credentials: result.credentials };
     };
 
-    // Main Login method - Authenticates with Mikrotik using browser navigation
-    const doLogin = async (voucherCode?: string): Promise<LoginFormState> => {
-        setIsLoading(true);
-
-        const loadingToast = toast.loading('Connecting to Hotspot...');
-        console.log("vouchercode", voucherCode)
-
-        try {
-            // Determine credentials
-            // const username = voucherCode || appConfig.mikrotik.defaultUsername;
-            // const password = voucherCode || appConfig.mikrotik.defaultPassword;
-
-            // // Construct the final URL
-            // const finalUrl = `${loginUrl}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
-
-            // console.log("ConnectContext navigating to:", finalUrl);
-
-
-
-
-            // Step 1: Make API Request to "/api/login" to redirect Login request to MT
-            // const result = await clientLoginToHotspot(voucherCode)
-
-            // Dismiss loading toast before navigation
-            toast.dismiss(loadingToast);
-
-            // Show appropirate toast based on actual result
-            // if (result.success) {
-            toast.success('Successfully connected to Hotspot!');
-
-            // Small delay then navigate
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            router.push("/welcome")
-            // window.location.href = finalUrl;
-            // } else {
-            //     toast.error(result.message || appConfig.messages.errorConnect);
-            // }
-
-
-            return { success: true, message: "Redirecting to authentication..." };
-        } catch (error) {
-            console.error("Login error:", error);
-
-            // Dismiss loading toast
-            toast.dismiss(loadingToast);
-
-            const errorResult = {
-                success: false,
-                message: error instanceof Error ? error.message : "Authentication failed"
-            };
-
-            toast.error(errorResult.message);
-            return errorResult;
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Callback for when the Ad completes playing
-    const onAdComplete = async () => {
+    const onAdComplete = () => {
+        if (state !== 'ad') return;
         setShowAd(false);
-        await doLogin(pendingVoucherCode);
-        setPendingVoucherCode(undefined);
+        setGatedOnce(true);
+        const result = svc.buildCredentials({ voucherCode: pendingVoucher, enabledAuth });
+        if (!result.ok) {
+            setState('idle');
+            return; // consumer will retry connect to see error
+        }
+        setCredentials(result.credentials);
+        setState('ready');
+    };
+
+    const reset = () => {
+        setCredentials(undefined);
+        setPendingVoucher(undefined);
+        setShowAd(false);
+        setState('idle');
     };
 
     return (
-        <ConnectContext.Provider value={{
-            connect,
-            showAd,
-            onAdComplete,
-            isDepleted,
-            isLoading
-        }}>
+        <ConnectContext.Provider value={{ state, showAd, credentials, pendingVoucher, connect, onAdComplete, reset }}>
             {children}
         </ConnectContext.Provider>
     );
 }
+
