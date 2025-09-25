@@ -5,10 +5,9 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode } fro
 import { pluxnetTheme } from '@/lib/theme';
 import { BrandingConfig } from '@/lib/types';
 import { hotspotAPI } from '@/lib/hotspotAPI';
+import { normalizeBranding } from '@/lib/utils/branding-normalize';
 
-const THEME_STORAGE_KEY = 'BrandingConfig';
-const BRAND_CACHE_COOKIE_PREFIX = 'branding_fetch_'; // branding_fetch_<ssid>=1 cookie means fresh within TTL
-const BRAND_CACHE_MAX_AGE_SEC = 180; // 3 minutes
+const STALE_CLIENT_TTL_MS = 6 * 60 * 1000; // 6 minutes after which client will background refresh
 
 interface ThemeContextType {
   theme: BrandingConfig;
@@ -35,21 +34,20 @@ interface ThemeProviderProps {
   showInitialSpinner?: boolean; // default true
 }
 
-function getStoredTheme(): BrandingConfig | null {
+function getStoredTheme(ssid: string): BrandingConfig | null {
   if (typeof window === 'undefined') return null;
   try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch { }
-  return null;
+    const stored = localStorage.getItem(`branding:${ssid}`);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return normalizeBranding(parsed?.theme || parsed);
+  } catch { return null; }
 }
 
-function storeTheme(theme: BrandingConfig) {
+function storeTheme(ssid: string, theme: BrandingConfig) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    localStorage.setItem(`branding:${ssid}`, JSON.stringify({ ssid, updatedAt: theme.updatedAt, theme }));
   } catch { }
 }
 
@@ -60,10 +58,10 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   const fetchingRef = useRef(false);
 
   // Use provided initialTheme, or stored theme, or fallback
-  const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme() || pluxnetTheme);
+  const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme(ssid) || pluxnetTheme);
 
   // Persist theme to localStorage on change
-  useEffect(() => { storeTheme(theme); }, [theme]);
+  useEffect(() => { storeTheme(ssid, theme); }, [theme, ssid]);
 
   const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
     if (!incoming) return;
@@ -73,17 +71,10 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     }
   };
 
-  const brandingCookieName = `${BRAND_CACHE_COOKIE_PREFIX}${ssid}`;
-
-  const hasValidBrandingCache = (): boolean => {
-    if (typeof document === 'undefined') return false;
-    const cookies = document.cookie.split(';').map(c => c.trim());
-    return cookies.some(c => c.startsWith(`${brandingCookieName}=`));
-  };
-
-  const setBrandingCacheCookie = () => {
-    if (typeof document === 'undefined') return;
-    document.cookie = `${brandingCookieName}=1; Max-Age=${BRAND_CACHE_MAX_AGE_SEC}; Path=/`;
+  const isFreshEnough = (incoming?: BrandingConfig | null) => {
+    if (!incoming?.updatedAt) return false;
+    const age = Date.now() - new Date(incoming.updatedAt).getTime();
+    return age < STALE_CLIENT_TTL_MS;
   };
 
   const normalizeBrandingResponse = (resp: unknown): BrandingConfig | undefined => {
@@ -108,31 +99,23 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
 
   const fetchTheme = async (force = false) => {
     if (fetchingRef.current) return;
-    // Skip fetch if cache valid and not forced
-    if (!force && hasValidBrandingCache()) {
+    if (!force && initialTheme && isFreshEnough(initialTheme)) {
       setLoading(false);
-      return;
+      return; // server provided fresh theme
     }
     fetchingRef.current = true;
     setError(null);
     try {
       const apiRes = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
       const incoming = normalizeBrandingResponse(apiRes);
-      applyThemeIfChanged(incoming);
-      // Persist latest theme to localStorage explicitly after fetch
-      if (incoming) {
-        try { localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(incoming)); } catch { /* ignore */ }
-      }
-      setBrandingCacheCookie();
+      const normalized = incoming ? normalizeBranding(incoming) : undefined;
+      applyThemeIfChanged(normalized);
+      if (normalized) storeTheme(ssid, normalized);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to load branding config';
       setError(msg);
       setThemeState(pluxnetTheme);
       console.log("ThemeProvider Error (Failed to fetch theme): ", msg);
-      // If no stored theme available fallback to pluxnet
-      // if (!getStoredTheme()) {
-      //   setThemeState(pluxnetTheme);
-      // }
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -141,13 +124,15 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
 
   // Initial fetch (always perform at least one client refresh so backend changes propagate even if server supplied initialTheme)
   useEffect(() => {
-    // If stored theme's ssid mismatches current ssid, force fetch ignoring cache cookie
-    const stored = getStoredTheme();
-    const storedSsid = stored?.ssid as string | undefined;
-    const force = !!(storedSsid && storedSsid !== ssid);
-    fetchTheme(force);
+    const stored = getStoredTheme(ssid);
+    if (!initialTheme && stored) {
+      // Use stored immediately if no initialTheme
+      applyThemeIfChanged(stored);
+    }
+    const force = stored?.ssid && stored.ssid !== ssid;
+    fetchTheme(!!force);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ssid]);
+  }, [ssid, initialTheme]);
 
   // Manual setTheme exposed to consumers
   const setTheme = (newTheme: BrandingConfig) => setThemeState(newTheme || pluxnetTheme);
