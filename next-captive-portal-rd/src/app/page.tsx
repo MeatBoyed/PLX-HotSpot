@@ -29,12 +29,16 @@ export default function HomePage() {
         </h2>
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
-          <FreePlanCard total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+          {theme.authMethods.includes("free") && (
+            <FreePlanCard total_data='24 Hrs • 1.5 GB' tag='Promotion' />
+          )}
           {/* <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' /> */}
           {/* <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' /> */}
         </div>
 
-        <VoucherCTA />
+        {theme.authMethods.includes("voucher") && (
+          <VoucherCTA />
+        )}
 
         {/* Banner
         <div className="rounded-xl overflow-hidden">
