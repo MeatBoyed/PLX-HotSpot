@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState, useState } from "react";
+import React, { useActionState } from "react";
 import { Button } from "../ui/button";
 // import { useFormState } from "react-dom";
 import Form from "next/form";
@@ -19,18 +19,20 @@ export type LoginFormState = { success: boolean, message: string };
 const initialState: LoginFormState = { success: false, message: "" };
 
 export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
-    const { connect, showAd, onAdComplete, isDepleted } = useConnect();
-    const [voucherCode, setVoucherCode] = useState<string>("");
+    const { connect, showAd, onAdComplete } = useConnect();
     const [state, formAction] = useActionState(handleSubmit, initialState);
     const { theme } = useTheme();
 
 
     async function handleSubmit(): Promise<LoginFormState> {
-        if (voucherCode.length > 1) {
-            return await connect(voucherCode);
-        } else {
-            return await connect();
+        const result = connect();
+        if ('error' in result) {
+            return { success: false, message: result.error };
         }
+        if ('credentials' in result) {
+            return { success: true, message: 'ready' };
+        }
+        return { success: false, message: 'pending' };
     }
 
     return (
@@ -60,16 +62,7 @@ export default function ConnectCard({ backgroundImage }: ConnectCardProps) {
 
                     <Form action={formAction} className="flex flex-col justify-center items-center">
                         {/* Conditionally Rendered if User's Usage is depleted */}
-                        {isDepleted && (
-                            <div className="flex items-center justify-between mb-4 gap-4 w-full p-3 bg-white rounded-lg text-black" style={{ borderColor: 'var(--surface-border)', borderWidth: '1px' }}>
-                                <input type="text" id="voucherCode" className="text-base font-normal w-full" placeholder={'Enter voucher code'} value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
-                                {/* <button type="button" className="text-base font-semibold text-[#5B3393]" onClick={() => {
-
-                                }} >
-                                    Apply
-                                </button> */}
-                            </div>
-                        )}
+                        {/* Voucher input (only shown when depletion gating is implemented; currently always hidden) */}
                         <div className="flex items-center justify-center space-x-3 mb-4">
                             <input
                                 id="terms"
