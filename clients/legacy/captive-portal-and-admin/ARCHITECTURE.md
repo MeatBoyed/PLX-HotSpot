@@ -14,11 +14,11 @@ Layered approach ensures fast first paint, minimal network chatter, and simple f
 7. Updated theme (if fetched) replaces context & localStorage atomically.
 
 ### Caching
-| Layer | TTL | Purpose |
-|-------|-----|---------|
-| In-process (BrandingService) | 3 min | Avoid repeated backend hits across requests |
-| Client freshness window | 6 min | Limit background refresh frequency |
-| LocalStorage | Session | Instant paint on navigations with same SSID |
+| Layer                        | TTL     | Purpose                                     |
+| ---------------------------- | ------- | ------------------------------------------- |
+| In-process (BrandingService) | 3 min   | Avoid repeated backend hits across requests |
+| Client freshness window      | 6 min   | Limit background refresh frequency          |
+| LocalStorage                 | Session | Instant paint on navigations with same SSID |
 
 ### De-duplication
 Concurrent server requests for the same SSID share a single in-flight Promise in the service cache.
@@ -28,12 +28,12 @@ Service exceptions -> layout supplies no `initialTheme` -> ThemeProvider falls b
 Client refresh errors are swallowed; last good theme retained.
 
 ### Extensibility Hooks
-| Need | Change |
-|------|--------|
-| Redis / KV cache | Replace `cache` Map in BrandingService |
-| ETag support | Store `etag` in cache entry; send conditional request |
-| Multi-tenant theming | Key by `${tenant}:${ssid}` |
-| Metrics | Wrap fetch and log duration |
+| Need                 | Change                                                |
+| -------------------- | ----------------------------------------------------- |
+| Redis / KV cache     | Replace `cache` Map in BrandingService                |
+| ETag support         | Store `etag` in cache entry; send conditional request |
+| Multi-tenant theming | Key by `${tenant}:${ssid}`                            |
+| Metrics              | Wrap fetch and log duration                           |
 
 ### Dev Utilities
 `BrandingService._clearCache()` clears in-process cache (disabled in production).
