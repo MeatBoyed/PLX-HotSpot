@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { hotspotAPI, schemas } from "@/lib/hotspotAPI";
-import { BrandingConfig, FormFieldConfig, FormSectionConfig } from "@/lib/types";
+import { schemas } from "@/lib/hotspotAPI";
+import { FormFieldConfig, FormSectionConfig } from "@/lib/types";
 import { CustomForm } from "@/components/ui/custom-form";
-import { toast } from "sonner";
 import { useTheme } from "@/components/theme-provider";
 import Head from "@/components/home-page/head";
 import { z } from "zod";

@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
 import Footer from "@/components/footer";
+import { BrandingService } from "@/lib/services/branding-service";
 // Removed server-side fetch; ThemeProvider will fetch client-side for runtime updates
 
 // const geistSans = Geist({
@@ -22,36 +23,28 @@ export const metadata: Metadata = {
   description: env.SITE_DESCRIPTION,
 };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  // Theme will load client-side (with spinner) & poll for updates
-  console.log("RootLayout env.NEXT_PUBLIC_SSID: ", env.NEXT_PUBLIC_SSID);
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const ssid = env.NEXT_PUBLIC_SSID;
+  let branding = undefined;
+  try {
+    branding = await BrandingService.get(ssid);
+  } catch (e) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.debug('RootLayout branding fetch failed, falling back', e);
+    }
+  }
   return (
     <html lang="en">
-      <body
-        className={`antialiased min-h-screen flex flex-col justify-between bg-gray-50`}
-      >
-        <ThemeProvider ssid={env.NEXT_PUBLIC_SSID} showInitialSpinner>
-          <div className="flex flex-col justify-center items-center " >
+      <body className="antialiased min-h-screen flex flex-col justify-between bg-gray-50">
+        <ThemeProvider ssid={ssid} initialTheme={branding} showInitialSpinner={!branding}>
+          <div className="flex flex-col justify-center items-center ">
             {children}
           </div>
           <Footer />
-          {/* <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center bg-gray-300">
-            <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span>
-            <img
-              src="/pluxnet-logo.svg"
-              alt="PluxNet"
-              className="h-5 w-auto opacity-80"
-              draggable={false}
-            />
-          </footer> */}
           <Toaster position="top-center" richColors />
         </ThemeProvider>
-      </body >
-    </html >
-
+      </body>
+    </html>
   );
 }
