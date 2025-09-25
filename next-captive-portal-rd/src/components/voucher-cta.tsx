@@ -8,9 +8,9 @@ export default function VoucherCTA() {
 
     return (
         <>
-            <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4 hover:cursor-pointer" onClick={() => setShowVoucherInput(!showVoucherInput)} >
+            <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4 hover:cursor-pointer"  >
                 {!showVoucherInput ? (
-                    <>
+                    <div className="flex justify-between w-full" onClick={() => setShowVoucherInput(!showVoucherInput)} >
                         <div className="flex items-center gap-2">
                             <div className={`text-white rounded-full p-2`} style={{ backgroundColor: theme.brandPrimary }}>
                                 {/* Icon: use a placeholder */}
@@ -19,7 +19,7 @@ export default function VoucherCTA() {
                             <span className="text-gray-700 text-sm font-medium">Got a voucher? Redeem now.</span>
                         </div>
                         <span className={`text-xl`} style={{ color: theme.brandPrimary }} >&#8594;</span>
-                    </>
+                    </div>
                 ) : <VoucherPlanCard setOpen={() => setShowVoucherInput(!showVoucherInput)} />}
             </div>
         </>
