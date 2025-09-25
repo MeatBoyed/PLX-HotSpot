@@ -8,8 +8,8 @@ export default function VoucherCTA() {
 
     return (
         <>
-            <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4 hover:cursor-pointer"  >
-                {!showVoucherInput ? (
+            {!showVoucherInput ? (
+                <div className="bg-white border rounded-xl flex items-center justify-between px-4 py-3 mt-4 mb-4 hover:cursor-pointer"  >
                     <div className="flex justify-between w-full" onClick={() => setShowVoucherInput(!showVoucherInput)} >
                         <div className="flex items-center gap-2">
                             <div className={`text-white rounded-full p-2`} style={{ backgroundColor: theme.brandPrimary }}>
@@ -20,14 +20,14 @@ export default function VoucherCTA() {
                         </div>
                         <span className={`text-xl`} style={{ color: theme.brandPrimary }} >&#8594;</span>
                     </div>
-                ) : (
-                    <PlanCard
-                        variant="voucher"
-                        onDismiss={() => setShowVoucherInput(false)}
-                        className="w-full"
-                    />
-                )}
-            </div>
+                </div>
+            ) : (
+                <PlanCard
+                    variant="voucher"
+                    onDismiss={() => setShowVoucherInput(false)}
+                    className="w-full"
+                />
+            )}
         </>
     )
 }
