@@ -8,12 +8,13 @@ const Container = ({ children }: { children: React.ReactNode }) => (
   <div className="mx-auto max-w-xl p-6 space-y-6">{children}</div>
 );
 
-interface CheckoutPageProps {
-  params: { planId: string };
-}
+// interface CheckoutPageProps {
+//   params: { planId: string };
+// }
 
-export default function CheckoutPlanPage({ params }: CheckoutPageProps) {
-  const plan = getPlan(params.planId);
+export default async function CheckoutPlanPage({ params }: { params: Promise<{ planId: string }> }) {
+  const { planId } = await params;
+  const plan = getPlan(planId);
   if (!plan) return notFound();
 
   // Validate env before constructing fields
@@ -67,7 +68,7 @@ export default function CheckoutPlanPage({ params }: CheckoutPageProps) {
           </button>
         </form>
       )}
-      <p className="text-xs text-muted-foreground">You will be redirected to PayFast. After payment you'll return to the success page. A voucher code will be SMS’d (dry-run if SMS not configured).</p>
+      <p className="text-xs text-muted-foreground">You will be redirected to PayFast. After payment you&apos;ll return to the success page. A voucher code will receive an SMS.</p>
     </Container>
   );
 }

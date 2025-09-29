@@ -59,11 +59,6 @@ class VoucherService {
   getVoucher(paymentKey: string): VoucherRecord | null {
     return this.store.get(paymentKey) || null;
   }
-
-  validate(_code: string): null | { valid: boolean } {
-    // Placeholder for future validation / redemption logic.
-    return null;
-  }
 }
 
 export const voucherService = new VoucherService();

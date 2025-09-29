@@ -73,12 +73,13 @@ export async function POST(req: NextRequest) {
       'w1w.payfast.co.za',
       'w2w.payfast.co.za'
     ];
-    const pfIp = req.headers.get('x-forwarded-for') || (req as any).ip || (req as any).socket?.remoteAddress || '';
+    // const pfIp = req.headers.get('x-forwarded-for') || (req as any).ip || (req as any).socket?.remoteAddress || '';
+    const pfIp = req.headers.get('x-forwarded-for') || '';
     let validIps: string[] = [];
     try {
       const lookups = await Promise.all(
         validHosts.map(
-          host => new Promise<string[]>((resolve, reject) => {
+          host => new Promise<string[]>((resolve) => {
             dns.lookup(host, { all: true }, (err, addresses) => {
               if (err) return resolve([]); // don't reject IPN on DNS hiccup; we'll handle below
               resolve(addresses.map(a => a.address));
