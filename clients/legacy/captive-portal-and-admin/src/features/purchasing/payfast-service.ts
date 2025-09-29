@@ -25,8 +25,8 @@ const pfGenerateSignature = (
 ): string => {
   // Create parameter string
   let pfOutput = '';
-  for (let key in data) {
-    if ((data as any).hasOwnProperty(key)) {
+  for (const key in data) {
+    if ((data as Record<string, unknown>).hasOwnProperty(key)) {
       if (data[key] !== '') {
         pfOutput += `${key}=${encodeURIComponent(data[key].trim()).replace(/%20/g, '+')}&`;
       }
@@ -118,8 +118,8 @@ export class PayFastService {
     if (this.debugSigning) {
       // Recreate the exact signing string for debugging
       let pfOutput = '';
-      for (let key in fields) {
-        if ((fields as any).hasOwnProperty(key)) {
+      for (const key in fields) {
+        if ((fields as Record<string, unknown>).hasOwnProperty(key)) {
           const value = fields[key];
           if (value !== '') {
             pfOutput += `${key}=${encodeURIComponent(String(value).trim()).replace(/%20/g, '+')}&`;
@@ -144,8 +144,8 @@ export class PayFastService {
     if (!sig) return false;
     // Build pfParamString exactly like PayFast sample: iterate over posted fields, exclude 'signature'
     let pfParamString = '';
-    for (let key in payload) {
-      if ((payload as any).hasOwnProperty(key) && key !== 'signature') {
+    for (const key in payload) {
+      if ((payload as Record<string, unknown>).hasOwnProperty(key) && key !== 'signature') {
         const value = payload[key];
         pfParamString += `${key}=${encodeURIComponent(String(value).trim()).replace(/%20/g, '+')}&`;
       }
