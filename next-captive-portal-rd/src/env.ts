@@ -23,6 +23,7 @@ export const env = createEnv({
         NEXT_PUBLIC_MIKROTIK_BASE_URL: z.string().url().default('https://gateway.pluxnet.co.za'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME: z.string().min(1).default('click_to_connect@dev'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD: z.string().min(1).default('click_to_connect'),
+        NEXT_PUBLIC_BASE_URL: z.string().min(1).default('http://localhost:3001'),
     },
     runtimeEnv: {
         SITE_TITLE: process.env.SITE_TITLE,
@@ -36,5 +37,6 @@ export const env = createEnv({
         MIKROTIK_REDIRECT_URL: process.env.MIKROTIK_REDIRECT_URL,
         NEXT_PUBLIC_MIKROTIK_BASE_URL: process.env.NEXT_PUBLIC_MIKROTIK_BASE_URL,
         USE_SEED_DATA: process.env.USE_SEED_DATA,
+        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL
     }
 });
