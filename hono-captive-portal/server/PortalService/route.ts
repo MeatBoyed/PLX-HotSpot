@@ -1,18 +1,14 @@
-import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
+import { OpenAPIHono } from '@hono/zod-openapi'
 import { logApp } from '../logger.js'
 import { setCookie } from 'hono/cookie'
 import { brandingConfigCreateSchema, GetBrandingConfigQuery, brandingConfigSchema } from '../app-schemas.js'
 import { PortalService } from './PortalService.js'
 import { Hono } from 'hono'
 import { buffer } from 'node:stream/consumers'
+import { createBrandingRoute, getBrandingRoute, updateBrandingRoute, getBrandingImageRoute, multipartBrandingUpdateSchema } from './openapi.js'
+import { ImageService } from './ImageService.js'
 
-const IMAGE_FIELDS = new Set(['logo', 'logoWhite', 'connectCardBackground', 'bannerOverlay', 'favicon'])
-const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp'])
-const MAX_FILE_BYTES = 20 * 1024 * 1024
-
-function validateSlug(slug: string): boolean {
-    return /^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)
-}
+// Image processing moved to ImageService
 import { env } from 'hono/adapter'
 
 export const portalRoute = new OpenAPIHono()
@@ -26,120 +22,12 @@ portalRoute.post('/hook/login', async (c: any) => {
     logApp({ event: 'MT Login Hook Accessed', data })
     setCookie(c, 'mikrotik-data', JSON.stringify(mikrotikData), {
         path: '/',
-        maxAge: 60 * 50,
+        maxAge: 60 * 50
     })
     return c.redirect('/')
 })
 
-// OpenAPI route definitions
-const createBrandingRoute = createRoute({
-    method: 'post',
-    path: '/config',
-    tags: ['Branding'],
-    request: {
-        body: {
-            content: {
-                'application/json': { schema: brandingConfigCreateSchema }
-            },
-            required: true
-        }
-    },
-    responses: {
-        200: {
-            description: 'Branding config created',
-            content: {
-                'application/json': {
-                    schema: z.object({ id: z.number().int().positive().openapi({ example: 1 }) }).openapi('BrandingConfigCreateResponse')
-                }
-            }
-        },
-        400: { description: 'Validation error' }
-    }
-})
-
-const getBrandingRoute = createRoute({
-    method: 'get',
-    path: '/config',
-    tags: ['Branding'],
-    request: {
-        query: GetBrandingConfigQuery
-    },
-    responses: {
-        200: {
-            description: 'Branding config fetched',
-            content: {
-                'application/json': {
-                    schema: z.object({ res: brandingConfigSchema })
-                }
-            }
-        },
-        400: { description: 'Validation error' },
-        404: { description: 'Not found' }
-    }
-})
-
-// Multipart form schema for update (json part + optional image files)
-const multipartBrandingUpdateSchema = z.object({
-    json: z.string().openapi({ description: 'Stringified JSON matching BrandingConfigUpdateBody' }),
-    logo: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Logo image (png/jpeg/webp)' }),
-    logoWhite: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'White logo image (png/jpeg/webp)' }),
-    connectCardBackground: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Background image (png/jpeg/webp)' }),
-    bannerOverlay: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Banner overlay (png/jpeg/webp)' }),
-    favicon: z.any().optional().openapi({ type: 'string', format: 'binary', description: 'Favicon (png/jpeg/webp)' })
-}).partial()
-
-// PATCH /config?ssid=SSID - partial update (JSON or multipart)
-const updateBrandingRoute = createRoute({
-    method: 'patch',
-    path: '/config',
-    tags: ['Branding'],
-    request: {
-        query: GetBrandingConfigQuery,
-        body: {
-            content: {
-                'application/json': { schema: brandingConfigCreateSchema.partial().openapi('BrandingConfigUpdateBody') },
-                'multipart/form-data': { schema: multipartBrandingUpdateSchema.openapi('BrandingConfigMultipartUpdate') }
-            },
-            required: true
-        }
-    },
-    responses: {
-        200: {
-            description: 'Branding config updated',
-            content: {
-                'application/json': {
-                    schema: z.object({ res: brandingConfigSchema })
-                }
-            }
-        },
-        400: { description: 'Validation or file processing error' },
-        404: { description: 'Not found' }
-    }
-})
-
-// GET image route spec
-const getBrandingImageRoute = createRoute({
-    method: 'get',
-    path: '/config/image/{ssid}/{slug}',
-    tags: ['Branding'],
-    request: {
-        params: z.object({
-            ssid: z.string().min(1).openapi({ example: 'my-venue-wifi' }),
-            slug: z.string().min(1).openapi({ example: 'logo' })
-        })
-    },
-    responses: {
-        200: {
-            description: 'Branding image binary',
-            content: {
-                'image/png': { schema: z.any() },
-                'image/jpeg': { schema: z.any() },
-                'image/webp': { schema: z.any() },
-            }
-        },
-        404: { description: 'Not found' }
-    }
-})
+// OpenAPI route definitions moved to ./openapi.ts
 
 portalRoute.get("/config/all", async (c: any) => {
     const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
@@ -195,6 +83,7 @@ portalRoute.openapi(updateBrandingRoute, async (c: any) => {
     const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
     const portalService = new PortalService(APP_DATABASE_URL)
     const partialSchema = brandingConfigCreateSchema.partial()
+    const imageService = new ImageService(portalService)
 
     if (contentType.startsWith('multipart/form-data')) {
         // Multipart path
@@ -210,35 +99,10 @@ portalRoute.openapi(updateBrandingRoute, async (c: any) => {
             return c.json({ status: 'error', errors: parsedBody.error.flatten() }, 400)
         }
         const bodyUpdates = { ...parsedBody.data }
-        const fileErrors: any[] = []
-        // Iterate file entries
-        for (const [field, value] of form.entries()) {
-            if (field === 'json') continue
-            if (!(value instanceof File)) continue
-            if (!IMAGE_FIELDS.has(field)) continue // ignore unknown image fields silently
-            const file = value as File
-            if (!ALLOWED_MIME.has(file.type)) {
-                fileErrors.push({ field, reason: 'Unsupported mime type' }); continue
-            }
-            if (file.size > MAX_FILE_BYTES) {
-                fileErrors.push({ field, reason: 'File too large' }); continue
-            }
-            const arrayBuffer = await file.arrayBuffer()
-            const dataBuf = Buffer.from(arrayBuffer)
-            const slug = field // derive slug from field name
-            if (!validateSlug(slug)) {
-                fileErrors.push({ field, reason: 'Invalid derived slug' }); continue
-            }
-            try {
-                const stored = await portalService.upsertBrandingImage({ ssid, slug, mimeType: file.type, data: dataBuf })
-                    // Set field path in updates
-                    ; (bodyUpdates as any)[field] = stored.path
-            } catch (e: any) {
-                fileErrors.push({ field, reason: e.message || 'Store failed' })
-            }
-        }
-        if (fileErrors.length > 0) {
-            return c.json({ status: 'error', error: 'One or more files failed', fileErrors }, 400)
+        const { updates, errors } = await imageService.processFormData(ssid, form)
+        Object.assign(bodyUpdates, updates)
+        if (errors.length > 0) {
+            return c.json({ status: 'error', error: 'One or more files failed', fileErrors: errors }, 400)
         }
         try {
             const res = await portalService.updateBrandingConfig(ssid, bodyUpdates)
@@ -268,8 +132,9 @@ portalRoute.openapi(getBrandingImageRoute, async (c: any) => {
     const { ssid, slug } = c.req.param()
     const { APP_DATABASE_URL } = env<{ APP_DATABASE_URL: string }>(c)
     const portalService = new PortalService(APP_DATABASE_URL)
+    const imageService = new ImageService(portalService)
     try {
-        const { data, mimeType, size, hash, updatedAt } = await portalService.getBrandingImage(ssid, slug)
+        const { data, mimeType, size, hash, updatedAt } = await imageService.getImage(ssid, slug)
         c.header('Content-Type', mimeType)
         c.header('Content-Length', String(size))
         c.header('ETag', `"sha256:${hash}"`)

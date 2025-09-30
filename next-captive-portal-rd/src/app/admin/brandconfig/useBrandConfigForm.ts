@@ -17,6 +17,7 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
     const [submitting, setSubmitting] = useState(false);
     const [initialValues, setInitialValues] = useState<Record<string, unknown> | null>(null);
     const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({});
+    const [uploadingByField, setUploadingByField] = useState<Record<string, boolean>>({});
     const objectUrlsRef = useRef<Record<string, string>>({});
 
     const allowedMime = new Set(["image/png", "image/jpeg", "image/webp"]);
@@ -85,47 +86,42 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
                 toast.error("Missing SSID context");
                 return;
             }
-            const hasFiles = Object.keys(selectedFiles).length > 0;
-            let updated: BrandingConfig | null = null;
-            if (!hasFiles) {
-                const response = await hotspotAPI.patchApiportalconfig(body as unknown as Record<string, unknown>, { queries: { ssid } });
-                updated = (response as { res: BrandingConfig }).res;
-            } else {
-                for (const [field, file] of Object.entries(selectedFiles)) {
-                    if (!allowedMime.has(file.type)) {
-                        toast.error(`${field}: Unsupported file type`);
-                        return;
-                    }
-                    if (file.size > maxBytes) {
-                        toast.error(`${field}: File exceeds 20MB limit`);
-                        return;
-                    }
+            // Always send multipart/form-data with a required 'json' part to match backend
+            for (const [field, file] of Object.entries(selectedFiles)) {
+                if (!allowedMime.has(file.type)) {
+                    toast.error(`${field}: Unsupported file type`);
+                    return;
                 }
-                // Build JSON part without any file path fields that are being replaced
-                const jsonPayload: Record<string, unknown> = { ...(body as Record<string, unknown>) };
-                for (const f of Object.keys(selectedFiles)) {
-                    delete jsonPayload[f];
+                if (file.size > maxBytes) {
+                    toast.error(`${field}: File exceeds 20MB limit`);
+                    return;
                 }
-                // ssid comes from query param in the API spec; keep body free of it (server reads query)
-                delete jsonPayload.ssid;
-
-                const form = new FormData();
-                form.append("json", JSON.stringify(jsonPayload));
-                for (const [field, file] of Object.entries(selectedFiles)) {
-                    form.append(field, file);
-                }
-
-                // Use fetch for multipart since the typed client only defines JSON for this endpoint
-                const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
-                const url = `${baseUrl}/api/portal/config?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/g, "$1/");
-                const resp = await fetch(url, { method: "PATCH", body: form });
-                if (!resp.ok) {
-                    const text = await resp.text();
-                    throw new Error(text || `Upload failed with status ${resp.status}`);
-                }
-                const json = (await resp.json()) as { res: BrandingConfig };
-                updated = json.res;
             }
+
+            // Build JSON part without any file path fields that are being replaced
+            const jsonPayload: Record<string, unknown> = { ...(body as Record<string, unknown>) };
+            for (const f of Object.keys(selectedFiles)) {
+                delete jsonPayload[f];
+            }
+            // ssid comes from query param in the API spec; keep body free of it (server reads query)
+            delete jsonPayload.ssid;
+
+            const form = new FormData();
+            form.append("json", JSON.stringify(jsonPayload));
+            for (const [field, file] of Object.entries(selectedFiles)) {
+                form.append(field, file);
+            }
+
+            // Use fetch for multipart, leveraging hotspotAPI base URL for consistency
+            const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
+            const url = `${baseUrl}/api/portal/config?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/g, "$1/");
+            const resp = await fetch(url, { method: "PATCH", body: form });
+            if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error(text || `Upload failed with status ${resp.status}`);
+            }
+            const json = (await resp.json()) as { res: BrandingConfig };
+            const updated: BrandingConfig | null = json.res;
             if (updated) {
                 setTheme(updated);
                 toast.success("Branding updated");
@@ -142,12 +138,75 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
         }
     }, [StripSchema, theme, selectedFiles, setTheme, refreshTheme]);
 
+    const uploadImage = useCallback(async (field: string) => {
+        const file = selectedFiles[field];
+        if (!file) {
+            toast.error(`Select a ${field} file first`);
+            return;
+        }
+        if (!allowedMime.has(file.type)) {
+            toast.error(`${field}: Unsupported file type`);
+            return;
+        }
+        if (file.size > maxBytes) {
+            toast.error(`${field}: File exceeds 20MB limit`);
+            return;
+        }
+        const ssid = theme?.ssid as string | undefined;
+        if (!ssid) {
+            toast.error("Missing SSID context");
+            return;
+        }
+        setUploadingByField(prev => ({ ...prev, [field]: true }));
+        const start = performance.now();
+        try {
+            const form = new FormData();
+            // Backend requires 'json' part; empty object is acceptable due to partial schema
+            form.append("json", JSON.stringify({}));
+            form.append(field, file);
+
+            const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
+            const url = `${baseUrl}/api/portal/config?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/, "$1/");
+            const resp = await fetch(url, { method: "PATCH", body: form });
+            if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error(text || `Upload failed with status ${resp.status}`);
+            }
+            const json = (await resp.json()) as { res: BrandingConfig };
+            const updated: BrandingConfig | null = json.res;
+            if (updated) {
+                setTheme(updated);
+                toast.success(`${field} updated`);
+                await refreshTheme();
+                // Clear just this field's selection and preview URL
+                setSelectedFiles(prev => {
+                    const next = { ...prev };
+                    delete next[field];
+                    return next;
+                });
+                if (objectUrlsRef.current[field]) {
+                    URL.revokeObjectURL(objectUrlsRef.current[field]);
+                    delete objectUrlsRef.current[field];
+                }
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : `Upload failed for ${field}`;
+            console.error(`[BrandConfig] Upload error [${field}]`, e);
+            toast.error(msg);
+        } finally {
+            setUploadingByField(prev => ({ ...prev, [field]: false }));
+            console.log(`[BrandConfig] Upload(${field}) completed in ${(performance.now() - start).toFixed(0)}ms`);
+        }
+    }, [selectedFiles, theme?.ssid, refreshTheme, setTheme]);
+
     return {
         submitting,
         initialValues,
         selectedFiles,
         objectUrlsRef,
         handleFileChange,
+        uploadingByField,
+        uploadImage,
         onSubmit,
     } as const;
 }
