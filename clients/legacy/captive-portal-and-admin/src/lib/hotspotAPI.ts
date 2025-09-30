@@ -300,13 +300,12 @@ const BrandingConfigUpdateBody = z
 const BrandingConfigMultipartUpdate = z
   .object({
     json: z.string(),
-    logo: z.instanceof(File),
-    logoWhite: z.instanceof(File),
-    connectCardBackground: z.instanceof(File),
-    bannerOverlay: z.instanceof(File),
-    favicon: z.instanceof(File),
+    logo: z.instanceof(File).optional(),
+    logoWhite: z.instanceof(File).optional(),
+    connectCardBackground: z.instanceof(File).optional(),
+    bannerOverlay: z.instanceof(File).optional(),
+    favicon: z.instanceof(File).optional(),
   })
-  .partial()
   .strict()
   .passthrough();
 

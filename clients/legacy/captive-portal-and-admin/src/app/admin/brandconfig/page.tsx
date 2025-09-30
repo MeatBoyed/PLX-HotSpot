@@ -81,7 +81,7 @@ const sections: FormSectionConfig[] = [
 
 export default function BrandConfigAdminPage() {
     const { theme, refreshTheme, setTheme } = useTheme();
-    const { submitting, initialValues, objectUrlsRef, handleFileChange, onSubmit } = useBrandConfigForm<UpdateInput>({
+    const { submitting, initialValues, objectUrlsRef, handleFileChange, onSubmit, uploadImage, uploadingByField } = useBrandConfigForm<UpdateInput>({
         theme,
         setTheme,
         refreshTheme,
@@ -110,11 +110,66 @@ export default function BrandConfigAdminPage() {
                     defaultValues={initialValues}
                     isSubmitting={submitting}
                     fieldRenderers={{
-                        logo: ({ value }) => <ImageField name="logo" label="Logo" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
-                        logoWhite: ({ value }) => <ImageField name="logoWhite" label="Logo (White)" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
-                        connectCardBackground: ({ value }) => <ImageField name="connectCardBackground" label="Connect Card Background" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
-                        bannerOverlay: ({ value }) => <ImageField name="bannerOverlay" label="Banner Overlay" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
-                        favicon: ({ value }) => <ImageField name="favicon" label="Favicon" value={value} onFile={handleFileChange} previewUrls={objectUrlsRef.current} readOnlyPath />,
+                        logo: ({ value }) => (
+                            <ImageField
+                                name="logo"
+                                label="Logo"
+                                value={value}
+                                onFile={handleFileChange}
+                                previewUrls={objectUrlsRef.current}
+                                readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["logo"]}
+                            />
+                        ),
+                        logoWhite: ({ value }) => (
+                            <ImageField
+                                name="logoWhite"
+                                label="Logo (White)"
+                                value={value}
+                                onFile={handleFileChange}
+                                previewUrls={objectUrlsRef.current}
+                                readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["logoWhite"]}
+                            />
+                        ),
+                        connectCardBackground: ({ value }) => (
+                            <ImageField
+                                name="connectCardBackground"
+                                label="Connect Card Background"
+                                value={value}
+                                onFile={handleFileChange}
+                                previewUrls={objectUrlsRef.current}
+                                readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["connectCardBackground"]}
+                            />
+                        ),
+                        bannerOverlay: ({ value }) => (
+                            <ImageField
+                                name="bannerOverlay"
+                                label="Banner Overlay"
+                                value={value}
+                                onFile={handleFileChange}
+                                previewUrls={objectUrlsRef.current}
+                                readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["bannerOverlay"]}
+                            />
+                        ),
+                        favicon: ({ value }) => (
+                            <ImageField
+                                name="favicon"
+                                label="Favicon"
+                                value={value}
+                                onFile={handleFileChange}
+                                previewUrls={objectUrlsRef.current}
+                                readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["favicon"]}
+                            />
+                        ),
                         splashBackground: ({ value }) => (
                             <ImageField
                                 name="splashBackground"
@@ -123,6 +178,8 @@ export default function BrandConfigAdminPage() {
                                 onFile={handleFileChange}
                                 previewUrls={objectUrlsRef.current}
                                 readOnlyPath
+                                onUpload={uploadImage}
+                                uploading={!!uploadingByField["splashBackground"]}
                             />
                         ),
                     }}

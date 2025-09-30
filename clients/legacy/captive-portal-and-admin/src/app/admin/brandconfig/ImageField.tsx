@@ -9,10 +9,12 @@ export interface ImageFieldProps {
     onFile: (field: string, file: File | undefined) => void;
     previewUrls: Record<string, string>;
     readOnlyPath?: boolean;
+    onUpload?: (field: string) => void;
+    uploading?: boolean;
 }
 
 // const ImageField: React.FC<ImageFieldProps> = ({ name, label, value, onFile, previewUrls, readOnlyPath }) => {
-function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath }: ImageFieldProps) {
+function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath, onUpload, uploading }: ImageFieldProps) {
     const currentPath = typeof value === 'string' ? value : '';
     const preview = previewUrls[name] || (currentPath ? (currentPath.startsWith('http') ? currentPath : currentPath) : '');
     return (
@@ -48,6 +50,16 @@ function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath }: I
                         }}
                         className="text-xs"
                     />
+                    {onUpload && (
+                        <button
+                            type="button"
+                            className="inline-flex items-center justify-center rounded border px-2 py-1 text-xs disabled:opacity-50"
+                            onClick={() => onUpload(name)}
+                            disabled={uploading}
+                        >
+                            {uploading ? "Uploading…" : "Upload"}
+                        </button>
+                    )}
                     <p className="text-[10px] text-muted-foreground">PNG, JPEG, WEBP up to 20MB. Selecting a file will replace existing image after save.</p>
                 </div>
             </div>
