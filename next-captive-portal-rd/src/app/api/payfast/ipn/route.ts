@@ -4,6 +4,7 @@ import { voucherService } from '@/features/purchasing/voucher-service';
 import { smsService } from '@/features/purchasing/sms-service';
 import { listPlans } from '@/features/purchasing/plan-catalog';
 import dns from 'dns';
+import { env } from '@/env';
 
 /**
  * PayFast IPN (Instant Payment Notification) Handler (MVP)
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Merchant id check
-    if (process.env.PAYFAST_MERCHANT_ID && payload.merchant_id !== process.env.PAYFAST_MERCHANT_ID) {
+    if (env.PAYFAST_MERCHANT_ID && payload.merchant_id !== env.PAYFAST_MERCHANT_ID) {
       console.warn('[PF:IPN:MERCHANT_MISMATCH]', payload.merchant_id);
       return NextResponse.json({ error: 'Merchant mismatch' }, { status: 400 });
     }
@@ -117,11 +118,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Use global/hardcoded MSISDN
-    const msisdn = process.env.PAYFAST_TEST_MSISDN || '27656853805';
+    const msisdn = env.PAYFAST_TEST_MSISDN || '27656853805';
     const paymentKey = payload.pf_payment_id || payload.m_payment_id || payload.signature; // fallback sequence
 
     // Issue (idempotent) voucher and attempt SMS
-    const voucher = voucherService.issueVoucher({ paymentKey, planId: plan.id, msisdn });
+    const voucher = await voucherService.issueVoucher({ paymentKey, planId: plan.id, msisdn });
     try {
       await smsService.sendVoucher({ msisdn, code: voucher.code });
     } catch (err) {
