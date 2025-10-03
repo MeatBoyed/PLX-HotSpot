@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
 import Footer from "@/components/footer";
 import { BrandingService } from "@/lib/services/branding-service";
+import { ClerkProvider } from "@clerk/nextjs";
 // Removed server-side fetch; ThemeProvider will fetch client-side for runtime updates
 
 // const geistSans = Geist({
@@ -29,22 +30,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   try {
     branding = await BrandingService.get(ssid);
   } catch (e) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.debug('RootLayout branding fetch failed, falling back', e);
     }
   }
   return (
-    <html lang="en">
-      <body className="antialiased min-h-screen flex flex-col justify-between bg-gray-50">
-        <ThemeProvider ssid={ssid} initialTheme={branding} showInitialSpinner={!branding}>
-          <div className="flex flex-col justify-center items-center ">
-            {children}
-          </div>
-          <Footer />
-          <Toaster position="top-center" richColors />
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className="antialiased min-h-screen flex flex-col justify-between bg-gray-50">
+          <ThemeProvider ssid={ssid} initialTheme={branding} showInitialSpinner={!branding}>
+            <div className="flex flex-col justify-center items-center ">
+              {children}
+            </div>
+            <Footer />
+            <Toaster position="top-center" richColors />
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

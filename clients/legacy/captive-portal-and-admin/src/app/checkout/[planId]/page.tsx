@@ -18,7 +18,7 @@ export default async function CheckoutPlanPage({ params }: { params: Promise<{ p
   if (!plan) return notFound();
 
   // Validate env before constructing fields
-  const { PAYFAST_MERCHANT_ID, PAYFAST_MERCHANT_KEY } = process.env;
+  const { PAYFAST_MERCHANT_ID, PAYFAST_MERCHANT_KEY } = env;
   const missing = [
     !PAYFAST_MERCHANT_ID && 'PAYFAST_MERCHANT_ID',
     !PAYFAST_MERCHANT_KEY && 'PAYFAST_MERCHANT_KEY'
