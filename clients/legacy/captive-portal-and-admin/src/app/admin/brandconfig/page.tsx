@@ -3,12 +3,14 @@
 import { useEffect } from "react";
 import { schemas } from "@/lib/hotspotAPI";
 import { FormFieldConfig, FormSectionConfig } from "@/lib/types";
-import { CustomForm } from "@/components/ui/custom-form";
 import { useTheme } from "@/components/theme-provider";
 import Head from "@/components/home-page/head";
 import { z } from "zod";
 import ImageField from "./ImageField";
 import useBrandConfigForm from "./useBrandConfigForm";
+import { updateBrandIdentityAction, updateButtonsAction, updateColorsAction, updateAdsAction } from './actions';
+import SectionForm from "./SectionForm";
+import AdSection from "@/components/ad-section";
 
 // Canonical update schema (partial & strict) reused directly; create a stripped variant to auto-drop unknown keys
 const UpdateSchema = schemas.BrandingConfigUpdateBody; // partial().strict()
@@ -18,21 +20,11 @@ type UpdateInput = z.infer<typeof StripSchema>;
 // Field groups
 const brandingFields: FormFieldConfig[] = [
     { name: "name", label: "Display Name", type: "text", placeholder: "Venue WiFi" },
-    // Image fields will be rendered read-only path + upload widget via custom renderer
-    { name: "logo", label: "Logo", type: "text", placeholder: "/pluxnet-logo.svg" },
-    { name: "logoWhite", label: "Logo (White)", type: "text", placeholder: "/pluxnet-logo-white.svg" },
-    { name: "connectCardBackground", label: "Connect Card Background", type: "text", placeholder: "/internet-claim-bg.png" },
-    { name: "bannerOverlay", label: "Banner Overlay", type: "text", placeholder: "/banner-overlay.png" },
-    { name: "favicon", label: "Favicon", type: "text", placeholder: "/favicon.ico" },
     { name: "heading", label: "Heading", type: "text", placeholder: "Connect to WiFi" },
     { name: "subheading", label: "Subheading", type: "text", placeholder: "Enjoy free internet" },
     { name: "buttonText", label: "Button Text", type: "text", placeholder: "Connect" },
     { name: "termsLinks", label: "Terms Links", type: "text", placeholder: "https://example.com/terms" },
-
-    // Splash page fields
-    { name: "splashBackground", label: "Splash Background", type: "text", placeholder: "/splash-bg.png" },
     { name: "splashHeading", label: "Splash Heading", type: "text", placeholder: "Welcome to the hotspot" },
-
     // Auth methods (multi-select)
     {
         name: "authMethods", label: "Allowed Authentication Methods", type: "multiselect", options: [
@@ -40,6 +32,16 @@ const brandingFields: FormFieldConfig[] = [
             { value: "voucher", label: "Voucher" },
         ]
     },
+];
+
+// Image fields moved to their own section
+const imageFields: FormFieldConfig[] = [
+    { name: "logo", label: "Logo", type: "text", placeholder: "/pluxnet-logo.svg" },
+    { name: "logoWhite", label: "Logo (White)", type: "text", placeholder: "/pluxnet-logo-white.svg" },
+    { name: "connectCardBackground", label: "Connect Card Background", type: "text", placeholder: "/internet-claim-bg.png" },
+    { name: "bannerOverlay", label: "Banner Overlay", type: "text", placeholder: "/banner-overlay.png" },
+    { name: "favicon", label: "Favicon", type: "text", placeholder: "/favicon.ico" },
+    { name: "splashBackground", label: "Splash Background", type: "text", placeholder: "/splash-bg.png" },
 ];
 
 const colorFields: FormFieldConfig[] = [
@@ -57,12 +59,12 @@ const colorFields: FormFieldConfig[] = [
 ];
 
 const buttonFields: FormFieldConfig[] = [
-    { name: "buttonPrimary", label: "Button Primary", type: "text", placeholder: "#301358" },
-    { name: "buttonPrimaryHover", label: "Button Primary Hover", type: "text", placeholder: "#5B3393" },
-    { name: "buttonPrimaryText", label: "Button Primary Text", type: "text", placeholder: "#FFFFFF" },
-    { name: "buttonSecondary", label: "Button Secondary", type: "text", placeholder: "#FFFFFF" },
-    { name: "buttonSecondaryHover", label: "Button Secondary Hover", type: "text", placeholder: "#f5f5f5" },
-    { name: "buttonSecondaryText", label: "Button Secondary Text", type: "text", placeholder: "#301358" },
+    { name: "buttonPrimary", label: "Button Primary", type: "color", placeholder: "#301358" },
+    { name: "buttonPrimaryHover", label: "Button Primary Hover", type: "color", placeholder: "#5B3393" },
+    { name: "buttonPrimaryText", label: "Button Primary Text", type: "color", placeholder: "#FFFFFF" },
+    { name: "buttonSecondary", label: "Button Secondary", type: "color", placeholder: "#FFFFFF" },
+    { name: "buttonSecondaryHover", label: "Button Secondary Hover", type: "color", placeholder: "#f5f5f5" },
+    { name: "buttonSecondaryText", label: "Button Secondary Text", type: "color", placeholder: "#301358" },
 ];
 
 const adFields: FormFieldConfig[] = [
@@ -73,7 +75,8 @@ const adFields: FormFieldConfig[] = [
 ];
 
 const sections: FormSectionConfig[] = [
-    { title: "Brand Identity", description: "Logos, copy and assets.", fields: brandingFields },
+    { title: "Brand Identity", description: "Copy and meta information.", fields: brandingFields },
+    { title: "Images", description: "Logos and backgrounds.", fields: imageFields },
     { title: "Colors", description: "Core palette.", fields: colorFields },
     { title: "Buttons", description: "Button styles.", fields: buttonFields },
     { title: "Advertising", description: "Ad & VAST configuration.", fields: adFields },
@@ -103,87 +106,148 @@ export default function BrandConfigAdminPage() {
                 </p>
             </div>
             {initialValues && (
-                <CustomForm
-                    sections={[...sections]}
-                    schema={StripSchema}
-                    onSubmit={onSubmit}
-                    defaultValues={initialValues}
-                    isSubmitting={submitting}
-                    fieldRenderers={{
-                        logo: ({ value }) => (
-                            <ImageField
-                                name="logo"
-                                label="Logo"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["logo"]}
-                            />
-                        ),
-                        logoWhite: ({ value }) => (
-                            <ImageField
-                                name="logoWhite"
-                                label="Logo (White)"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["logoWhite"]}
-                            />
-                        ),
-                        connectCardBackground: ({ value }) => (
-                            <ImageField
-                                name="connectCardBackground"
-                                label="Connect Card Background"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["connectCardBackground"]}
-                            />
-                        ),
-                        bannerOverlay: ({ value }) => (
-                            <ImageField
-                                name="bannerOverlay"
-                                label="Banner Overlay"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["bannerOverlay"]}
-                            />
-                        ),
-                        favicon: ({ value }) => (
-                            <ImageField
-                                name="favicon"
-                                label="Favicon"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["favicon"]}
-                            />
-                        ),
-                        splashBackground: ({ value }) => (
-                            <ImageField
-                                name="splashBackground"
-                                label="Splash Background"
-                                value={value}
-                                onFile={handleFileChange}
-                                previewUrls={objectUrlsRef.current}
-                                readOnlyPath
-                                onUpload={uploadImage}
-                                uploading={!!uploadingByField["splashBackground"]}
-                            />
-                        ),
-                    }}
-                />
+                <div className="space-y-10">
+                    {/* Identity Section - now text/meta only */}
+                    <SectionForm
+                        title="Brand Identity"
+                        description="Copy and meta information."
+                        fields={brandingFields}
+                        schema={StripSchema}
+                        defaultValues={initialValues}
+                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        action={updateBrandIdentityAction}
+                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                    />
+
+                    {/* Images Section - handles uploads separately */}
+                    <SectionForm
+                        title="Images"
+                        description="Logos and backgrounds."
+                        fields={imageFields}
+                        schema={StripSchema}
+                        defaultValues={initialValues}
+                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        action={updateBrandIdentityAction}
+                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        fieldRenderers={{
+                            logo: ({ value }: any) => (
+                                <ImageField
+                                    name="logo"
+                                    label="Logo"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["logo"]}
+                                />
+                            ),
+                            logoWhite: ({ value }: any) => (
+                                <ImageField
+                                    name="logoWhite"
+                                    label="Logo (White)"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["logoWhite"]}
+                                />
+                            ),
+                            connectCardBackground: ({ value }: any) => (
+                                <ImageField
+                                    name="connectCardBackground"
+                                    label="Connect Card Background"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["connectCardBackground"]}
+                                />
+                            ),
+                            bannerOverlay: ({ value }: any) => (
+                                <ImageField
+                                    name="bannerOverlay"
+                                    label="Banner Overlay"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["bannerOverlay"]}
+                                />
+                            ),
+                            favicon: ({ value }: any) => (
+                                <ImageField
+                                    name="favicon"
+                                    label="Favicon"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["favicon"]}
+                                />
+                            ),
+                            splashBackground: ({ value }: any) => (
+                                <ImageField
+                                    name="splashBackground"
+                                    label="Splash Background"
+                                    value={value}
+                                    onFile={handleFileChange}
+                                    previewUrls={objectUrlsRef.current}
+                                    readOnlyPath
+                                    onUpload={uploadImage}
+                                    uploading={!!uploadingByField["splashBackground"]}
+                                />
+                            ),
+                        }}
+                    />
+
+                    {/* Colors Section */}
+                    <SectionForm
+                        title="Colors"
+                        description="Core palette."
+                        fields={colorFields}
+                        schema={StripSchema}
+                        defaultValues={initialValues}
+                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        action={updateColorsAction}
+                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                    />
+
+                    {/* Buttons Section */}
+                    <SectionForm
+                        title="Buttons"
+                        description="Button styles."
+                        fields={buttonFields}
+                        schema={StripSchema}
+                        defaultValues={initialValues}
+                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        action={updateButtonsAction}
+                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                    />
+
+                    {/* Advertising Section */}
+                    <SectionForm
+                        title="Advertising"
+                        description="Ad & VAST configuration."
+                        fields={adFields}
+                        schema={StripSchema}
+                        defaultValues={initialValues}
+                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        action={updateAdsAction}
+                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                    />
+
+                    {/* Advertising Preview (uses shared component) */}
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-medium">Ad Preview</h3>
+                        <p className="text-xs text-muted-foreground">Preview uses the current advertising configuration. Save the Advertising form to update.</p>
+                        <AdSection />
+                    </div>
+                </div>
             )}
         </div>
     );
