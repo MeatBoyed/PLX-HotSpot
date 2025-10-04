@@ -6,6 +6,50 @@ import { PrismaClient, Prisma } from '../../../generated/prisma';
 import { normalizeBranding } from '@/lib/utils/branding-normalize';
 import type { BrandingConfig as AppBrandingConfig } from '@/lib/types';
 
+// Update payload shape (app-level/camelCase). Allows nulls for nullable fields.
+export type BrandingConfigAppUpdate = {
+	name?: string;
+	// colors
+	brandPrimary?: string;
+	brandPrimaryHover?: string;
+	brandSecondary?: string;
+	brandAccent?: string;
+	textPrimary?: string;
+	textSecondary?: string;
+	textTertiary?: string;
+	textMuted?: string;
+	surfaceCard?: string;
+	surfaceWhite?: string;
+	surfaceBorder?: string;
+	// buttons
+	buttonPrimary?: string;
+	buttonPrimaryHover?: string;
+	buttonPrimaryText?: string;
+	buttonSecondary?: string;
+	buttonSecondaryHover?: string;
+	buttonSecondaryText?: string;
+	// assets & text
+	logo?: string | null;
+	logoWhite?: string | null;
+	connectCardBackground?: string | null;
+	bannerOverlay?: string | null;
+	favicon?: string | null;
+	termsLinks?: string | null;
+	heading?: string | null;
+	subheading?: string | null;
+	buttonText?: string | null;
+	// ads
+	adsReviveServerUrl?: string | null;
+	adsZoneId?: string | null;
+	adsReviveId?: string | null;
+	adsVastUrl?: string | null;
+	// splash
+	splashBackground?: string | null;
+	splashHeading?: string | null;
+	// auth
+	authMethods?: string[];
+};
+
 // Reuse a single Prisma client instance across HMR in dev
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 export const prisma: PrismaClient = globalForPrisma.prisma ?? new PrismaClient();
@@ -148,6 +192,55 @@ export class DatabaseService {
 			}
 			throw err;
 		}
+	}
+
+	// Convenience: accept app-level camelCase fields and map to Prisma update
+	async updateBrandingConfigApp(ssid: string, updates: BrandingConfigAppUpdate): Promise<BrandingConfig | null> {
+		const map: Record<string, string> = {
+			name: 'name',
+			brandPrimary: 'brand_primary',
+			brandPrimaryHover: 'brand_primary_hover',
+			brandSecondary: 'brand_secondary',
+			brandAccent: 'brand_accent',
+			textPrimary: 'text_primary',
+			textSecondary: 'text_secondary',
+			textTertiary: 'text_tertiary',
+			textMuted: 'text_muted',
+			surfaceCard: 'surface_card',
+			surfaceWhite: 'surface_white',
+			surfaceBorder: 'surface_border',
+			buttonPrimary: 'button_primary',
+			buttonPrimaryHover: 'button_primary_hover',
+			buttonPrimaryText: 'button_primary_text',
+			buttonSecondary: 'button_secondary',
+			buttonSecondaryHover: 'button_secondary_hover',
+			buttonSecondaryText: 'button_secondary_text',
+			logo: 'logo',
+			logoWhite: 'logo_white',
+			connectCardBackground: 'connect_card_background',
+			bannerOverlay: 'banner_overlay',
+			favicon: 'favicon',
+			termsLinks: 'terms_links',
+			heading: 'heading',
+			subheading: 'subheading',
+			buttonText: 'button_text',
+			adsReviveServerUrl: 'ads_revive_server_url',
+			adsZoneId: 'ads_zone_id',
+			adsReviveId: 'ads_revive_id',
+			adsVastUrl: 'ads_vast_url',
+			splashBackground: 'splash_background',
+			splashHeading: 'splash_heading',
+			authMethods: 'auth_methods',
+		};
+		const prismaUpdate: Record<string, any> = {};
+		for (const [ckey, value] of Object.entries(updates)) {
+			if (!(ckey in map)) continue;
+			const dbKey = (map as any)[ckey];
+			if (value === undefined) continue; // omit undefined
+			prismaUpdate[dbKey] = value; // null allowed to clear, arrays passed as-is
+		}
+		if (Object.keys(prismaUpdate).length === 0) return await this.getBrandingConfig(ssid);
+		return await this.updateBrandingConfig(ssid, prismaUpdate as any);
 	}
 
 	// Upsert by SSID — creates if missing, otherwise updates
