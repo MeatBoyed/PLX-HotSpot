@@ -4,8 +4,8 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { pluxnetTheme } from '@/lib/theme';
 import { BrandingConfig } from '@/lib/types';
-import { hotspotAPI } from '@/lib/hotspotAPI';
 import { normalizeBranding } from '@/lib/utils/branding-normalize';
+import { fetchBrandingConfigAction } from '@/lib/actions/branding-actions';
 
 const STALE_CLIENT_TTL_MS = 6 * 60 * 1000; // 6 minutes after which client will background refresh
 
@@ -77,26 +77,6 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     return age < STALE_CLIENT_TTL_MS;
   };
 
-  const normalizeBrandingResponse = (resp: unknown): BrandingConfig | undefined => {
-    if (!resp || typeof resp !== 'object') return undefined;
-    const obj = resp as Record<string, unknown>;
-    // Check nested keys first
-    const possibleNested = ['res', 'data'] as const;
-    for (const key of possibleNested) {
-      if (key in obj && obj[key] && typeof obj[key] === 'object') {
-        const nested = obj[key] as Record<string, unknown>;
-        if (typeof nested.ssid === 'string' && typeof nested.name === 'string') {
-          return nested as unknown as BrandingConfig;
-        }
-      }
-    }
-    // Direct shape fallback
-    if (typeof obj.ssid === 'string' && typeof obj.name === 'string') {
-      return obj as unknown as BrandingConfig;
-    }
-    return undefined;
-  };
-
   const fetchTheme = async (force = false) => {
     if (fetchingRef.current) return;
     if (!force && initialTheme && isFreshEnough(initialTheme)) {
@@ -106,9 +86,9 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     fetchingRef.current = true;
     setError(null);
     try {
-      const apiRes = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
-      const incoming = normalizeBrandingResponse(apiRes);
-      const normalized = incoming ? normalizeBranding(incoming) : undefined;
+      // Request normalized branding config via server action
+      const incoming = await fetchBrandingConfigAction(ssid);
+      const normalized = normalizeBranding(incoming);
       applyThemeIfChanged(normalized);
       if (normalized) storeTheme(ssid, normalized);
     } catch (e: unknown) {
