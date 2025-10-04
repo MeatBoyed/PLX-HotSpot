@@ -1,7 +1,6 @@
-import 'server-only';
 import { BrandingConfig } from '@/lib/types';
-import { hotspotAPI } from '@/lib/hotspotAPI';
-import { normalizeBranding } from '@/lib/utils/branding-normalize';
+import { databaseService } from '@/lib/services/database-service';
+import { env } from '@/env';
 
 const IN_PROCESS_TTL_MS = 3 * 60 * 1000; // 3 minutes
 
@@ -14,7 +13,7 @@ type CacheEntry = {
 const cache = new Map<string, CacheEntry>();
 
 function log(...args: unknown[]) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (env.NODE_ENV !== 'production') {
     console.debug('[BrandingService]', ...args);
   }
 }
@@ -37,13 +36,14 @@ export class BrandingService {
 
     const inFlight = (async () => {
       log('fetch start', { ssid });
-      const raw = await hotspotAPI.getApiportalconfig({ queries: { ssid } });
-      // API schema guarantees a `res` field containing the BrandingConfig
-      const apiData: BrandingConfig = raw.res;
-      const normalized = normalizeBranding(apiData);
-      cache.set(key, { data: normalized, expires: Date.now() + IN_PROCESS_TTL_MS });
+      const dbData = await databaseService.getBrandingConfig(ssid);
+      if (!dbData) {
+        throw new Error(`Branding config not found for ssid=${ssid}`);
+      }
+      // databaseService already returns app-level normalized BrandingConfig
+      cache.set(key, { data: dbData, expires: Date.now() + IN_PROCESS_TTL_MS });
       log('fetch success', { ssid });
-      return normalized;
+      return dbData;
     })();
 
     cache.set(key, { ...(entry || { expires: 0 }), inFlight, expires: now + IN_PROCESS_TTL_MS });
@@ -56,7 +56,7 @@ export class BrandingService {
   }
 
   static _clearCache() {
-    if (process.env.NODE_ENV !== 'production') {
+    if (env.NODE_ENV !== 'production') {
       cache.clear();
       log('cache cleared');
     }

@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model branding_config {
+  id                      Int       @id @default(autoincrement())
+  ssid                    String    @unique(map: "branding_config_ssid_unique") @db.VarChar(255)
+  name                    String    @db.VarChar(255)
+  brand_primary           String    @default("#301358") @db.VarChar(7)
+  brand_primary_hover     String    @default("#5B3393") @db.VarChar(7)
+  brand_secondary         String    @default("#F2F2F2") @db.VarChar(7)
+  brand_accent            String    @default("#F60031") @db.VarChar(7)
+  text_primary            String    @default("#181818") @db.VarChar(7)
+  text_secondary          String    @default("#5D5D5D") @db.VarChar(7)
+  text_tertiary           String    @default("#7A7A7A") @db.VarChar(7)
+  text_muted              String    @default("#CECECE") @db.VarChar(7)
+  surface_card            String    @default("#F2F2F2") @db.VarChar(7)
+  surface_white           String    @default("#FFFFFF") @db.VarChar(7)
+  surface_border          String    @default("#CECECE") @db.VarChar(7)
+  button_primary          String    @default("#301358") @db.VarChar(7)
+  button_primary_hover    String    @default("#5B3393") @db.VarChar(7)
+  button_primary_text     String    @default("#FFFFFF") @db.VarChar(7)
+  button_secondary        String    @default("#FFFFFF") @db.VarChar(7)
+  button_secondary_hover  String    @default("#f5f5f5") @db.VarChar(7)
+  button_secondary_text   String    @default("#301358") @db.VarChar(7)
+  logo                    String    @default("/pluxnet-logo.svg") @db.VarChar(255)
+  logo_white              String    @default("/pluxnet-logo-white.svg") @db.VarChar(255)
+  connect_card_background String    @default("/internet-claim-bg.png") @db.VarChar(255)
+  banner_overlay          String?   @db.VarChar(255)
+  favicon                 String?   @db.VarChar(255)
+  terms_links             String?
+  heading                 String?   @db.VarChar(255)
+  subheading              String?   @db.VarChar(255)
+  button_text             String?   @db.VarChar(255)
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  updated_at              DateTime? @default(now()) @db.Timestamp(6)
+  ads_revive_server_url   String?   @db.VarChar(255)
+  ads_zone_id             String?   @db.VarChar(255)
+  ads_revive_id           String?   @db.VarChar(255)
+  ads_vast_url            String?   @db.VarChar(255)
+  splash_background       String?   @db.VarChar(255)
+  splash_heading          String?   @db.VarChar(255)
+  auth_methods            String[]  @default(["free"])
+}
+
+model branding_image {
+  id          Int       @id @default(autoincrement())
+  ssid        String    @db.VarChar(255)
+  slug        String    @db.VarChar(255)
+  mime_type   String    @db.VarChar(100)
+  size_bytes  Int
+  sha256_hash String    @db.VarChar(64)
+  data        String
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+
+  @@unique([ssid, slug], map: "branding_image_ssid_slug_unique")
+}

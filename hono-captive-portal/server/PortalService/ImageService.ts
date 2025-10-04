@@ -82,9 +82,9 @@ export class ImageService {
 
         return { updates, errors }
     }
-  
-  /** Fetch image binary/meta by (ssid, slug) via PortalService */
-  async getImage(ssid: string, slug: string): Promise<{ data: Buffer; mimeType: string; size: number; hash: string; updatedAt?: Date }> {
-      return this.portalService.getBrandingImage(ssid, slug)
-  }
+
+    /** Fetch image binary/meta by (ssid, slug) via PortalService */
+    async getImage(ssid: string, slug: string): Promise<{ data: Buffer; mimeType: string; size: number; hash: string; updatedAt?: Date }> {
+        return this.portalService.getBrandingImage(ssid, slug)
+    }
 }
