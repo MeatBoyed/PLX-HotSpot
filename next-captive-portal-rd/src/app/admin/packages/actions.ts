@@ -23,4 +23,4 @@ export async function deletePackageAction(ssid: string, id: number): Promise<{ o
   const ok = await packageService.remove(ssid, id);
   return ok ? { ok: true } : { ok: false, error: 'Package not found' };
 }
- 
+
