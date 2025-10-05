@@ -3,10 +3,12 @@ import { XCircleIcon } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { FreeLoginFormButton, VoucherLoginForm } from "./ui/login-form-button";
 import React from "react";
+import Link from "next/link";
 
 export type PlanVariant = 'free' | 'paid' | 'voucher';
 
 interface PlanCardProps {
+    name?: string
     variant: PlanVariant;
     tag?: string;
     price?: string; // required for paid variant
@@ -15,7 +17,7 @@ interface PlanCardProps {
     className?: string;
 }
 
-export function PlanCard({ variant, tag, price, totalData, onDismiss, className }: PlanCardProps) {
+export function PlanCard({ name, variant, tag, price, totalData, onDismiss, className }: PlanCardProps) {
     const { theme } = useTheme();
 
     const isPaid = variant === 'paid';
@@ -51,12 +53,13 @@ export function PlanCard({ variant, tag, price, totalData, onDismiss, className 
             )}
 
             {isPaid && (
-                <button
+                <Link
+                    href={`/checkout/${name}`}
                     className="text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm"
                     style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
                 >
-                    Claim
-                </button>
+                    Buy now
+                </Link>
             )}
 
             {isFree && (
@@ -68,9 +71,10 @@ export function PlanCard({ variant, tag, price, totalData, onDismiss, className 
 
             {isVoucher && (
                 <VoucherLoginForm
+                    // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
+                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
                     style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                    label="Redeem voucher"
-                    className="text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"
+                    label="Redeem"
                 />
             )}
         </div>

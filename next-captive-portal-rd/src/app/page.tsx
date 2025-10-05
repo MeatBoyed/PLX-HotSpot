@@ -5,6 +5,7 @@ import AdSection from "@/components/ad-section";
 // import VoucherCTA from '@/components/voucher-cta';
 import { Navbar } from '@/components/home-page/head';
 import VoucherCTA from '@/components/voucher-cta';
+import PackagesPlanList from '@/components/packages-plan-list';
 
 
 export default function HomePage() {
@@ -32,9 +33,8 @@ export default function HomePage() {
           {theme.authMethods.includes("free") && (
             <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
           )}
-          {/* <PlanCard price='Free' total_data='24 Hrs • 1.5 GB' tag='Promotion' /> */}
-          {/* <PlanCard price='$8.00' total_data='50 Hrs • 2GB' tag='Mini' /> */}
         </div>
+        <PackagesPlanList ssid={theme.ssid} />
 
         {theme.authMethods.includes("voucher") && (
           <VoucherCTA />

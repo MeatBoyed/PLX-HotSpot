@@ -140,6 +140,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logo"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                             logoWhite: ({ value }: any) => (
@@ -152,6 +153,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logoWhite"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                             connectCardBackground: ({ value }: any) => (
@@ -164,6 +166,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["connectCardBackground"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                             bannerOverlay: ({ value }: any) => (
@@ -176,6 +179,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["bannerOverlay"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                             favicon: ({ value }: any) => (
@@ -188,6 +192,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["favicon"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                             splashBackground: ({ value }: any) => (
@@ -200,6 +205,7 @@ export default function BrandConfigAdminPage() {
                                     readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["splashBackground"]}
+                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
                         }}

@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import type { FormFieldConfig, FormSectionConfig } from "@/lib/types";
 import { CustomForm } from "@/components/ui/custom-form";
 import type { BrandingConfig } from "@/lib/types";
+import type { UseFormReturn } from "react-hook-form";
 
-type FieldRenderers = Record<string, React.ComponentType<{ value: unknown } & any>>;
+type FieldRenderers = Record<string, (ctx: { field: FormFieldConfig; form: UseFormReturn<Record<string, unknown>>; value: unknown }) => React.ReactNode>;
 
 export type SectionFormProps = {
     title: string;
