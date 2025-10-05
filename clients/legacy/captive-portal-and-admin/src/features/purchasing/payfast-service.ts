@@ -17,6 +17,7 @@
 import 'server-only';
 import crypto from 'crypto';
 import type { Plan } from './plan-catalog';
+import { Package } from '@/lib/services/package-service';
 
 // Exact PayFast Node.js signature function (adapted to TypeScript)
 const pfGenerateSignature = (
@@ -43,10 +44,11 @@ const pfGenerateSignature = (
 };
 
 interface BuildPaymentInput {
-  plan: Plan;
+  pkg: Package;
   returnUrl: string;
   cancelUrl: string;
   notifyUrl: string; // IPN endpoint
+  cellNumber?: string; // South African MSISDN in +27 format
 }
 
 interface BuildPaymentResult {
@@ -88,12 +90,12 @@ export class PayFastService {
   }
 
   buildPaymentFields(input: BuildPaymentInput): BuildPaymentResult {
-    const { plan, returnUrl, cancelUrl, notifyUrl } = input;
+    const { pkg, returnUrl, cancelUrl, notifyUrl, cellNumber } = input;
     if (!this.merchantId || !this.merchantKey) {
       throw new Error('PayFastService: Missing required env (PAYFAST_MERCHANT_ID, PAYFAST_MERCHANT_KEY).');
     }
 
-    const amount = plan.price.toFixed(2); // Ensure two decimals
+    const amount = pkg.price.toFixed(2); // Ensure two decimals
     // Ordered fields aligned to PayFast docs (merchant -> URLs -> buyer -> transaction)
     const baseFields = {
       // Merchant details
@@ -107,10 +109,11 @@ export class PayFastService {
       // name_first: '',
       // name_last: '',
       // email_address: '',
+      cell_number: cellNumber ?? '',
       // Transaction details
-      m_payment_id: String(plan.id),
+      m_payment_id: String(pkg.id),
       amount,
-      item_name: plan.itemName,
+      item_name: pkg.name,
     } as const;
     const fields: Record<string, string> = { ...baseFields };
     const signature = pfGenerateSignature(fields, this.passphrase ?? null);
@@ -135,7 +138,7 @@ export class PayFastService {
     }
     fields.signature = signature;
 
-    console.log(`[PF:FORM] plan=${plan.id} amount=${amount}`);
+    console.log(`[PF:FORM] pkg=${pkg.id} amount=${amount}`);
     return { actionUrl: this.getActionUrl(), fields };
   }
 

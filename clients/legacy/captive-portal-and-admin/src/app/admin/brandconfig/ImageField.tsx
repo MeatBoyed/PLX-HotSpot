@@ -11,12 +11,15 @@ export interface ImageFieldProps {
     readOnlyPath?: boolean;
     onUpload?: (field: string) => void;
     uploading?: boolean;
+    ssid?: string;
 }
 
 // const ImageField: React.FC<ImageFieldProps> = ({ name, label, value, onFile, previewUrls, readOnlyPath }) => {
-function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath, onUpload, uploading }: ImageFieldProps) {
+function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath, onUpload, uploading, ssid }: ImageFieldProps) {
     const currentPath = typeof value === 'string' ? value : '';
-    const preview = previewUrls[name] || (currentPath ? (currentPath.startsWith('http') ? currentPath : currentPath) : '');
+    // If a local selection exists, prefer its object URL. Otherwise, use our first-party API with slug=name when ssid is available.
+    const apiUrl = ssid ? `/api/image/${encodeURIComponent(name)}?ssid=${encodeURIComponent(ssid)}` : '';
+    const preview = previewUrls[name] || (apiUrl || (currentPath ? (currentPath.startsWith('http') ? currentPath : currentPath) : ''));
     return (
         <div className="space-y-2">
             <label className="text-sm font-medium flex items-center justify-between">
