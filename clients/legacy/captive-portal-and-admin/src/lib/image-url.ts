@@ -8,9 +8,9 @@ import { env } from '@/env';
  * Falls back to empty string if slug is falsy.
  */
 export function imageUrl(slug?: string | null, ssid?: string | null): string {
-  const s = (ssid ?? env.NEXT_PUBLIC_SSID ?? '').trim();
-  const sl = (slug ?? '').trim();
-  if (!sl) return '';
-  const qp = s ? `?ssid=${encodeURIComponent(s)}` : '';
-  return `/api/image/${encodeURIComponent(sl)}${qp}`;
+    const s = (ssid ?? env.NEXT_PUBLIC_SSID ?? '').trim();
+    const sl = (slug ?? '').trim();
+    if (!sl) return '';
+    const qp = s ? `?ssid=${encodeURIComponent(s)}` : '';
+    return `/api/image/${encodeURIComponent(sl)}${qp}`;
 }

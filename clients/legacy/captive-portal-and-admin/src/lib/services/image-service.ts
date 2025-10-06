@@ -23,7 +23,7 @@ export const imageService = {
     };
   },
   /** Overwrite canonical (ssid, slug) image; if it exists, create a timestamped backup row before updating. */
-  async overwriteWithBackup(ssid: string, slug: string, mimeType: string, data: Buffer): Promise<{ sha256: string; size: number; mimeType: string }>{
+  async overwriteWithBackup(ssid: string, slug: string, mimeType: string, data: Buffer): Promise<{ sha256: string; size: number; mimeType: string }> {
     if (!ssid || !slug) throw new Error('Missing ssid or slug');
     if (!data || data.length === 0) throw new Error('Empty image data');
     const existing = await prisma.branding_image.findUnique({ where: { ssid_slug: { ssid, slug } }, select: { mime_type: true, data: true, sha256_hash: true, size_bytes: true } });
@@ -46,7 +46,7 @@ export const imageService = {
     return this.upsert(ssid, slug, mimeType, data);
   },
   /** Upsert (overwrite) a branding image by (ssid, slug). Returns stored metadata summary. */
-  async upsert(ssid: string, slug: string, mimeType: string, data: Buffer): Promise<{ sha256: string; size: number; mimeType: string }>{
+  async upsert(ssid: string, slug: string, mimeType: string, data: Buffer): Promise<{ sha256: string; size: number; mimeType: string }> {
     if (!ssid || !slug) throw new Error('Missing ssid or slug');
     if (!data || data.length === 0) throw new Error('Empty image data');
     const base64 = data.toString('base64');
