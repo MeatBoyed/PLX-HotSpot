@@ -98,10 +98,10 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
                 }
             }
 
-            // Build JSON part without any file path fields that are being replaced
+            // Build JSON part ensuring fields with selected files are set to their slug key names for consistency
             const jsonPayload: Record<string, unknown> = { ...(body as Record<string, unknown>) };
             for (const f of Object.keys(selectedFiles)) {
-                delete jsonPayload[f];
+                jsonPayload[f] = f; // brand_config.<field> must match its field/slug name
             }
             // ssid comes from query param in the API spec; keep body free of it (server reads query)
             delete jsonPayload.ssid;
@@ -114,8 +114,8 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
 
             // Use fetch for multipart, leveraging hotspotAPI base URL for consistency
             const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
-            const url = `${baseUrl}/api/portal/config?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/g, "$1/");
-            const resp = await fetch(url, { method: "PATCH", body: form });
+            const url = `${baseUrl}/api/image?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/g, "$1/");
+            const resp = await fetch(url, { method: "POST", body: form });
             if (!resp.ok) {
                 const text = await resp.text();
                 throw new Error(text || `Upload failed with status ${resp.status}`);
@@ -161,13 +161,13 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
         const start = performance.now();
         try {
             const form = new FormData();
-            // Backend requires 'json' part; empty object is acceptable due to partial schema
-            form.append("json", JSON.stringify({}));
+            // Backend requires 'json' part; include the field set to its slug to enforce consistency
+            form.append("json", JSON.stringify({ [field]: field }));
             form.append(field, file);
 
             const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
-            const url = `${baseUrl}/api/portal/config?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/, "$1/");
-            const resp = await fetch(url, { method: "PATCH", body: form });
+            const url = `${baseUrl}/api/image?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/, "$1/");
+            const resp = await fetch(url, { method: "POST", body: form });
             if (!resp.ok) {
                 const text = await resp.text();
                 throw new Error(text || `Upload failed with status ${resp.status}`);

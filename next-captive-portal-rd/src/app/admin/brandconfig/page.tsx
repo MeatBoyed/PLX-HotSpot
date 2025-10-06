@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { schemas } from "@/lib/hotspotAPI";
 import { FormFieldConfig } from "@/lib/types";
 import { useTheme } from "@/components/theme-provider";
-import Head from "@/components/home-page/head";
+import { Navbar } from "@/components/home-page/head";
 import { z } from "zod";
 import ImageField from "./ImageField";
 import useBrandConfigForm from "./useBrandConfigForm";
@@ -91,7 +91,7 @@ export default function BrandConfigAdminPage() {
     return (
         <div className="md:min-w-xl md:max-w-3xl mx-auto py-8 space-y-8">
             <nav className="flex items-center justify-center w-full">
-                <Head />
+                <Navbar />
             </nav>
             <div>
                 <h1 className="text-2xl font-semibold">Brand Configuration</h1>
@@ -131,7 +131,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logo"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
@@ -144,7 +143,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logoWhite"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
@@ -157,7 +155,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["connectCardBackground"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
@@ -170,7 +167,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["bannerOverlay"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
@@ -183,7 +179,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["favicon"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
@@ -196,7 +191,6 @@ export default function BrandConfigAdminPage() {
                                     value={value}
                                     onFile={handleFileChange}
                                     previewUrls={objectUrlsRef.current}
-                                    readOnlyPath
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["splashBackground"]}
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}

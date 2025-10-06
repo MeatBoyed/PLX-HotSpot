@@ -1,6 +1,7 @@
 "use client"
 import { env } from "@/env";
 import { useTheme } from "../theme-provider";
+import { imageUrl } from "@/lib/image-url";
 
 
 
@@ -35,7 +36,7 @@ export function Navbar() {
                 <span className="text-white text-lg font-semibold">PluxNet</span> */}
                 <img
                     // src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
-                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.logo}`}
+                    src={imageUrl(theme.logo, theme.ssid)}
                     alt="Brand logo"
                     width="auto"
                     height="auto"
