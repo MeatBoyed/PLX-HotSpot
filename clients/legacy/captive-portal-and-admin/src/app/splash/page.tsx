@@ -1,6 +1,7 @@
 "use client"
 import { useTheme } from "@/components/theme-provider";
 import { env } from "@/env";
+import { imageUrl } from "@/lib/image-url";
 import Link from "next/dist/client/link";
 import React from "react";
 
@@ -14,7 +15,7 @@ export default function SplashPage() {
             {/* Background image */}
             <div className="fixed inset-0 z-0">
                 <img
-                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.splashBackground}`}
+                    src={imageUrl(theme.splashBackground, theme.ssid)}
                     // src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                     alt=""
                     className="w-full h-full object-cover"

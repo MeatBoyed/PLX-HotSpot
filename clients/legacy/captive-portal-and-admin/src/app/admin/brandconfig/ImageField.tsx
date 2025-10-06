@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { imageUrl } from "@/lib/image-url";
 
 export interface ImageFieldProps {
     name: string;
@@ -8,32 +9,26 @@ export interface ImageFieldProps {
     value: unknown;
     onFile: (field: string, file: File | undefined) => void;
     previewUrls: Record<string, string>;
-    readOnlyPath?: boolean;
     onUpload?: (field: string) => void;
     uploading?: boolean;
     ssid?: string;
 }
 
 // const ImageField: React.FC<ImageFieldProps> = ({ name, label, value, onFile, previewUrls, readOnlyPath }) => {
-function ImageField({ name, label, value, onFile, previewUrls, readOnlyPath, onUpload, uploading, ssid }: ImageFieldProps) {
+function ImageField({ name, label, value, onFile, previewUrls, onUpload, uploading, ssid }: ImageFieldProps) {
     const currentPath = typeof value === 'string' ? value : '';
-    // If a local selection exists, prefer its object URL. Otherwise, use our first-party API with slug=name when ssid is available.
-    const apiUrl = ssid ? `/api/image/${encodeURIComponent(name)}?ssid=${encodeURIComponent(ssid)}` : '';
-    const preview = previewUrls[name] || (apiUrl || (currentPath ? (currentPath.startsWith('http') ? currentPath : currentPath) : ''));
+    // If a local selection exists, prefer its object URL. Otherwise, use our shared util to build a stable API URL.
+    const apiUrl = imageUrl(name, ssid);
+    const fallback = currentPath
+        ? (currentPath.startsWith('http') ? currentPath : imageUrl(currentPath, ssid))
+        : '';
+    const preview = previewUrls[name] || apiUrl || fallback;
     return (
         <div className="space-y-2">
             <label className="text-sm font-medium flex items-center justify-between">
                 <span>{label}</span>
             </label>
-            {readOnlyPath && (
-                <input
-                    type="text"
-                    value={currentPath}
-                    readOnly
-                    className="w-full text-xs bg-muted/40 border rounded px-2 py-1 font-mono"
-                    title={currentPath}
-                />
-            )}
+            {/* Admin users shouldn't need to see or edit the slug; preview only. */}
             <div className="flex items-start gap-4">
                 <div className="w-32 h-32 border rounded bg-muted/20 flex items-center justify-center overflow-hidden">
                     {preview ? (
