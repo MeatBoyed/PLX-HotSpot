@@ -16,7 +16,6 @@
  */
 import 'server-only';
 import crypto from 'crypto';
-import type { Plan } from './plan-catalog';
 import { Package } from '@/lib/services/package-service';
 
 // Exact PayFast Node.js signature function (adapted to TypeScript)
@@ -109,7 +108,7 @@ export class PayFastService {
       // name_first: '',
       // name_last: '',
       // email_address: '',
-      cell_number: cellNumber ?? '',
+      name_first: cellNumber ?? '',
       // Transaction details
       m_payment_id: String(pkg.id),
       amount,

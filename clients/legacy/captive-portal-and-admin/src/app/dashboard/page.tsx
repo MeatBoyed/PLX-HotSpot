@@ -28,6 +28,7 @@ import { PlanCard } from '@/components/plan-card';
 import React from "react";
 import AdSection from "@/components/ad-section";
 import { Navbar } from "@/components/home-page/head";
+import PackagesPlanList from "@/components/packages-plan-list";
 
 export default function Dashboard() {
     const { theme } = useTheme()
@@ -77,11 +78,12 @@ export default function Dashboard() {
 
                 {/* Change Plan */}
                 <h2 className="text-gray-500 text-lg font-medium mb-2">Change your plan</h2>
-                <div className="flex gap-3 overflow-x-auto pb-3 items-center">
-                    {/* <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' /> */}
-                    <PlanCard variant="paid" price='R50' totalData='50 Hrs • 2GB' tag='Mini' />
+                {/* <div className="flex gap-3 overflow-x-auto pb-3 items-center"> */}
+                {/* <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' /> */}
+                {/* <PlanCard variant="paid" price='R50' totalData='50 Hrs • 2GB' tag='Mini' />
                     <PlanCard variant="paid" price='R100' totalData='100 Hrs • 100GB' tag='Mega' />
-                </div>
+                </div> */}
+                <PackagesPlanList ssid={theme.ssid} />
 
                 {/* Voucher Section */}
                 {/* <VoucherCTA /> */}

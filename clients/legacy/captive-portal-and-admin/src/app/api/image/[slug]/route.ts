@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { imageService } from '@/lib/services/image-service';
 
 // GET /api/image/[slug]?ssid=... -> returns image binary from branding_image
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
-  const slug = params?.slug;
-  const ssid = req.nextUrl.searchParams.get('ssid');
+export async function GET(req: NextRequest) {
+  const { pathname, searchParams } = req.nextUrl;
+  const slug = pathname.split('/').pop() || '';
+  const ssid = searchParams.get('ssid');
   if (!slug) {
     return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
   }

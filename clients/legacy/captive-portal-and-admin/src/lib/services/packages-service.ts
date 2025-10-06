@@ -36,14 +36,14 @@ const selectPackage = {
 export const packagesService = {
   async list(ssid: string): Promise<PackageRecord[]> {
     const rows = await prisma.packages.findMany({ where: { ssid }, orderBy: { id: 'asc' }, select: selectPackage });
-    return rows as unknown as PackageRecord[];
+    return rows as PackageRecord[];
   },
   async create(input: Omit<PackageRecord, 'id' | 'created_at' | 'updated_at'>): Promise<PackageRecord> {
     try {
-      const created = await prisma.packages.create({ data: input as any, select: selectPackage });
-      return created as unknown as PackageRecord;
+      const created = await prisma.packages.create({ data: input as Prisma.PackagesCreateInput, select: selectPackage });
+      return created as PackageRecord;
     } catch (err) {
-      if ((err as any)?.code === 'P2002') {
+      if ((err as { code?: string } | null)?.code === 'P2002') {
         throw new Error('A package with this name already exists for this SSID');
       }
       throw err;
@@ -51,10 +51,10 @@ export const packagesService = {
   },
   async update(id: number, ssid: string, updates: Partial<Omit<PackageRecord, 'id' | 'ssid'>>): Promise<PackageRecord> {
     try {
-      const updated = await prisma.packages.update({ where: { id }, data: { ...updates, ssid } as any, select: selectPackage });
-      return updated as unknown as PackageRecord;
+      const updated = await prisma.packages.update({ where: { id }, data: { ...updates, ssid } as unknown as Prisma.PackagesUpdateInput, select: selectPackage });
+      return updated as PackageRecord;
     } catch (err) {
-      if ((err as any)?.code === 'P2002') {
+      if ((err as { code?: string } | null)?.code === 'P2002') {
         throw new Error('A package with this name already exists for this SSID');
       }
       throw err;

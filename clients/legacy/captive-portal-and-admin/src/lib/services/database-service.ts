@@ -104,8 +104,10 @@ const brandingConfigSelect = {
 
 export class DatabaseService {
 	// Convert a prisma row (snake_case) to app shape (camelCase), then normalize to ensure defaults
-	#toAppBrandingConfig(row: any): BrandingConfig {
+	#toAppBrandingConfig(row: Prisma.branding_configGetPayload<{ select: typeof brandingConfigSelect }>): BrandingConfig {
 		if (!row) throw new Error('Branding config row is empty');
+		const rawAuth = Array.isArray(row.auth_methods) ? row.auth_methods : undefined;
+		const filteredAuth = rawAuth?.filter((m: unknown): m is 'free' | 'voucher' => m === 'free' || m === 'voucher');
 		const mapped: Partial<AppBrandingConfig> = {
 			id: row.id,
 			ssid: row.ssid,
@@ -142,7 +144,7 @@ export class DatabaseService {
 			adsVastUrl: row.ads_vast_url ?? null,
 			splashBackground: row.splash_background ?? null,
 			splashHeading: row.splash_heading ?? null,
-			authMethods: Array.isArray(row.auth_methods) ? row.auth_methods : undefined,
+			authMethods: filteredAuth,
 			createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
 			updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
 		};
@@ -169,7 +171,7 @@ export class DatabaseService {
 			if (this.#isPrismaKnownError(err)) {
 				// P2002: Unique constraint failed
 				if (err.code === 'P2002' && Array.isArray(err.meta?.target) && err.meta?.target.includes('ssid')) {
-					throw new Error(`Branding config already exists for ssid=${(input as any).ssid}`);
+					throw new Error(`Branding config already exists for ssid=${(input as { ssid?: string }).ssid}`);
 				}
 			}
 			throw err;
@@ -232,15 +234,15 @@ export class DatabaseService {
 			splashHeading: 'splash_heading',
 			authMethods: 'auth_methods',
 		};
-		const prismaUpdate: Record<string, any> = {};
+		const prismaUpdate: Record<string, unknown> = {};
 		for (const [ckey, value] of Object.entries(updates)) {
 			if (!(ckey in map)) continue;
-			const dbKey = (map as any)[ckey];
+			const dbKey = map[ckey as keyof typeof map];
 			if (value === undefined) continue; // omit undefined
 			prismaUpdate[dbKey] = value; // null allowed to clear, arrays passed as-is
 		}
 		if (Object.keys(prismaUpdate).length === 0) return await this.getBrandingConfig(ssid);
-		return await this.updateBrandingConfig(ssid, prismaUpdate as any);
+		return await this.updateBrandingConfig(ssid, prismaUpdate as Prisma.branding_configUpdateInput);
 	}
 
 	// Upsert by SSID — creates if missing, otherwise updates
@@ -255,7 +257,7 @@ export class DatabaseService {
 	}
 
 	#isPrismaKnownError(err: unknown): err is Prisma.PrismaClientKnownRequestError {
-		return typeof err === 'object' && err !== null && 'code' in err && typeof (err as any).code === 'string';
+		return typeof err === 'object' && err !== null && 'code' in (err as Record<string, unknown>) && typeof (err as { code?: unknown }).code === 'string';
 	}
 }
 

@@ -15,7 +15,7 @@ const UpdateSchema = PackageUpdateSchema;
 export default function PackagesAdminPage() {
   const { theme } = useTheme();
   const ssid = theme?.ssid;
-  const [loading, setLoading] = useState(false);
+  // Loading state removed to avoid unused variable lint
   const [items, setItems] = useState<Pkg[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Pkg>>({});
@@ -23,12 +23,11 @@ export default function PackagesAdminPage() {
   useEffect(() => {
     if (!ssid) return;
     (async () => {
-      setLoading(true);
       try {
         const list = await listPackagesAction(ssid);
         setItems(list);
       } finally {
-        setLoading(false);
+        // no-op
       }
     })();
   }, [ssid]);

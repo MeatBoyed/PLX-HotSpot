@@ -30,7 +30,7 @@ export async function buildPayfastFieldsAction(_prevState: BuildState | undefine
     if (!pkg) return { error: 'Selected package not found.' };
 
     const baseUrl = env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const returnUrl = `${baseUrl}/checkout/`;
+    const returnUrl = `${baseUrl}/checkout/success`;
     const cancelUrl = `${baseUrl}/checkout/cancel`;
     const notifyUrl = `${baseUrl}/api/payfast/ipn`;
 

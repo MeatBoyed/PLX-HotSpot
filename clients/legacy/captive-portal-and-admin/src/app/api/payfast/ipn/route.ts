@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { payFastService } from '@/features/purchasing/payfast-service';
 import { voucherService } from '@/features/purchasing/voucher-service';
 import { smsService } from '@/features/purchasing/sms-service';
-import { listPlans } from '@/features/purchasing/plan-catalog';
+import { packageService } from '@/lib/services/package-service';
 import dns from 'dns';
 import { env } from '@/env';
 
@@ -58,13 +58,13 @@ export async function POST(req: NextRequest) {
   try {
     const payload = await parseBody(req);
     if (!payload || Object.keys(payload).length === 0) {
-      return NextResponse.json({ error: 'Empty payload' }, { status: 400 });
+      return NextResponse.json({ error: 'Empty payload' }, { status: 500 });
     }
 
     // 1) Signature verification (using exact PayFast algorithm)
     if (!payFastService.verifySignature(payload)) {
       console.warn('[PF:IPN] Invalid signature');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 500 });
     }
 
     // 2) Check that the notification came from a valid PayFast domain IP
@@ -94,42 +94,47 @@ export async function POST(req: NextRequest) {
     }
     if (pfIp && validIps.length > 0 && !validIps.includes(pfIp)) {
       console.warn('[PF:IPN] Invalid source IP', pfIp);
-      return NextResponse.json({ error: 'Invalid source IP' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid source IP' }, { status: 500 });
     }
 
     // Merchant id check
     if (env.PAYFAST_MERCHANT_ID && payload.merchant_id !== env.PAYFAST_MERCHANT_ID) {
       console.warn('[PF:IPN:MERCHANT_MISMATCH]', payload.merchant_id);
-      return NextResponse.json({ error: 'Merchant mismatch' }, { status: 400 });
+      return NextResponse.json({ error: 'Merchant mismatch' }, { status: 500 });
     }
 
-    // Map plan by item_name (minimal field set) and validate amount
-    const plans = listPlans();
-    const plan = plans.find(p => p.itemName === payload.item_name);
-    if (!plan) {
-      return NextResponse.json({ error: 'Unknown plan (item_name)' }, { status: 400 });
+    // Look up package by item_name (DB-backed)
+    const pkg = await packageService.getByName(payload.item_name);
+    if (!pkg) {
+      return NextResponse.json({ error: 'Unknown package (item_name)' }, { status: 500 });
     }
 
-    const expectedAmount = plan.price.toFixed(2);
+    const expectedAmount = pkg.price.toFixed(2);
     const amountOk = payload.amount === expectedAmount || payload.amount_gross === expectedAmount;
     if (!amountOk) {
       console.warn('[PF:IPN:AMOUNT_MISMATCH]', { got: payload.amount || payload.amount_gross, expected: expectedAmount });
-      return NextResponse.json({ error: 'Amount mismatch' }, { status: 400 });
+      return NextResponse.json({ error: 'Amount mismatch' }, { status: 500 });
     }
 
-    // Use global/hardcoded MSISDN
-    const msisdn = env.PAYFAST_TEST_MSISDN || '27656853805';
+
+    console.log("[PF:IPN:VERIFIED_PAYLOAD]", payload)
+    // MSISDN passed from PayFast payload
+    const msisdn = (payload.name_first || '').trim();
+    if (!msisdn) {
+      console.warn('[PF:IPN] Missing cell_number in payload');
+      return NextResponse.json({ error: 'Missing cell_number' }, { status: 400 });
+    }
     const paymentKey = payload.pf_payment_id || payload.m_payment_id || payload.signature; // fallback sequence
 
     // Issue (idempotent) voucher and attempt SMS
-    const voucher = await voucherService.issueVoucher({ paymentKey, planId: plan.id, msisdn });
+    const voucher = await voucherService.issueVoucher({ paymentKey, pkg, msisdn });
     try {
       await smsService.sendVoucher({ msisdn, code: voucher.code });
     } catch (err) {
       console.warn('[PF:IPN] SMS dispatch error', err);
     }
 
-    console.log(`[PF:IPN] plan=${plan.id} paymentKey=${paymentKey}`);
+    console.log(`[PF:IPN] package=${pkg.id} paymentKey=${paymentKey}`);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[PF:IPN] Handler error', err);
