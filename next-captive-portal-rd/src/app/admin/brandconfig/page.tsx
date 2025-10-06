@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { schemas } from "@/lib/hotspotAPI";
-import { FormFieldConfig, FormSectionConfig } from "@/lib/types";
+import { FormFieldConfig } from "@/lib/types";
 import { useTheme } from "@/components/theme-provider";
 import Head from "@/components/home-page/head";
 import { z } from "zod";
@@ -74,17 +74,11 @@ const adFields: FormFieldConfig[] = [
     { name: "adsVastUrl", label: "VAST URL", type: "text", placeholder: "https://example.com/vast.xml" },
 ];
 
-const sections: FormSectionConfig[] = [
-    { title: "Brand Identity", description: "Copy and meta information.", fields: brandingFields },
-    { title: "Images", description: "Logos and backgrounds.", fields: imageFields },
-    { title: "Colors", description: "Core palette.", fields: colorFields },
-    { title: "Buttons", description: "Button styles.", fields: buttonFields },
-    { title: "Advertising", description: "Ad & VAST configuration.", fields: adFields },
-];
+// Note: sections constant removed to avoid unused variable lint.
 
 export default function BrandConfigAdminPage() {
     const { theme, refreshTheme, setTheme } = useTheme();
-    const { submitting, initialValues, objectUrlsRef, handleFileChange, onSubmit, uploadImage, uploadingByField } = useBrandConfigForm<UpdateInput>({
+    const { initialValues, objectUrlsRef, handleFileChange, uploadImage, uploadingByField } = useBrandConfigForm<UpdateInput>({
         theme,
         setTheme,
         refreshTheme,
@@ -130,7 +124,7 @@ export default function BrandConfigAdminPage() {
                         action={updateBrandIdentityAction}
                         onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
                         fieldRenderers={{
-                            logo: ({ value }: any) => (
+                            logo: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="logo"
                                     label="Logo"
@@ -143,7 +137,7 @@ export default function BrandConfigAdminPage() {
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
-                            logoWhite: ({ value }: any) => (
+                            logoWhite: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="logoWhite"
                                     label="Logo (White)"
@@ -156,7 +150,7 @@ export default function BrandConfigAdminPage() {
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
-                            connectCardBackground: ({ value }: any) => (
+                            connectCardBackground: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="connectCardBackground"
                                     label="Connect Card Background"
@@ -169,7 +163,7 @@ export default function BrandConfigAdminPage() {
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
-                            bannerOverlay: ({ value }: any) => (
+                            bannerOverlay: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="bannerOverlay"
                                     label="Banner Overlay"
@@ -182,7 +176,7 @@ export default function BrandConfigAdminPage() {
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
-                            favicon: ({ value }: any) => (
+                            favicon: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="favicon"
                                     label="Favicon"
@@ -195,7 +189,7 @@ export default function BrandConfigAdminPage() {
                                     ssid={(theme?.ssid || initialValues?.ssid) as string}
                                 />
                             ),
-                            splashBackground: ({ value }: any) => (
+                            splashBackground: ({ value }: { value: unknown }) => (
                                 <ImageField
                                     name="splashBackground"
                                     label="Splash Background"

@@ -5,14 +5,15 @@ import type { FormFieldConfig, FormSectionConfig } from "@/lib/types";
 import { CustomForm } from "@/components/ui/custom-form";
 import type { BrandingConfig } from "@/lib/types";
 import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
 
-type FieldRenderers = Record<string, (ctx: { field: FormFieldConfig; form: UseFormReturn<Record<string, unknown>>; value: unknown }) => React.ReactNode>;
+export type FieldRenderers = Record<string, (ctx: { field: FormFieldConfig; form: UseFormReturn<Record<string, unknown>>; value: unknown }) => React.ReactNode>;
 
 export type SectionFormProps = {
     title: string;
     description?: string;
     fields: FormFieldConfig[];
-    schema: any; // Zod schema for validation (full object ok; we filter values before submit)
+    schema: z.ZodType<Record<string, unknown>>; // Zod schema for validation (full object ok; we filter values before submit)
     defaultValues: Record<string, unknown>;
     ssid: string;
     // Server action that updates only this section
@@ -50,7 +51,7 @@ export default function SectionForm({ title, description, fields, schema, defaul
     // Compose default values limited to the section fields
     const sectionDefaults: Record<string, unknown> = {};
     for (const f of fields) {
-        if (f.name in defaultValues) sectionDefaults[f.name] = (defaultValues as any)[f.name];
+        if (f.name in defaultValues) sectionDefaults[f.name] = defaultValues[f.name];
     }
 
     return (

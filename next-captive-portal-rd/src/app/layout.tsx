@@ -31,7 +31,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     branding = await BrandingService.get(ssid);
   } catch (e) {
     if (env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.debug('RootLayout branding fetch failed, falling back', e);
     }
   }

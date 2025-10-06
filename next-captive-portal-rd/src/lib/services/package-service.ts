@@ -29,7 +29,21 @@ const select = {
   updated_at: true,
 } satisfies Prisma.PackagesSelect;
 
-function toApp(p: any): Package {
+type Row = {
+  id: number;
+  ssid: string;
+  name: string;
+  description: string | null;
+  price: number;
+  radiusProfileId: number;
+  radiusProfile: string;
+  radiusRealmId: string | null;
+  radiusCloudId: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+function toApp(p: Row): Package {
   return {
     id: p.id,
     ssid: p.ssid,
@@ -85,9 +99,9 @@ export const packageService = {
         description: data.description === undefined ? undefined : data.description ?? null,
         radiusRealmId: data.radiusRealmId === undefined ? undefined : data.radiusRealmId ?? null,
         radiusCloudId: data.radiusCloudId === undefined ? undefined : data.radiusCloudId ?? null,
-      } as any,
+      } as Prisma.PackagesUpdateInput,
       select,
-    }).catch((e) => {
+    }).catch(() => {
       // If not found, return null
       return null;
     });

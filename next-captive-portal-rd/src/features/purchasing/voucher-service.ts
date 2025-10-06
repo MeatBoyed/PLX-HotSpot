@@ -7,17 +7,18 @@
  */
 import 'server-only';
 import { env } from '@/env';
+import type { Package } from '@/lib/services/package-service';
 
 interface IssueVoucherInput {
   paymentKey: string; // Typically PayFast pf_payment_id or custom tracking id
-  planId: string;
+  pkg: Package; // carries RadiusDesk identifiers
   msisdn: string;
   ttlHours?: number;
 }
 
 export interface VoucherRecord {
   code: string;
-  planId: string;
+  profileId: string; // RadiusDesk profile ID used
   msisdn: string;
   createdAt: Date;
   expiresAt: Date;
@@ -28,49 +29,52 @@ const DEFAULT_TTL_HOURS = Number(env.VOUCHER_DEFAULT_TTL_HOURS || 24);
 class VoucherService {
   private store = new Map<string, VoucherRecord>();
 
-  private getRadiusDeskConfig() {
-    const baseUrl = env.MIKROTIK_RADIUS_DESK_BASE_URL; // Prefer shared base URL from env.ts
-    const token = env.RADIUSDESK_TOKEN;
-    const realmId = env.RADIUSDESK_REALM_ID;
-    const profileId = env.RADIUSDESK_PROFILE_ID;
-    const cloudId = env.RADIUSDESK_CLOUD_ID;
+  private getRadiusDeskConfig(pkg: Package) {
+    const baseUrl = env.MIKROTIK_RADIUS_DESK_BASE_URL; // Base URL stays global
+    const token = env.RADIUSDESK_TOKEN; // Token stays global
+    const realmId = pkg.radiusRealmId;
+    const cloudId = pkg.radiusCloudId;
+    const profileId = String(pkg.radiusProfileId);
     const missing = [
       !baseUrl && 'RADIUSDESK_BASE_URL',
       !token && 'RADIUSDESK_TOKEN',
-      !realmId && 'RADIUSDESK_REALM_ID',
-      !profileId && 'RADIUSDESK_PROFILE_ID',
-      !cloudId && 'RADIUSDESK_CLOUD_ID',
+      !realmId && 'PACKAGE.radiusRealmId',
+      !cloudId && 'PACKAGE.radiusCloudId',
+      !profileId && 'PACKAGE.radiusProfileId',
     ].filter(Boolean) as string[];
     if (missing.length) {
-      throw new Error(`VoucherService: Missing env vars: ${missing.join(', ')}`);
+      throw new Error(`VoucherService: Missing config: ${missing.join(', ')}`);
     }
     return { baseUrl: String(baseUrl), token: String(token), realmId: String(realmId), profileId: String(profileId), cloudId: String(cloudId) };
   }
 
-  private extractVoucherCode(obj: any): string | null {
+  private extractVoucherCode(obj: unknown): string | null {
     if (obj == null) return null;
     // Common field guesses from RadiusDesk payloads
     const candidates = ['voucher', 'code', 'password', 'name', 'username'];
-    for (const key of candidates) {
-      const v = obj[key];
-      if (typeof v === 'string' && v.trim().length > 0) return v.trim();
-    }
-    if (Array.isArray(obj)) {
-      for (const item of obj) {
-        const got = this.extractVoucherCode(item);
-        if (got) return got;
+    if (typeof obj === 'object' && obj !== null) {
+      const rec: Record<string, unknown> = obj as Record<string, unknown>;
+      for (const key of candidates) {
+        const v = rec[key];
+        if (typeof v === 'string' && v.trim().length > 0) return v.trim();
       }
-    } else if (typeof obj === 'object') {
-      for (const k of Object.keys(obj)) {
-        const got = this.extractVoucherCode(obj[k]);
-        if (got) return got;
+      if (Array.isArray(obj)) {
+        for (const item of obj) {
+          const got = this.extractVoucherCode(item);
+          if (got) return got;
+        }
+      } else {
+        for (const k of Object.keys(rec)) {
+          const got = this.extractVoucherCode(rec[k]);
+          if (got) return got;
+        }
       }
     }
     return null;
   }
 
-  private async createVoucherViaRadiusDesk(): Promise<string> {
-    const { baseUrl, token, realmId, profileId, cloudId } = this.getRadiusDeskConfig();
+  private async createVoucherViaRadiusDesk(config: { baseUrl: string; token: string; realmId: string; profileId: string; cloudId: string; }, msisdn: string): Promise<string> {
+    const { baseUrl, token, realmId, profileId, cloudId } = config;
     const url = new URL('/cake4/rd_cake/vouchers/add.json', baseUrl.replace(/\/$/, ''));
     const params = new URLSearchParams();
     params.append('single_field', 'true');
@@ -83,7 +87,7 @@ class VoucherService {
     params.append('minutes_valid', '0');
     params.append('never_expire', 'on');
     params.append('extra_name', '');
-    params.append('extra_value', '');
+    params.append('extra_value', msisdn);
     params.append('token', token);
     params.append('cloud_id', cloudId);
 
@@ -111,18 +115,19 @@ class VoucherService {
   }
 
   async issueVoucher(input: IssueVoucherInput): Promise<VoucherRecord> {
-    const { paymentKey, planId, msisdn } = input;
+    const { paymentKey, pkg, msisdn } = input;
     const ttlHours = input.ttlHours ?? DEFAULT_TTL_HOURS;
     const existing = this.store.get(paymentKey);
     if (existing) return existing;
 
     // Create via RadiusDesk
-    const code = await this.createVoucherViaRadiusDesk();
+    const rd = this.getRadiusDeskConfig(pkg);
+    const code = await this.createVoucherViaRadiusDesk(rd, msisdn);
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
-    const record: VoucherRecord = { code, planId, msisdn, createdAt: now, expiresAt };
+    const record: VoucherRecord = { code, profileId: rd.profileId, msisdn, createdAt: now, expiresAt };
     this.store.set(paymentKey, record);
-    console.log(`[VOUCHER:CREATED] paymentKey=${paymentKey} code=${code} plan=${planId} msisdn=${msisdn}`);
+    console.log(`[VOUCHER:CREATED] paymentKey=${paymentKey} code=${code} profile=${rd.profileId} msisdn=${msisdn}`);
     return record;
   }
 

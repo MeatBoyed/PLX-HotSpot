@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { hotspotAPI } from "@/lib/hotspotAPI";
 import { BrandingConfig } from "@/lib/types";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
     const [uploadingByField, setUploadingByField] = useState<Record<string, boolean>>({});
     const objectUrlsRef = useRef<Record<string, string>>({});
 
-    const allowedMime = new Set(["image/png", "image/jpeg", "image/webp"]);
+    const allowedMime = useMemo(() => new Set(["image/png", "image/jpeg", "image/webp"]), []);
     const maxBytes = 20 * 1024 * 1024;
 
     const handleFileChange = (field: string, file: File | undefined) => {
@@ -136,7 +136,7 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
             setSubmitting(false);
             console.log(`[BrandConfig] Submit completed in ${(performance.now() - start).toFixed(0)}ms`);
         }
-    }, [StripSchema, theme, selectedFiles, setTheme, refreshTheme]);
+    }, [StripSchema, theme, selectedFiles, setTheme, refreshTheme, allowedMime, maxBytes]);
 
     const uploadImage = useCallback(async (field: string) => {
         const file = selectedFiles[field];
@@ -197,7 +197,7 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
             setUploadingByField(prev => ({ ...prev, [field]: false }));
             console.log(`[BrandConfig] Upload(${field}) completed in ${(performance.now() - start).toFixed(0)}ms`);
         }
-    }, [selectedFiles, theme?.ssid, refreshTheme, setTheme]);
+    }, [selectedFiles, theme?.ssid, refreshTheme, setTheme, allowedMime, maxBytes]);
 
     return {
         submitting,
