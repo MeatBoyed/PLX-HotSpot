@@ -1,0 +1,13 @@
+services:
+  web:
+    # Uses the prebuilt image; ensure it's available locally or in your registry
+    image: vv-hotspot:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Run in production mode
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    restart: unless-stopped

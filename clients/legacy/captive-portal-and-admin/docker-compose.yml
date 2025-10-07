@@ -1,30 +1,34 @@
-version: '3.8'
-
 services:
-  hotspot-app:
-    container_name: hotspot-app
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: charlesmbv/vv-captive-portal:pluxnet
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # If you later need build-time args, you can pass them here; currently we COPY .env during build.
+      # args:
+      #   - NEXT_PUBLIC_BASE_URL
+    image: vv-hotspot:latest
+    ports:
+      - "3000:3000"
     env_file:
       - .env
     environment:
-      # Ensure container listens on 3001 by default; override with PORT env or .env file
-      - PORT=${PORT:-3001}
-      # Ensure container listens on 3001 by default; override with PORT env or .env file
-      - NEXT_PUBLIC_SSID=${NEXT_PUBLIC_SSID:-Jozi-wifi}
-      # Optionally expose NODE_ENV, defaults to production in Dockerfile
-      - NODE_ENV=${NODE_ENV:-production}
-    ports:
-      - "${HOST_PORT:-3001}:${PORT:-3001}"
+      # Ensure production mode in container
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      # Uncomment if you run Postgres here
+      # - db
+      []
     restart: unless-stopped
-    networks:
-      - default
-      - public-proxy
+  # Example Postgres service if you want it here (optional)
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_PASSWORD: example
+  #   volumes:
+  #     - dbdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
 
-networks:
-  default:
-    name: hotspot-app-default
-  public-proxy:
-    external: true
+  # volumes:
+  #   dbdata:

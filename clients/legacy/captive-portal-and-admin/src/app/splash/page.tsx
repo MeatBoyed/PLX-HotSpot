@@ -1,6 +1,5 @@
 "use client"
 import { useTheme } from "@/components/theme-provider";
-import { env } from "@/env";
 import { imageUrl } from "@/lib/image-url";
 import Link from "next/dist/client/link";
 import React from "react";

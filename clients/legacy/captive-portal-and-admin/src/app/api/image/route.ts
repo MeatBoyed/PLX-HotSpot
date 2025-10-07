@@ -2,20 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { databaseService } from '@/lib/services/database-service';
 import { imageService } from '@/lib/services/image-service';
 
-const allowedFields = new Set([
+// Define allowed field names as a const tuple to derive a union type
+const allowedFieldNames = [
     'logo',
     'logoWhite',
     'connectCardBackground',
     'bannerOverlay',
     'favicon',
     'splashBackground',
-]);
+] as const;
+type AllowedField = typeof allowedFieldNames[number];
+const allowedFields = new Set<AllowedField>(allowedFieldNames);
 
 const allowedMime = new Set(['image/png', 'image/jpeg', 'image/webp']);
 const maxBytes = 20 * 1024 * 1024;
 
 function toBuffer(file: File): Promise<Buffer> {
     return file.arrayBuffer().then((ab) => Buffer.from(ab));
+}
+
+// Type guard to narrow arbitrary strings to AllowedField
+function isAllowedField(name: string): name is AllowedField {
+    return (allowedFields as Set<string>).has(name);
 }
 
 export async function POST(req: NextRequest) {
@@ -28,13 +36,17 @@ export async function POST(req: NextRequest) {
 
     try {
         const form = await req.formData();
-        const updates: Record<string, string> = {};
+        const updates: Partial<Record<AllowedField, string>> = {};
 
         for (const [field, val] of form.entries()) {
             if (!(val instanceof File)) continue;
-            if (!allowedFields.has(field)) continue; // ignore unknown fields silently
-            if (!allowedMime.has(val.type)) return NextResponse.json({ error: `${field}: Unsupported MIME` }, { status: 400 });
-            if (val.size > maxBytes) return NextResponse.json({ error: `${field}: File exceeds 20MB` }, { status: 400 });
+            if (!isAllowedField(field)) continue; // ignore unknown fields silently
+            if (!allowedMime.has(val.type)) {
+                return NextResponse.json({ error: `${field}: Unsupported MIME` }, { status: 400 });
+            }
+            if (val.size > maxBytes) {
+                return NextResponse.json({ error: `${field}: File exceeds 20MB` }, { status: 400 });
+            }
             const data = await toBuffer(val);
             // Enforce slug consistency: slug == field
             await imageService.overwriteWithBackup(ssid, field, val.type, data);
@@ -46,8 +58,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No valid image fields found' }, { status: 400 });
         }
 
-        // Update only provided fields
-        const res = await databaseService.updateBrandingConfigApp(ssid, updates as any);
+        // Update only provided fields (typed; no `any`)
+        const res = await databaseService.updateBrandingConfigApp(ssid, updates);
         if (!res) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         return NextResponse.json({ res });
     } catch (e) {

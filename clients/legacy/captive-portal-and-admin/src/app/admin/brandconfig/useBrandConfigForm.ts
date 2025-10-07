@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { hotspotAPI } from "@/lib/hotspotAPI";
 import { BrandingConfig } from "@/lib/types";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -112,9 +111,8 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
                 form.append(field, file);
             }
 
-            // Use fetch for multipart, leveraging hotspotAPI base URL for consistency
-            const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
-            const url = `${baseUrl}/api/image?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/g, "$1/");
+            // Use same-origin relative URL to the dedicated image endpoint
+            const url = `/api/image?ssid=${encodeURIComponent(ssid)}`;
             const resp = await fetch(url, { method: "POST", body: form });
             if (!resp.ok) {
                 const text = await resp.text();
@@ -165,8 +163,8 @@ export function useBrandConfigForm<T extends Record<string, unknown>>({ theme, s
             form.append("json", JSON.stringify({ [field]: field }));
             form.append(field, file);
 
-            const baseUrl = (hotspotAPI as unknown as { defaults?: { baseURL?: string } }).defaults?.baseURL || (hotspotAPI as unknown as { baseURL?: string }).baseURL || "";
-            const url = `${baseUrl}/api/image?ssid=${encodeURIComponent(ssid)}`.replace(/([^:]\/)\/+/, "$1/");
+            // Use same-origin relative URL to the dedicated image endpoint
+            const url = `/api/image?ssid=${encodeURIComponent(ssid)}`;
             const resp = await fetch(url, { method: "POST", body: form });
             if (!resp.ok) {
                 const text = await resp.text();

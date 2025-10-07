@@ -13,8 +13,9 @@ build/
 dist/
 
 # Environment files
-.env
+# Keep local variants ignored, but include .env in build context so Dockerfile can COPY it for Next.js build
 .env.*
+!.env
 !.env.example
 
 # Runtime data
@@ -64,7 +65,8 @@ Thumbs.db
 .git
 .gitignore
 
-# Docker
+# Docker (keep compose and Dockerfile out of context if desired)
+# Dockerfile will be provided explicitly via build, so ignoring it is okay.
 Dockerfile*
 docker-compose*
 .dockerignore

@@ -1,6 +1,5 @@
 "use client";
 import { useTheme } from "@/components/theme-provider";
-import { PlanCard } from '@/components/plan-card';
 // Must run on Server otherwise RadiusDesk requests fails
 // import UserSession from '@/components/welcome-page/user-session';
 // import InfoCard from '@/components/welcome-page/info-card';
@@ -91,25 +90,7 @@ export default function Dashboard() {
                 <AdSection />
             </div>
 
-            {/* Bottom Nav */}
-            {/* <nav className="fixed bottom-0 left-0 w-full bg-white border-t flex justify-between px-6 py-2">
-                <div className="flex flex-col items-center text-[#6F36C1]">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 3l9.5 8.5-1.42 1.42L12 5.84l-8.08 7.08L2.5 11.5z" fill="currentColor" /></svg>
-                    <span className="text-xs">Home</span>
-                </div>
-                <div className="flex flex-col items-center text-gray-400">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" /></svg>
-                    <span className="text-xs">Weather</span>
-                </div>
-                <div className="flex flex-col items-center text-gray-400">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor" /><circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="2" /></svg>
-                    <span className="text-xs">Around me</span>
-                </div>
-                <div className="flex flex-col items-center text-gray-400">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor" /></svg>
-                    <span className="text-xs">More</span>
-                </div>
-            </nav> */}
+
         </div>
     );
 }
