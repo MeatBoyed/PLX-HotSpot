@@ -1,5 +1,4 @@
 "use client"
-import { env } from "@/env";
 import { useTheme } from "../theme-provider";
 import { imageUrl } from "@/lib/image-url";
 
@@ -14,7 +13,7 @@ export default function Head() {
             <a href="index.html" className="w-28">
                 {/* eslint-disable @next/next/no-img-element  */}
                 <img
-                    src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}${theme.logo}`}
+                    src={imageUrl(theme.logo, theme.ssid)}
                     alt="Brand logo"
                     width="auto"
                     height="auto"

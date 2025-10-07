@@ -1,5 +1,48 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Runtime vs Build-time environment variables
+
+This app uses T3 Env (`src/env.ts`) to validate environment variables for both server and client.
+
+- Server-only variables (in the `server` block of `src/env.ts`) are read at runtime. Updating these in `.env` and restarting the container is sufficient. Examples:
+	- `PAYFAST_*`, `RADIUSDESK_*`, `MIKROTIK_RADIUS_DESK_BASE_URL`, `VOUCHER_DEFAULT_TTL_HOURS`, `USE_SEED_DATA`, `SITE_TITLE`, `SITE_DESCRIPTION`, `BRAND_NAME`.
+
+- Public/client variables (prefixed with `NEXT_PUBLIC_`) are compiled into the client bundle at build time. Changing these requires rebuilding the image. Examples:
+	- `NEXT_PUBLIC_SSID`, `NEXT_PUBLIC_MIKROTIK_*`, `NEXT_PUBLIC_BASE_URL`.
+
+Rule of thumb:
+- Change only server vars → restart container (no rebuild required).
+- Change any `NEXT_PUBLIC_*` or anything that affects build output → rebuild image.
+
+## Docker: build and run
+
+The Dockerfile copies `.env` into the build stage so Next can inline any required build-time values. At runtime, Compose injects environment variables from `.env` into the container process.
+
+Development (rebuild on changes):
+
+```bash
+docker compose up --build -d
+```
+
+Production (use prebuilt image):
+
+1) Build the image locally (or pull from your registry):
+
+```bash
+docker build -t vv-hotspot:latest .
+```
+
+2) Run with the production compose file:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Notes:
+- Ensure `.env` exists at the project root. It is used at both build time (baked where needed) and runtime (via Compose `env_file`).
+- Changing `NEXT_PUBLIC_*` after an image is built will not affect the already built client code; rebuild the image to apply.
+- Server-only changes (e.g., PayFast or RadiusDesk tokens/IDs) can be applied by updating `.env` and restarting the container.
+
 ## Getting Started
 
 First, run the development server:
