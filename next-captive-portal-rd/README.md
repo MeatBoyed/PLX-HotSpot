@@ -43,6 +43,49 @@ Notes:
 - Changing `NEXT_PUBLIC_*` after an image is built will not affect the already built client code; rebuild the image to apply.
 - Server-only changes (e.g., PayFast or RadiusDesk tokens/IDs) can be applied by updating `.env` and restarting the container.
 
+What I built
+- File: deploy-ssid.sh
+- Behavior:
+  - Determines SSID from your env file in this priority: NEXT_PUBLIC_SSID → SSID → PUBLIC_NEXT_SSID
+  - Sanitizes SSID to be Docker-safe and uses it to form:
+    - Image name: vv-hotspot-<sanitized-ssid>:<tag>
+    - Container name: vv-hotspot-<sanitized-ssid>
+  - Copies your chosen env file to .env for the build step (since Next inlines some vars at build time), then runs the container with `--env-file` to ensure runtime values are also applied.
+  - Options:
+    - `-e/--env` choose env file (default .env)
+    - `-p/--port` host port (default 3000)
+    - `--tag` specify tag (default `latest`; use `time` for timestamp tag)
+    - `--no-build` skip the Docker build and just run
+- Contracts:
+  - Requires Docker installed
+  - Exits early with readable errors if env file or SSID are missing
+
+Try it
+- Build and run on default port with .env:
+```bash
+cd next-captive-portal-rd
+chmod +x deploy-ssid.sh
+./deploy-ssid.sh
+```
+
+- Use a specific env and timestamped tag, map to port 3001:
+```bash
+./deploy-ssid.sh -e .env.prod --tag time -p 3001
+```
+
+- Run an already-built image (skip build):
+```bash
+./deploy-ssid.sh --no-build
+```
+
+Notes
+- The script builds with `docker build` directly (not compose) and runs with `docker run` so the image/container names can be dynamically tied to the SSID without maintaining separate compose files per SSID.
+- It copies your chosen env file to .env before building so Next.js gets build-time variables, then runs the container with `--env-file` so server-side runtime reads use the same values.
+- If you change any `NEXT_PUBLIC_*` variables, re-run the script without `--no-build` to rebuild the image. For server-only vars, `--no-build` is fine—just restart the container.
+
+
+
+
 ## Getting Started
 
 First, run the development server:
