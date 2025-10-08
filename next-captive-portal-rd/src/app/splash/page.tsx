@@ -9,6 +9,7 @@ export default function SplashPage() {
     // const [agreed, setAgreed] = useState(false);
 
     return (
+        // <div style={{ background: theme.brandPrimary }} className="flex items-center justify-center flex-col max-w-md w-full" >
         <div className="relative h-[90vh] overflow-hidden">
 
             {/* Background image */}
@@ -70,5 +71,6 @@ export default function SplashPage() {
                 Powered by <span className="font-bold text-[#F55C7A]">N</span> <span className="font-semibold text-white">PluxNet</span>
             </div> */}
         </div>
+        // </div>
     );
 }
