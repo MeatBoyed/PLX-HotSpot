@@ -38,10 +38,10 @@ export default function Dashboard() {
 
             {/* Welcome Text */}
             <div className="flex flex-col items-center mt-8 mb-2 w-full">
-                <h1 className="text-white text-2xl font-semibold text-center">
+                <h1 className="text-white text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
                     Welcome back <span className="inline-block">👋</span>
                 </h1>
-                <span className="text-gray-200 text-base mt-1">
+                <span className=" text-base mt-1" style={{ color: theme.textTertiary }}>
                     View your connection details below
                 </span>
             </div>

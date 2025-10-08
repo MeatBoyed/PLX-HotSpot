@@ -16,7 +16,7 @@ export default function HomePage() {
 
       {/* Welcome Text */}
       <div className="flex flex-col items-center mt-8 mb-6 w-full">
-        <h1 className="text-white text-2xl font-semibold text-center">
+        <h1 className="text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
           {/* Welcome to Pluxnet <br /> Public WiFi */}
           {theme.heading}
         </h1>

@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link";
 import { useTheme } from "../theme-provider";
 import { imageUrl } from "@/lib/image-url";
 
@@ -33,13 +34,15 @@ export function Navbar() {
                     <span className="text-white font-bold">N</span>
                 </div>
                 <span className="text-white text-lg font-semibold">PluxNet</span> */}
-                <img
-                    // src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
-                    src={imageUrl(theme.logo, theme.ssid)}
-                    alt="Brand logo"
-                    width="auto"
-                    height="auto"
-                />
+                <Link href="/">
+                    <img
+                        // src={`${env.NEXT_PUBLIC_HOTSPOT_API_BASE_URL}/${theme.ssid}${theme.logo}`}
+                        src={imageUrl(theme.logo, theme.ssid)}
+                        alt="Brand logo"
+                        width="auto"
+                        height="auto"
+                    />
+                </Link>
             </div>
             {/* <button className="border border-white rounded-full px-4 py-1 text-white text-sm">Connect Now</button> */}
             {/* Profile Icon */}
