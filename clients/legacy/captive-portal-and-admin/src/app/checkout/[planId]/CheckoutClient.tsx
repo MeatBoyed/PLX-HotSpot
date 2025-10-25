@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useFormState } from 'react-dom';
 import { PhoneInput } from '@/components/ui/phone-input';
 import type { BuildState } from './actions';
+import HowItWorks from "./how-it-works"
+import { useTheme } from '@/components/theme-provider';
 
 export default function CheckoutClient({ planName, price, ssid, description, action }: {
     planName: string;
@@ -12,6 +14,7 @@ export default function CheckoutClient({ planName, price, ssid, description, act
     description: string;
     action: (prevState: BuildState | undefined, formData: FormData) => Promise<BuildState>;
 }) {
+    const { theme } = useTheme()
     const [phone, setPhone] = useState<string | undefined>(undefined); // E.164 (+2782...)
     const [state, formAction] = useFormState(action, undefined as unknown as BuildState);
     const ready = Boolean(state?.fields && state?.actionUrl);
@@ -26,11 +29,13 @@ export default function CheckoutClient({ planName, price, ssid, description, act
                 <div className="flex justify-between text-sm"><span>Plan</span><span>{planName}</span></div>
                 <div className="flex justify-between text-sm"><span>Description: </span><span>{description}</span></div>
                 <div className="flex justify-between text-sm font-semibold"><span>Price</span><span>R {price.toFixed(2)}</span></div>
-                <div className="flex justify-between text-xs text-muted-foreground"><span>SSID</span><span>{ssid}</span></div>
+                {/* <div className="flex justify-between text-xs text-muted-foreground"><span>SSID</span><span>{ssid}</span></div> */}
                 {state?.displayMsisdn && (
                     <div className="flex justify-between text-xs text-muted-foreground"><span>Cell</span><span>{state.displayMsisdn}</span></div>
                 )}
             </div>
+            {/* How it works: short explainer under the details card */}
+            <HowItWorks />
 
             {/* Phone capture form (outside PayFast form) */}
             <form action={formAction} className="space-y-4">
@@ -58,6 +63,7 @@ export default function CheckoutClient({ planName, price, ssid, description, act
                     <p className="text-xs text-muted-foreground mt-1">Only South African numbers are accepted.</p>
                 </div>
                 {!ready && (
+                    // <button type="submit" style={{background: theme.buttonPrimary, color: theme.buttonText}} className={`w-full rounded hover:text-[${theme.buttonPrimaryHover}] py-2 text-sm font-medium`}>Continue</button>
                     <button type="submit" className="w-full rounded bg-primary text-primary-foreground py-2 text-sm font-medium">Continue</button>
                 )}
             </form>
@@ -67,10 +73,11 @@ export default function CheckoutClient({ planName, price, ssid, description, act
                 <form action={state.actionUrl} method="post" className="space-y-4">
                     {Object.entries(state.fields).map(([key, value]) => (
                         value !== '' ? (
-                            <input key={key} type="hidden" name={key} value={value.trim()} />
+                            <input key={key} type="hidden" name={key} value={value.replace(/\s+/g, ' ').trim()} />
                         ) : null
                     ))}
-                    <button type="submit" className="w-full rounded bg-primary text-primary-foreground py-2 text-sm font-medium">Pay with PayFast</button>
+                    {/* <button type="submit" className="w-full rounded bg-primary text-primary-foreground py-2 text-sm font-medium">Pay with PayFast</button> */}
+                    <button type="submit" style={{ background: theme.buttonPrimary, color: theme.buttonPrimaryText }} className={`w-full rounded hover:text-[${theme.buttonPrimaryHover}] py-2 text-sm font-medium`}>Pay with PayFast</button>
                 </form>
             )}
         </div>

@@ -11,8 +11,8 @@ export default function CheckoutSuccessPage() {
     // const code = useSearch;
     return (
         <Container>
-            <div className="space-y-2">
-                <h1 className="text-2xl font-semibold">Payment Redirected</h1>
+            <div className="space-y-2 mb-5">
+                <h1 className="text-2xl font-semibold">Connect Now</h1>
                 <p className="text-sm text-muted-foreground">If your payment completed successfully your voucher will arrive shortly via SMS. Already have it? Enter below.</p>
             </div>
             {/* {code && (
