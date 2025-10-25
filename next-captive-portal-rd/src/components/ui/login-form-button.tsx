@@ -114,8 +114,8 @@ function VoucherInnerForm({ label = 'Connect Now', style, className }: BaseButto
             <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onSubmit}>
                 {credentials && (
                     <>
-                        <input type="hidden" name="username" value={credentials.username} />
-                        <input type="hidden" name="password" value={credentials.password} />
+                        <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
+                        <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
                     </>
                 )}
                 <button
