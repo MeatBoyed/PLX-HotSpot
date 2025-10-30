@@ -28,8 +28,9 @@ export default function PackagesPlanList({ ssid, }: Props) {
     return () => { active = false };
   }, [ssid]);
 
+
   return (
-    <div className="flex justify-center gap-3 overflow-x-auto pb-3">
+    <div className="grid grid-cols-2 gap-3">
       {pkgs.map((p) => (
         <PlanCard
           key={p.id}
