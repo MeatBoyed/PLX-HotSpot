@@ -34,11 +34,13 @@ export default function HomePage() {
             <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
           )}
         </div>
-        <PackagesPlanList ssid={theme.ssid} />
 
         {theme.authMethods.includes("voucher") && (
           <VoucherCTA />
         )}
+        <PackagesPlanList ssid={theme.ssid} />
+
+
 
         {/* Banner
         <div className="rounded-xl overflow-hidden">

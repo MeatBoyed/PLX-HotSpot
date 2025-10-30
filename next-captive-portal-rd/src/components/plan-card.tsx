@@ -26,8 +26,8 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
 
     return (
         <div className={[
-            "bg-gray-100 rounded-xl p-4 flex flex-col w-full",
-            isVoucher ? "items-start w-full" : "items-center min-w-[140px]",
+            "bg-gray-100 rounded-xl p-4 flex flex-col w-full text-center",
+            isVoucher ? "items-center w-full" : "items-center min-w-[140px] justify-between",
             className || ""
         ].join(" ").trim()}>
             {tag && (
@@ -55,7 +55,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             {isPaid && (
                 <Link
                     href={`/checkout/${name}`}
-                    className="text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm"
+                    className="text-white rounded-full w-full py-3 font-semibold mt-2 text-sm"
                     style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
                 >
                     Buy now

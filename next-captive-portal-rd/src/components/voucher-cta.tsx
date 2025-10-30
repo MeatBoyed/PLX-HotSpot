@@ -25,7 +25,7 @@ export default function VoucherCTA() {
                 <PlanCard
                     variant="voucher"
                     onDismiss={() => setShowVoucherInput(false)}
-                    className="w-full"
+                    className="w-full mb-4"
                 />
             )}
         </>
