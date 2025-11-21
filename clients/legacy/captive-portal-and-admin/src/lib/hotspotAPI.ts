@@ -200,7 +200,7 @@ const BrandingConfig = z
     buttonText: z.string().max(255).nullish(),
     splashBackground: z.string().max(255).nullish(),
     splashHeading: z.string().max(255).nullish(),
-    authMethods: z.array(z.enum(["free", "voucher"])),
+    authMethods: z.array(z.enum(["free", "voucher", "pu-login"])),
     createdAt: z.string().datetime({ offset: true }).optional(),
     updatedAt: z.string().datetime({ offset: true }).optional(),
   })

@@ -107,7 +107,7 @@ export class DatabaseService {
 	#toAppBrandingConfig(row: Prisma.branding_configGetPayload<{ select: typeof brandingConfigSelect }>): BrandingConfig {
 		if (!row) throw new Error('Branding config row is empty');
 		const rawAuth = Array.isArray(row.auth_methods) ? row.auth_methods : undefined;
-		const filteredAuth = rawAuth?.filter((m: unknown): m is 'free' | 'voucher' => m === 'free' || m === 'voucher');
+		const filteredAuth = rawAuth?.filter((m: unknown): m is 'free' | 'voucher' | "pu-login" => m === 'free' || m === 'voucher' || m === "pu-login");
 		const mapped: Partial<AppBrandingConfig> = {
 			id: row.id,
 			ssid: row.ssid,

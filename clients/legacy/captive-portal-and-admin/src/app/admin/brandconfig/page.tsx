@@ -30,6 +30,7 @@ const brandingFields: FormFieldConfig[] = [
         name: "authMethods", label: "Allowed Authentication Methods", type: "multiselect", options: [
             { value: "free", label: "Free Access" },
             { value: "voucher", label: "Voucher" },
+            { value: "pu-login", label: "Permanent User Login" },
         ]
     },
 ];

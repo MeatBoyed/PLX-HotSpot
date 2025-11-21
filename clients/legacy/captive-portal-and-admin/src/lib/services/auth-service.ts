@@ -1,6 +1,6 @@
 import { env } from '@/env';
 
-export type AuthMode = 'free' | 'voucher';
+export type AuthMode = 'free' | 'voucher' | 'pu-login';
 
 export interface AuthCredentials {
     username: string;
@@ -11,6 +11,8 @@ export interface AuthCredentials {
 
 export interface BuildCredentialsParams {
     voucherCode?: string;
+    username?: string
+    password?: string;
     enabledAuth: AuthMode[];
 }
 
@@ -39,7 +41,27 @@ export class AuthService {
     }
 
     buildCredentials(params: BuildCredentialsParams): AuthCredentialsResult {
-        const { voucherCode, enabledAuth } = params;
+        const { voucherCode, username, password, enabledAuth } = params;
+
+        // TODO -- Perminant User (PU) login flow
+        if (params.username !== undefined && params.password !== undefined) {
+            if (!has(enabledAuth, 'pu-login')) {
+                return { ok: false, error: 'Permanent User authentication not enabled' };
+            }
+            const trimmedUser = params.username.trim();
+            const trimmedPass = params.password.trim();
+            if (!trimmedUser || !trimmedPass) {
+                return { ok: false, error: 'Username and Password required' };
+            }
+            return {
+                ok: true,
+                credentials: {
+                    username: trimmedUser,
+                    password: trimmedPass,
+                    mode: 'pu-login',
+                },
+            };
+        }
 
         // Voucher flow
         if (voucherCode !== undefined && voucherCode !== '') {
