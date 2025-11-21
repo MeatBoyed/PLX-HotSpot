@@ -1,11 +1,11 @@
 "use client";
 import { XCircleIcon } from "lucide-react";
 import { useTheme } from "./theme-provider";
-import { FreeLoginFormButton, VoucherLoginForm } from "./ui/login-form-button";
+import { FreeLoginFormButton, PULoginForm, PURegisterForm, VoucherLoginForm } from "./ui/login-form-button";
 import React from "react";
 import Link from "next/link";
 
-export type PlanVariant = 'free' | 'paid' | 'voucher';
+export type PlanVariant = 'free' | 'paid' | 'voucher' | 'pu-login' | 'pu-register';
 
 interface PlanCardProps {
     name?: string
@@ -23,6 +23,8 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
     const isPaid = variant === 'paid';
     const isFree = variant === 'free';
     const isVoucher = variant === 'voucher';
+    const isPULogin = variant === 'pu-login';
+    const isPURegister = variant === 'pu-register';
 
     return (
         <div className={[
@@ -44,6 +46,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                     {onDismiss && <XCircleIcon onClick={onDismiss} size={20} className="cursor-pointer" />}
                 </div>
             )}
+            {isPULogin && <span className="mb-2 font-bold text-lg">Login to connect</span>}
 
             {totalData && !isVoucher && (
                 <span className="text-gray-500 text-xs mb-2">{totalData}</span>
@@ -75,6 +78,24 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                     className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
                     style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
                     label="Redeem"
+                />
+            )}
+
+            {isPURegister && (
+                <PURegisterForm
+                    // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
+                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
+                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
+                // label="Redeem"
+                />
+            )}
+
+            {isPULogin && (
+                <PULoginForm
+                    // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
+                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
+                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
+                // label="Redeem"
                 />
             )}
         </div>

@@ -11,7 +11,7 @@ interface ConnectContextValue {
     showAd: boolean;
     credentials?: AuthCredentials;
     pendingVoucher?: string;
-    connect: (voucherCode?: string) => ConnectAttemptResult;
+    connect: (voucherCode?: string, credentials?: AuthCredentials) => ConnectAttemptResult;
     onAdComplete: () => void;
     reset: () => void;
 }
@@ -44,7 +44,7 @@ export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, 
     const [pendingVoucher, setPendingVoucher] = useState<string | undefined>(undefined);
     const [gatedOnce, setGatedOnce] = useState(false);
 
-    const connect = (voucherCode?: string): ConnectAttemptResult => {
+    const connect = (voucherCode?: string | undefined, credentials?: AuthCredentials): ConnectAttemptResult => {
         // Reset previous credentials if any
         setCredentials(undefined);
         setPendingVoucher(voucherCode);
@@ -56,7 +56,7 @@ export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, 
             return { pending: true };
         }
 
-        const result = svc.buildCredentials({ voucherCode, enabledAuth });
+        const result = svc.buildCredentials({ voucherCode, username: credentials?.username, password: credentials?.password, enabledAuth });
         if (!result.ok) return { pending: false, error: result.error };
         setCredentials(result.credentials);
         setState('ready');
