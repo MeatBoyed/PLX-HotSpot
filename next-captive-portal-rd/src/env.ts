@@ -16,10 +16,10 @@ export const env = createEnv({
         MIKROTIK_RADIUS_DESK_BASE_URL: z.string().url().default('https://radiusdesk.pluxnet.co.za'),
         MIKROTIK_REDIRECT_URL: z.string().url().default('https://pluxnet.co.za'),
 
-        // PayFast (server-side)
-        PAYFAST_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
-        PAYFAST_MERCHANT_ID: z.string().min(1).optional(),
-        PAYFAST_MERCHANT_KEY: z.string().min(1).optional(),
+        // PayFast (server-side) - all optional for deployments without payment features
+        PAYFAST_MODE: z.string().transform(val => val === '' ? 'sandbox' : val).pipe(z.enum(['sandbox', 'live'])).optional().default('sandbox'),
+        PAYFAST_MERCHANT_ID: z.string().optional(),
+        PAYFAST_MERCHANT_KEY: z.string().optional(),
         PAYFAST_PASSPHRASE: z.string().optional(),
         PAYFAST_DEBUG_SIGNING: z.string().optional(),
         PAYFAST_TEST_MSISDN: z.string().optional(),

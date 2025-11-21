@@ -45,7 +45,7 @@ export default function HomePage() {
         {theme.authMethods.includes("pu-login") && (
           <div className="flex justify-center gap-3 overflow-x-auto pb-3">
             {/* {theme.authMethods.includes("pu-login") && ( */}
-            <PlanCard variant="pu-login" totalData='24 Hrs • 1.5 GB' />
+            <PlanCard variant="pu-login" />
             {/* )} */}
           </div>
         )}
