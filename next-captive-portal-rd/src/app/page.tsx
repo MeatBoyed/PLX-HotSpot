@@ -38,7 +38,7 @@ export default function HomePage() {
         {theme.authMethods.includes("voucher") && (
           <>
             <VoucherCTA />
-            <PackagesPlanList ssid={theme.ssid} />
+            {/* <PackagesPlanList ssid={theme.ssid} /> */}
           </>
         )}
 
