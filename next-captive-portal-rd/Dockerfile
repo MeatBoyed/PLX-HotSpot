@@ -5,7 +5,7 @@ WORKDIR /app
 # Prisma on alpine needs openssl and libc6-compat
 RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json* ./
-RUN npm ci --ignore-scripts
+RUN npm ci --ignore-scripts --legacy-peer-deps
 
 FROM node:20-alpine AS builder
 WORKDIR /app
