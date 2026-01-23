@@ -42,7 +42,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
             {isVoucher && (
                 <div className="flex justify-between items-center w-full mb-1">
-                    <span className="font-bold text-lg">Redeem your voucher</span>
+                    <span className="font-bold text-lg">Enter your Wifi Code</span>
                     {onDismiss && <XCircleIcon onClick={onDismiss} size={20} className="cursor-pointer" />}
                 </div>
             )}
@@ -52,7 +52,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 <span className="text-gray-500 text-xs mb-2">{totalData}</span>
             )}
             {isVoucher && (
-                <span className="mb-2 text-sm">Please enter your voucher code to connect to the internet</span>
+                <span className="mb-2 text-sm">Please enter your wifi code to connect to the internet</span>
             )}
 
             {isPaid && (
@@ -77,7 +77,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                     // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
                     className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
                     style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                    label="Redeem"
+                    label="Connect"
                 />
             )}
 
