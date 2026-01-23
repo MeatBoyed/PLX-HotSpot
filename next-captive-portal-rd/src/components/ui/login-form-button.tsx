@@ -296,7 +296,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
             <input
                 type="text"
                 className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
-                placeholder="Enter your voucher code"
+                placeholder="Enter your Wifi Code to connect"
                 disabled={disabled}
                 value={voucherCode}
                 onChange={(e) => setVoucherCode(e.target.value)}

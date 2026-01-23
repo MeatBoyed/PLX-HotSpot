@@ -26,7 +26,7 @@ export default function HomePage() {
       <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full">
         {/* Plans */}
         <h2 className="text-gray-500 text-md font-medium mb-4">
-          Pick a plan to get started
+          Get Started
         </h2>
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
