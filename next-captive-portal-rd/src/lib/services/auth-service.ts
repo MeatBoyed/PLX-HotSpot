@@ -1,6 +1,6 @@
 import { env } from '@/env';
 
-export type AuthMode = 'free' | 'voucher' | 'pu-login';
+export type AuthMode = 'free' | 'voucher' | 'pu-login' | 'pu-phonename';
 
 export interface AuthCredentials {
     username: string;
@@ -14,6 +14,7 @@ export interface BuildCredentialsParams {
     username?: string
     password?: string;
     enabledAuth: AuthMode[];
+    mode?: AuthMode; // specify which auth method we're trying to build credentials for
 }
 
 export type AuthCredentialsResult =
@@ -43,24 +44,29 @@ export class AuthService {
     buildCredentials(params: BuildCredentialsParams): AuthCredentialsResult {
         const { voucherCode, username, password, enabledAuth } = params;
 
-        // TODO -- Perminant User (PU) login flow
+        // Username/password supplied explicitly (typically from a form)
         if (params.username !== undefined && params.password !== undefined) {
-            if (!has(enabledAuth, 'pu-login')) {
-                return { ok: false, error: 'Permanent User authentication not enabled' };
+            const mode = params.mode;
+            // Only permanent user flows support arbitrary username/password
+            if (mode === 'pu-login' || mode === 'pu-phonename') {
+                if (!has(enabledAuth, mode)) {
+                    return { ok: false, error: `Authentication mode '${mode}' not enabled` };
+                }
+                const trimmedUser = params.username.trim();
+                const trimmedPass = params.password.trim();
+                if (!trimmedUser || !trimmedPass) {
+                    return { ok: false, error: 'Username and Password required' };
+                }
+                return {
+                    ok: true,
+                    credentials: {
+                        username: trimmedUser,
+                        password: trimmedPass,
+                        mode,
+                    },
+                };
             }
-            const trimmedUser = params.username.trim();
-            const trimmedPass = params.password.trim();
-            if (!trimmedUser || !trimmedPass) {
-                return { ok: false, error: 'Username and Password required' };
-            }
-            return {
-                ok: true,
-                credentials: {
-                    username: trimmedUser,
-                    password: trimmedPass,
-                    mode: 'pu-login',
-                },
-            };
+            // fall through to other flows below if mode is unspecified
         }
 
         // Voucher flow

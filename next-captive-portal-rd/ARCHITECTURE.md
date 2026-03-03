@@ -49,9 +49,19 @@ Only non-secret branding fields exposed client-side. Sensitive / administrative 
 Provide form-based hotspot login (free or voucher) with optional ad gating while keeping presentation components (`plan-card`) simple.
 
 ### Layers
-| Layer                        | Responsibility                              |
-| ---------------------------- | ------------------------------------------- |
-| AuthService                  | Builds credentials + login URL (no network) |
+| Layer       | Responsibility                              |
+| ----------- | ------------------------------------------- |
+| AuthService | Builds credentials + login URL (no network) |
+
+### Authentication modes
+
+The portal supports a handful of authentication flavors which are driven by `authMethods` in the brand configuration. A new **`pu-phonename`** mode was added to allow visitors to sign up using a South African phone number and their name. This variant:
+
+- Automatically registers a permanent user on first submission
+- Stores credentials locally (cookie/`localStorage`) so returning browsers auto‑authenticate in the background
+- Shows a welcome message with the recorded name
+- Falls back to the normal login form if cookies are cleared or the device is unrecognized
+
 | ConnectProvider              | State machine (idle → ad → ready) + gating  |
 | login-form-button components | Embed provider and render forms / buttons   |
 
