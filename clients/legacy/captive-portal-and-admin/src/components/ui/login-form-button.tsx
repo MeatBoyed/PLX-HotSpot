@@ -1,6 +1,6 @@
 
 "use client";
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, FormEvent, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { AuthService } from '@/lib/services/auth-service';
 import { ConnectProvider, useConnect } from '@/components/home-page/ConnectContext';
@@ -9,6 +9,7 @@ import { FormLabel } from './form';
 import { Label } from './label';
 import Link from 'next/link';
 import { Dot } from 'lucide-react';
+import { PhoneInput } from './phone-input';
 // (env import removed - not used)
 
 type BaseButtonProps = {
@@ -136,6 +137,141 @@ function PULoginInnerForm({ label = 'Login to Connect', style, className }: Base
                     Register an account
                 </Link>
 
+            </div>
+            {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
+            <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onSubmit}>
+                {credentials && (
+                    <>
+                        <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
+                        <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
+                    </>
+                )}
+                <button
+                    type="submit"
+                    aria-disabled={disabled}
+                    disabled={disabled}
+                    className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
+                    style={style}
+                >
+                    {disabled ? (showAd ? 'Watch Ad…' : label) : label}
+                </button>
+            </form>
+        </div>
+    );
+}
+
+// PU Phone-based login/register Inner Form
+function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: BaseButtonProps) {
+    const { connect, state, showAd, credentials } = useConnect();
+    const { formRef, submit } = useProgrammaticSubmit();
+    // const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState<string | undefined>(undefined); // E.164 (+2782...)
+    const [name, setName] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [displayName, setDisplayName] = useState<string | null>(null);
+    const action = new AuthService().getLoginFormTarget();
+
+    // if we already have creds (auto-login) attempt to retrieve display name from storage
+    // useEffect(() => {
+    //     if (credentials && credentials.mode === 'pu-phonename') {
+    //         try {
+    //             const stored = localStorage.getItem('pu-phonename-display');
+    //             if (stored) {
+    //                 setDisplayName(stored);
+    //             }
+    //         } catch { }
+    //     }
+    // }, [credentials]);
+
+    // whenever credentials become available we want to automatically submit the hidden form
+    // useEffect(() => {
+    //     if (credentials && credentials.mode === 'pu-phonename') {
+    //         // defer so inputs are rendered
+    //         setTimeout(() => submit(), 0);
+    //     }
+    // }, [credentials, submit]);
+
+    const onSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        const trimmedPhone = phone?.trim();
+        const trimmedName = name?.trim();
+        if (!trimmedPhone || !trimmedName) {
+            setError('Phone and name are required');
+            return;
+        }
+        // call server endpoint to register/login and receive credentials
+        try {
+            const resp = await fetch('/api/pu-phonename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: trimmedPhone, name: trimmedName }),
+            });
+            const data = await resp.json();
+            if (!data.success) {
+                setError(data.error || 'Unable to login');
+                return;
+            }
+            const result = connect(undefined, { username: data.username, password: data.password, mode: 'pu-phonename' });
+            if (!result.pending) {
+                if ('error' in result) {
+                    setError(result.error);
+                } else if ('credentials' in result) {
+                    // persist display name
+                    try {
+                        localStorage.setItem('pu-phonename-display', trimmedName);
+                    } catch { }
+                    // defer for hidden inputs
+                    setTimeout(() => submit(), 0);
+                }
+            }
+        } catch (err) {
+            console.error('[PU-PHONE] client error', err);
+            setError('Unexpected error occurred');
+        }
+    };
+
+    const disabled = showAd || state === 'ad';
+
+    return (
+        <div className="inline-block w-full">
+            {displayName && (
+                <p className="mb-2 text-sm text-green-600">Welcome back, {displayName}!</p>
+            )}
+            <div className="flex gap-3 flex-col w-full mb-2">
+                <Label>Phone</Label>
+                {/* <Input
+                    type="tel"
+                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    placeholder="Enter SA phone number"
+                    disabled={disabled}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                /> */}
+                <PhoneInput
+                    id="cell_display"
+                    name="cell_display"
+                    defaultCountry="ZA"
+                    countries={["ZA"]}
+                    international
+                    countryCallingCodeEditable={false}
+                    placeholder={"+27 82 123 4567"}
+                    value={phone}
+                    onChange={(v) => setPhone(typeof v === 'string' ? v : undefined)}
+                    className="w-full border border-gray-500 rounded-lg disabled:opacity-60 "
+                // disabled={ready}
+                />
+            </div>
+            <div className="flex gap-3 flex-col w-full mb-2">
+                <Label>First Name</Label>
+                <Input
+                    type="text"
+                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    placeholder="First Name"
+                    disabled={disabled}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
             </div>
             {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
             <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onSubmit}>
@@ -344,6 +480,14 @@ export function PULoginForm(props: BaseButtonProps) {
     return (
         <ConnectProvider enabledAuth={['pu-login']} adGateEnabled={props.adGateEnabled}>
             <PULoginInnerForm {...props} />
+        </ConnectProvider>
+    );
+}
+
+export function PUPhoneForm(props: BaseButtonProps) {
+    return (
+        <ConnectProvider enabledAuth={['pu-phonename']} adGateEnabled={props.adGateEnabled}>
+            <PUPhoneInnerForm {...props} />
         </ConnectProvider>
     );
 }

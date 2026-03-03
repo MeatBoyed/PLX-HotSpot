@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthMode, AuthService, AuthCredentials } from '@/lib/services/auth-service';
 
 // State machine types
@@ -56,10 +56,32 @@ export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, 
             return { pending: true };
         }
 
-        const result = svc.buildCredentials({ voucherCode, username: credentials?.username, password: credentials?.password, enabledAuth });
+        const result = svc.buildCredentials({
+            voucherCode,
+            username: credentials?.username,
+            password: credentials?.password,
+            enabledAuth,
+            mode: credentials?.mode,
+        });
         if (!result.ok) return { pending: false, error: result.error };
         setCredentials(result.credentials);
         setState('ready');
+
+        // persist pu-phonename creds for auto-login later
+        if (result.credentials.mode === 'pu-phonename') {
+            try {
+                localStorage.setItem(
+                    'pu-phonename-creds',
+                    JSON.stringify({
+                        username: result.credentials.username,
+                        password: result.credentials.password,
+                    })
+                );
+            } catch {
+                // ignore storage errors
+            }
+        }
+
         return { pending: false, credentials: result.credentials };
     };
 
@@ -82,6 +104,23 @@ export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, 
         setShowAd(false);
         setState('idle');
     };
+
+    // attempt automatic pu-phonename login on mount if we have saved creds
+    useEffect(() => {
+        if (enabledAuth.includes('pu-phonename')) {
+            try {
+                const saved = localStorage.getItem('pu-phonename-creds');
+                if (saved && !credentials) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.username && parsed.password) {
+                        connect(undefined, { username: parsed.username, password: parsed.password, mode: 'pu-phonename' });
+                    }
+                }
+            } catch {
+                // ignore
+            }
+        }
+    }, [credentials, enabledAuth]);
 
     return (
         <ConnectContext.Provider value={{ state, showAd, credentials, pendingVoucher, connect, onAdComplete, reset }}>

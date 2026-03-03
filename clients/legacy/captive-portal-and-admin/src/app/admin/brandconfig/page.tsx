@@ -31,6 +31,7 @@ const brandingFields: FormFieldConfig[] = [
             { value: "free", label: "Free Access" },
             { value: "voucher", label: "Voucher" },
             { value: "pu-login", label: "Permanent User Login" },
+            { value: "pu-phonename", label: "PU Phone Login" },
         ]
     },
 ];

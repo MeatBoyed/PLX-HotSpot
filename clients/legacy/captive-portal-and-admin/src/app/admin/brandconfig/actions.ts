@@ -17,7 +17,7 @@ const identitySchema = z.object({
     termsLinks: z.string().nullable().optional(),
     splashBackground: z.string().max(255).nullable().optional(),
     splashHeading: z.string().max(255).nullable().optional(),
-    authMethods: z.array(z.enum(['free', 'voucher'])).optional(),
+    authMethods: z.array(z.enum(['free', 'voucher', 'pu-login', 'pu-phonename'])).optional(),
 });
 
 const colorsSchema = z.object({
