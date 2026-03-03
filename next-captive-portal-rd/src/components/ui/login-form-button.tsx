@@ -164,32 +164,46 @@ function PULoginInnerForm({ label = 'Login to Connect', style, className }: Base
 function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: BaseButtonProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
-    // const [phone, setPhone] = useState('');
     const [phone, setPhone] = useState<string | undefined>(undefined); // E.164 (+2782...)
     const [name, setName] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [displayName, setDisplayName] = useState<string | null>(null);
+    const [autoLoginStarted, setAutoLoginStarted] = useState(false);
+    const [countdown, setCountdown] = useState<number | null>(null);
     const action = new AuthService().getLoginFormTarget();
 
-    // if we already have creds (auto-login) attempt to retrieve display name from storage
-    // useEffect(() => {
-    //     if (credentials && credentials.mode === 'pu-phonename') {
-    //         try {
-    //             const stored = localStorage.getItem('pu-phonename-display');
-    //             if (stored) {
-    //                 setDisplayName(stored);
-    //             }
-    //         } catch { }
-    //     }
-    // }, [credentials]);
+    // pull stored display name when creds appear
+    useEffect(() => {
+        if (credentials && credentials.mode === 'pu-phonename') {
+            try {
+                const stored = localStorage.getItem('pu-phonename-display');
+                if (stored) {
+                    setDisplayName(stored);
+                }
+            } catch { }
+        }
+    }, [credentials]);
 
-    // whenever credentials become available we want to automatically submit the hidden form
+    // delay auto-submission to give user feedback
     // useEffect(() => {
-    //     if (credentials && credentials.mode === 'pu-phonename') {
-    //         // defer so inputs are rendered
-    //         setTimeout(() => submit(), 0);
+    //     if (credentials && credentials.mode === 'pu-phonename' && !autoLoginStarted) {
+    //         setAutoLoginStarted(true);
+    //         let remaining = 3;
+    //         setCountdown(remaining);
+    //         const interval = setInterval(() => {
+    //             remaining -= 1;
+    //             setCountdown(remaining);
+    //             if (remaining <= 0) clearInterval(interval);
+    //         }, 1000);
+    //         const timer = setTimeout(() => {
+    //             submit();
+    //         }, 3000);
+    //         return () => {
+    //             clearTimeout(timer);
+    //             clearInterval(interval);
+    //         };
     //     }
-    // }, [credentials, submit]);
+    // }, [credentials, submit, autoLoginStarted]);
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -231,13 +245,18 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
         }
     };
 
-    const disabled = showAd || state === 'ad';
+    const disabled = showAd || state === 'ad' || autoLoginStarted;
 
     return (
         <div className="inline-block w-full">
-            {displayName && (
-                <p className="mb-2 text-sm text-green-600">Welcome back, {displayName}!</p>
-            )}
+            {/* {displayName && (
+                <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded mb-3">
+                    <strong>Welcome back, {displayName}!</strong>
+                    {countdown != null
+                        ? ` Connecting you in ${countdown}s…`
+                        : ' Connecting you now…'}
+                </div>
+            )} */}
             <div className="flex gap-3 flex-col w-full mb-2">
                 <Label>Phone</Label>
                 {/* <Input
