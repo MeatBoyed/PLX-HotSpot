@@ -31,7 +31,7 @@ export default function HomePage() {
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
           {theme.authMethods.includes("free") && (
-            <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
+            <PlanCard variant="free" totalData='24 Hrs • 5 GB' tag='Promotion' />
           )}
         </div>
 
