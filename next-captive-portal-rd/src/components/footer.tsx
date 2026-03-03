@@ -1,24 +1,37 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Footer() {
-    let defaultSrc = "/footer-branding.png"
-    const pathname = usePathname()
-    if (pathname.includes("splash")) defaultSrc = "/branding-footer-light.png"
+  const pathname = usePathname();
+  const { theme } = useTheme();
 
-    return (
-        <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center ">
-            {/* <span className="text-[10px] uppercase tracking-wide text-gray-500">Powered By</span> */}
-            <Link href="/">
-                <img
-                    src={defaultSrc}
-                    alt="Powered by PluxNet Fibre"
-                    className="h-5 w-auto opacity-80"
-                    draggable={false}
-                />
-            </Link>
-        </footer>
-    );
+  // Existing image logic
+  let defaultSrc = "/footer-branding.png";
+  if (pathname.includes("splash")) defaultSrc = "/branding-footer-light.png";
+
+  // DB-driven switch (no enums, no crashes)
+  const brandText = `${theme?.name ?? ""} ${theme?.heading ?? ""}`.toLowerCase();
+  const isPronet = brandText.includes("pronet") || brandText.includes("joburg");
+
+  return (
+    <footer className="w-full py-4 flex flex-row items-center justify-center gap-3 text-center">
+      <Link href="/" className="flex items-center gap-2">
+        {isPronet ? (
+          <span className="text-[11px] uppercase tracking-wide opacity-80">
+            Powered by Pronet
+          </span>
+        ) : (
+          <img
+            src={defaultSrc}
+            alt="Powered by"
+            className="h-5 w-auto opacity-80"
+            draggable={false}
+          />
+        )}
+      </Link>
+    </footer>
+  );
 }
