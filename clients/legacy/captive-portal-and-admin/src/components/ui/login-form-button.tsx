@@ -168,8 +168,8 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
     const [name, setName] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [displayName, setDisplayName] = useState<string | null>(null);
-    const [autoLoginStarted, setAutoLoginStarted] = useState(false);
-    const [countdown, setCountdown] = useState<number | null>(null);
+    // const [autoLoginStarted, setAutoLoginStarted] = useState(false);
+    // const [countdown, setCountdown] = useState<number | null>(null);
     const action = new AuthService().getLoginFormTarget();
 
     // pull stored display name when creds appear
@@ -185,25 +185,25 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
     }, [credentials]);
 
     // delay auto-submission to give user feedback
-    // useEffect(() => {
-    //     if (credentials && credentials.mode === 'pu-phonename' && !autoLoginStarted) {
-    //         setAutoLoginStarted(true);
-    //         let remaining = 3;
-    //         setCountdown(remaining);
-    //         const interval = setInterval(() => {
-    //             remaining -= 1;
-    //             setCountdown(remaining);
-    //             if (remaining <= 0) clearInterval(interval);
-    //         }, 1000);
-    //         const timer = setTimeout(() => {
-    //             submit();
-    //         }, 3000);
-    //         return () => {
-    //             clearTimeout(timer);
-    //             clearInterval(interval);
-    //         };
-    //     }
-    // }, [credentials, submit, autoLoginStarted]);
+    useEffect(() => {
+        if (credentials && credentials.mode === 'pu-phonename') {
+            // setAutoLoginStarted(true);
+            // let remaining = 3;
+            // setCountdown(remaining);
+            // const interval = setInterval(() => {
+            //     remaining -= 1;
+            //     setCountdown(remaining);
+            //     if (remaining <= 0) clearInterval(interval);
+            // }, 1000);
+            const timer = setTimeout(() => {
+                submit();
+            }, 3000);
+            return () => {
+                clearTimeout(timer);
+                // clearInterval(interval);
+            };
+        }
+    }, [credentials, submit]);
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -245,28 +245,21 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
         }
     };
 
-    const disabled = showAd || state === 'ad' || autoLoginStarted;
+    // const disabled = showAd || state === 'ad' || autoLoginStarted;
 
     return (
         <div className="inline-block w-full">
-            {/* {displayName && (
+            {displayName && (
                 <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded mb-3">
                     <strong>Welcome back, {displayName}!</strong>
-                    {countdown != null
+                    Connecting you now...
+                    {/* {countdown != null
                         ? ` Connecting you in ${countdown}s…`
-                        : ' Connecting you now…'}
+                        : ' Connecting you now…'} */}
                 </div>
-            )} */}
+            )}
             <div className="flex gap-3 flex-col w-full mb-2">
                 <Label>Phone</Label>
-                {/* <Input
-                    type="tel"
-                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
-                    placeholder="Enter SA phone number"
-                    disabled={disabled}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                /> */}
                 <PhoneInput
                     id="cell_display"
                     name="cell_display"
@@ -287,7 +280,7 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
                     type="text"
                     className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
                     placeholder="First Name"
-                    disabled={disabled}
+                    // disabled={disabled}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
@@ -302,12 +295,13 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
                 )}
                 <button
                     type="submit"
-                    aria-disabled={disabled}
-                    disabled={disabled}
+                    // aria-disabled={disabled}
+                    // disabled={disabled}
                     className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
                     style={style}
                 >
-                    {disabled ? (showAd ? 'Watch Ad…' : label) : label}
+                    {/* {disabled ? (showAd ? 'Watch Ad…' : label) : label} */}
+                    {label}
                 </button>
             </form>
         </div>
