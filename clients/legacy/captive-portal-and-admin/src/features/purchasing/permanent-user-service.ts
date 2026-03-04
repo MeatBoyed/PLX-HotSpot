@@ -76,6 +76,7 @@ class PermanentUserService {
             profile_id: profileId,
             cloud_id: cloudId,
             token,
+            active: "true"
         };
 
         // Add optional fields if provided
