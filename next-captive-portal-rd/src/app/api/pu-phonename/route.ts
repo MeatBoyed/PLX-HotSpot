@@ -19,9 +19,18 @@ export async function POST(request: NextRequest) {
     }
 
     // build credentials according to spec
-    const username = trimmedPhone;
+    //const username = trimmedPhone;
     // password is first_surname (spaces replaced with underscores)
-    const password = trimmedName.replace(/\s+/g, '_');
+    //const password = trimmedName.replace(/\s+/g, '_');
+
+    const msisdn = trimmedPhone.replace(/\D/g, ''); // 27691235789
+if (!msisdn) {
+  return NextResponse.json({ success: false, error: 'Invalid phone number' }, { status: 400 });
+}
+
+const username = `jt_${msisdn}`;                 // safe + unique
+const password = trimmedName.replace(/\s+/g, '_').toLowerCase(); // keeps it consistent
+
 
     // locate a package for this SSID
     const ssid = env.NEXT_PUBLIC_SSID;
@@ -45,6 +54,7 @@ export async function POST(request: NextRequest) {
         username,
         password,
         pkg,
+        msisdn,
         phone: trimmedPhone,
         name: trimmedName.split(/\s+/)[0] || '',
         surname: trimmedName.split(/\s+/)[1] || '',
@@ -58,7 +68,7 @@ export async function POST(request: NextRequest) {
         console.log('[PU-PHONE] user already exists or taken, will login', username);
       } else {
         console.error('[PU-PHONE] error creating user', err);
-        return NextResponse.json({ success: false, error: 'Failed to register' }, { status: 500 });
+        return NextResponse.json({ success: false, error: msg }, { status: 500 });
       }
     }
 
