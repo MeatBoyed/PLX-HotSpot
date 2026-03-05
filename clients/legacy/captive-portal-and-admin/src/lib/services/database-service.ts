@@ -3,6 +3,7 @@
 
 import { env } from '@/env';
 import { PrismaClient, Prisma } from '../../../generated/prisma';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { normalizeBranding } from '@/lib/utils/branding-normalize';
 import type { BrandingConfig as AppBrandingConfig } from '@/lib/types';
 
@@ -51,8 +52,14 @@ export type BrandingConfigAppUpdate = {
 };
 
 // Reuse a single Prisma client instance across HMR in dev
+// Prisma v7 requires a driver adapter for PostgreSQL
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-export const prisma: PrismaClient = globalForPrisma.prisma ?? new PrismaClient();
+
+const adapter = new PrismaPg({
+	connectionString: process.env.DATABASE_URL,
+});
+
+export const prisma: PrismaClient = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 if (env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Public return type is the app-level BrandingConfig
