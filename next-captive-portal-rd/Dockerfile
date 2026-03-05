@@ -6,11 +6,11 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json* ./
 RUN npm config set registry https://registry.npmjs.org/ \
-	&& npm config set fetch-retries 6 \
-	&& npm config set fetch-retry-factor 2 \
-	&& npm config set fetch-retry-mintimeout 20000 \
-	&& npm config set fetch-retry-maxtimeout 120000 \
-	&& npm config set fetch-timeout 600000
+    && npm config set fetch-retries 6 \
+    && npm config set fetch-retry-factor 2 \
+    && npm config set fetch-retry-mintimeout 20000 \
+    && npm config set fetch-retry-maxtimeout 120000 \
+    && npm config set fetch-timeout 600000
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --legacy-peer-deps
 
 FROM node:20-alpine AS builder

@@ -36,12 +36,12 @@ export default function WelcomePage() {
   }, [storedName]);
 
   return (
-    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-between flex-col max-w-md w-full min-h-[80vh]">
-      <Navbar />
+    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-between flex-col max-w-md w-full min-h-[95vh]">
+      {/* <Navbar /> */}
 
       {/* Welcome Text */}
       <div className="flex flex-col items-center mt-8 mb-6 w-full">
-        <h1 className="text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
+        <h1 className="text-3xl font-semibold text-center" style={{ color: theme.textPrimary }}>
           {/* Welcome to Pluxnet <br /> Public WiFi */}
           Welcome {storedName ? storedName : displayName},
           <br />
@@ -52,6 +52,8 @@ export default function WelcomePage() {
           {/* {theme.heading} */}
         </h1>
       </div>
+
+      <Navbar />
 
       {/* Main Card Section */}
       {/* <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full"> */}
