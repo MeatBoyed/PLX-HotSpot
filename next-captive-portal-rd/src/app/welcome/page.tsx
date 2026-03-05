@@ -18,7 +18,6 @@ function normalizeName(value: string | null | undefined) {
 
 export default function WelcomePage() {
   const { theme } = useTheme();
-  const searchParams = useSearchParams();
   const [storedName, setStoredName] = useState("");
 
   useEffect(() => {
@@ -31,16 +30,10 @@ export default function WelcomePage() {
   }, []);
 
   const displayName = useMemo(() => {
-    const fromName = normalizeName(searchParams.get("name"));
-    if (fromName) return fromName;
-
-    const fromUsername = normalizeName(searchParams.get("username"));
-    if (fromUsername && /[a-zA-Z]/.test(fromUsername)) return fromUsername;
-
     if (storedName) return storedName;
 
     return "Guest";
-  }, [searchParams, storedName]);
+  }, [storedName]);
 
   return (
     <div style={{ background: theme.brandPrimary }} className="flex items-center justify-between flex-col max-w-md w-full min-h-[80vh]">
