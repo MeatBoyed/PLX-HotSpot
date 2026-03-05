@@ -7,60 +7,68 @@ import { Navbar } from "@/components/home-page/head";
 import AdSection from "@/components/ad-section";
 
 function normalizeName(value: string | null | undefined) {
-    if (!value) return "";
-    const cleaned = decodeURIComponent(value).replace(/[_+]/g, " ").trim();
-    return cleaned
-        .split(/\s+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-        .join(" ");
+  if (!value) return "";
+  const cleaned = decodeURIComponent(value).replace(/[_+]/g, " ").trim();
+  return cleaned
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
 }
 
 export default function WelcomePage() {
-    const { theme } = useTheme();
-    const searchParams = useSearchParams();
-    const [storedName, setStoredName] = useState("");
+  const { theme } = useTheme();
+  const searchParams = useSearchParams();
+  const [storedName, setStoredName] = useState("");
 
-    useEffect(() => {
-        try {
-            const fromStorage = localStorage.getItem("pu-phonename-display") || "";
-            setStoredName(normalizeName(fromStorage));
-        } catch {
-            setStoredName("");
-        }
-    }, []);
+  useEffect(() => {
+    try {
+      const fromStorage = localStorage.getItem("pu-phonename-display") || "";
+      setStoredName(normalizeName(fromStorage));
+    } catch {
+      setStoredName("");
+    }
+  }, []);
 
-    const displayName = useMemo(() => {
-        const fromName = normalizeName(searchParams.get("name"));
-        if (fromName) return fromName;
+  const displayName = useMemo(() => {
+    const fromName = normalizeName(searchParams.get("name"));
+    if (fromName) return fromName;
 
-        const fromUsername = normalizeName(searchParams.get("username"));
-        if (fromUsername && /[a-zA-Z]/.test(fromUsername)) return fromUsername;
+    const fromUsername = normalizeName(searchParams.get("username"));
+    if (fromUsername && /[a-zA-Z]/.test(fromUsername)) return fromUsername;
 
-        if (storedName) return storedName;
+    if (storedName) return storedName;
 
-        return "Guest";
-    }, [searchParams, storedName]);
+    return "Guest";
+  }, [searchParams, storedName]);
 
-    return (
-        <div style={{ background: theme.background }} className="flex items-center justify-center flex-col max-w-md w-full min-h-[80vh]">
-            <Navbar />
+  return (
+    <div style={{ background: theme.brandPrimary }} className="flex items-center justify-between flex-col max-w-md w-full min-h-[80vh]">
+      <Navbar />
 
-            <div className="w-full mt-8">
-                <div className="bg-white rounded-t-3xl px-5 pt-8 pb-8 min-h-[42vh] flex flex-col justify-center">
-                    <p className="text-sm mb-2" style={{ color: theme.textSecondary }}>
-                        Welcome to {theme.name}
-                    </p>
-                    <h1 className="text-2xl font-semibold leading-tight" style={{ color: theme.textPrimary }}>
-                        Hello, {displayName}
-                    </h1>
-                    <p className="mt-3 text-sm" style={{ color: theme.textSecondary }}>
-                        You are now connected. Enjoy your internet access.
-                    </p>
-                </div>
-            </div>
+      {/* Welcome Text */}
+      <div className="flex flex-col items-center mt-8 mb-6 w-full">
+        <h1 className="text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
+          {/* Welcome to Pluxnet <br /> Public WiFi */}
+          Welcome {storedName ? storedName : displayName},
+          <br />
+          {/* {theme.heading} */}
+          {/* </h1>
+        <h1 className="text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}> */}
+          to Joburg Theatre Wi-Fi
+          {/* {theme.heading} */}
+        </h1>
+      </div>
 
-            <AdSection />
-        </div>
-    );
+      {/* Main Card Section */}
+      {/* <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full"> */}
+      {/* Plans */}
+      {/* <h2 className="text-gray-500 text-md font-medium mb-4">
+          Get Started
+        </h2> */}
+
+      {/* </div> */}
+      <AdSection />
+    </div>
+  );
 }
