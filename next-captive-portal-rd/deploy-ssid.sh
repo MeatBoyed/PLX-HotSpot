@@ -24,6 +24,7 @@ IMAGE_BASE="vv-hotspot"
 TAG="latest"
 NO_BUILD="false"
 NO_CACHE="false"
+BUILD_NETWORK="default"
 
 usage() {
   cat <<EOF
@@ -35,11 +36,13 @@ Options:
       --tag TAG         Image tag (default: latest). Use 'time' for timestamp tag
       --no-build        Skip docker build (use existing image)
       --no-cache        Don't use docker build cache (rebuild fresh, required after Prisma changes)
+      --host-network-build  Use host network for docker build (helps unstable DNS/proxy links)
   -h, --help            Show this help
 
 Examples:
   $(basename "$0") -e .env.prod --tag time -p 3001
   $(basename "$0") --no-cache           # rebuild from scratch (after schema/prisma changes)
+  $(basename "$0") --host-network-build # build with host networking (network troubleshooting)
   $(basename "$0")                      # uses .env, builds image, runs on :3000
 EOF
 }
@@ -52,6 +55,7 @@ while [[ $# -gt 0 ]]; do
     --tag)     TAG="$2"; shift 2;;
     --no-build) NO_BUILD="true"; shift;;
     --no-cache) NO_CACHE="true"; shift;;
+    --host-network-build) BUILD_NETWORK="host"; shift;;
     -h|--help) usage; exit 0;;
     *) error "Unknown option: $1"; usage; exit 1;;
   esac
@@ -121,7 +125,10 @@ if [[ "$NO_BUILD" != "true" ]]; then
     BUILD_FLAGS="--no-cache"
     info "Building with --no-cache (fresh build)"
   fi
-  docker build $BUILD_FLAGS -t "${IMAGE_NAME}:${TAG}" .
+  if [[ "$BUILD_NETWORK" == "host" ]]; then
+    info "Building with --network=host"
+  fi
+  docker build --network "$BUILD_NETWORK" $BUILD_FLAGS -t "${IMAGE_NAME}:${TAG}" .
   info "Build complete"
 else
   warn "Skipping build as requested (--no-build)"
