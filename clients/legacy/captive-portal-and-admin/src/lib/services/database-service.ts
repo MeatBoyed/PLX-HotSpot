@@ -2,7 +2,7 @@
 // Focus: simple, maintainable, type-safe access with Prisma
 
 import { env } from '@/env';
-import { PrismaClient, Prisma } from '../../../generated/prisma';
+import { PrismaClient, Prisma } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { normalizeBranding } from '@/lib/utils/branding-normalize';
 import type { BrandingConfig as AppBrandingConfig } from '@/lib/types';

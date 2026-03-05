@@ -23,6 +23,7 @@ HOST_PORT="3000"
 IMAGE_BASE="vv-hotspot"
 TAG="latest"
 NO_BUILD="false"
+NO_CACHE="false"
 
 usage() {
   cat <<EOF
@@ -33,11 +34,13 @@ Options:
   -p, --port PORT       Host port to map to 3000 (default: 3000)
       --tag TAG         Image tag (default: latest). Use 'time' for timestamp tag
       --no-build        Skip docker build (use existing image)
+      --no-cache        Don't use docker build cache (rebuild fresh, required after Prisma changes)
   -h, --help            Show this help
 
 Examples:
   $(basename "$0") -e .env.prod --tag time -p 3001
-  $(basename "$0")               # uses .env, builds image, runs on :3000
+  $(basename "$0") --no-cache           # rebuild from scratch (after schema/prisma changes)
+  $(basename "$0")                      # uses .env, builds image, runs on :3000
 EOF
 }
 
@@ -48,6 +51,7 @@ while [[ $# -gt 0 ]]; do
     -p|--port) HOST_PORT="$2"; shift 2;;
     --tag)     TAG="$2"; shift 2;;
     --no-build) NO_BUILD="true"; shift;;
+    --no-cache) NO_CACHE="true"; shift;;
     -h|--help) usage; exit 0;;
     *) error "Unknown option: $1"; usage; exit 1;;
   esac
@@ -112,7 +116,12 @@ fi
 
 if [[ "$NO_BUILD" != "true" ]]; then
   info "Building image..."
-  docker build -t "${IMAGE_NAME}:${TAG}" .
+  BUILD_FLAGS=""
+  if [[ "$NO_CACHE" == "true" ]]; then
+    BUILD_FLAGS="--no-cache"
+    info "Building with --no-cache (fresh build)"
+  fi
+  docker build $BUILD_FLAGS -t "${IMAGE_NAME}:${TAG}" .
   info "Build complete"
 else
   warn "Skipping build as requested (--no-build)"

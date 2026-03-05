@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/services/database-service';
-import type { Prisma } from '../../../generated/prisma';
+import type { Prisma } from '../../../generated/prisma/client';
 
 export type Package = {
   id: number;
