@@ -19,9 +19,15 @@ import { ClerkProvider } from "@clerk/nextjs";
 //   subsets: ["latin"],
 // });
 
+const isJoburgTheatre = env.NEXT_PUBLIC_SSID === "joburg-theatre";
+
 export const metadata: Metadata = {
   title: env.SITE_TITLE,
   description: env.SITE_DESCRIPTION,
+  icons: {
+    icon: isJoburgTheatre ? "/jt-theatre-favicon.png" : "/favicon.svg",
+    shortcut: isJoburgTheatre ? "/jt-theatre-favicon.png" : "/favicon.svg",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
