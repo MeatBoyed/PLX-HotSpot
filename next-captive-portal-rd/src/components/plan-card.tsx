@@ -48,7 +48,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 </div>
             )}
             {isPULogin && <span className="mb-2 font-bold text-lg">Login to connect</span>}
-            {isPUPhone && <span className="mb-2 font-bold text-lg">Login with phone</span>}
+            {isPUPhone && <span className="mb-2 font-bold text-lg">Login with your Phone & Name</span>}
 
             {totalData && !isVoucher && (
                 <span className="text-gray-500 text-xs mb-2">{totalData}</span>

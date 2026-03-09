@@ -24,13 +24,14 @@ export async function POST(request: NextRequest) {
     //const password = trimmedName.replace(/\s+/g, '_');
 
     const msisdn = trimmedPhone.replace(/\D/g, ''); // 27691235789
-if (!msisdn) {
-  return NextResponse.json({ success: false, error: 'Invalid phone number' }, { status: 400 });
-}
+    if (!msisdn) {
+      return NextResponse.json({ success: false, error: 'Invalid phone number' }, { status: 400 });
+    }
 
-const username = `jt_${msisdn}`;                 // safe + unique
-const password = trimmedName.replace(/\s+/g, '_').toLowerCase(); // keeps it consistent
+    const username = `jt_${msisdn}`;                 // safe + unique
+    const password = trimmedName.replace(/\s+/g, '_').toLowerCase(); // keeps it consistent
 
+    console.log('[PU-PHONE] Login started and Credentials Verified', username);
 
     // locate a package for this SSID
     const ssid = env.NEXT_PUBLIC_SSID;

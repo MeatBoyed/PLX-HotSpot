@@ -179,31 +179,25 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
                 const stored = localStorage.getItem('pu-phonename-display');
                 if (stored) {
                     setDisplayName(stored);
+                    // Save username as an E.164 phone number
+                    setPhone("+" + credentials.username.replace(/^jt_/, '')); // reverse engineer phone from username
+                    setName(credentials.password.replace(/_/g, ' ')); // reverse engineer name from password
                 }
             } catch { }
         }
     }, [credentials]);
 
     // delay auto-submission to give user feedback
-    useEffect(() => {
-        if (credentials && credentials.mode === 'pu-phonename') {
-            // setAutoLoginStarted(true);
-            // let remaining = 3;
-            // setCountdown(remaining);
-            // const interval = setInterval(() => {
-            //     remaining -= 1;
-            //     setCountdown(remaining);
-            //     if (remaining <= 0) clearInterval(interval);
-            // }, 1000);
-            const timer = setTimeout(() => {
-                submit();
-            }, 3000);
-            return () => {
-                clearTimeout(timer);
-                // clearInterval(interval);
-            };
-        }
-    }, [credentials, submit]);
+    // useEffect(() => {
+    //     if (credentials && credentials.mode === 'pu-phonename') {
+    //         const timer = setTimeout(() => {
+    //             submit();
+    //         }, 3000);
+    //         return () => {
+    //             clearTimeout(timer);
+    //         };
+    //     }
+    // }, [credentials, submit]);
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -251,8 +245,8 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
         <div className="inline-block w-full">
             {displayName && (
                 <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded mb-3">
-                    <strong>Welcome back, {displayName}!</strong>
-                    Connecting you now...
+                    <strong>Welcome back, {displayName}!</strong> <br></br>
+                    {/* Connecting you now... */}
                     {/* {countdown != null
                         ? ` Connecting you in ${countdown}s…`
                         : ' Connecting you now…'} */}
@@ -275,7 +269,7 @@ function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: Ba
                 />
             </div>
             <div className="flex gap-3 flex-col w-full mb-2">
-                <Label>First Name</Label>
+                <Label>Name</Label>
                 <Input
                     type="text"
                     className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
