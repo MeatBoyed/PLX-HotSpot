@@ -44,7 +44,7 @@ export default function SplashPage() {
                         </span>
                         <span className="text-white text-base">
                             Agree with the{" "}
-                            <Link href={theme.termsLinks || ""} className={`text-[${theme.brandPrimary}] underline`}>terms and conditions</Link>{" "}
+                            <Link href={"/terms-and-conditions"} className={`text-[${theme.brandPrimary}] underline`}>terms and conditions</Link>{" "}
                             related to the processing of data for commercial purposes.
                         </span>
                     </label>
