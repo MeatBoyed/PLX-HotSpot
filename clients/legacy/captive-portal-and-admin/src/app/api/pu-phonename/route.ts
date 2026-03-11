@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { permanentUserService } from '@/features/purchasing/permanent-user-service';
 import { Package, packageService } from '@/lib/services/package-service';
+import { otpService } from '@/lib/services/otp-service';
 import { env } from '@/env';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { phone, name } = body;
+    const { phone, name, otp } = body;
 
     if (!phone || !name) {
       return NextResponse.json({ success: false, error: 'Phone and name are required' }, { status: 400 });
+    }
+    if (!otp) {
+      return NextResponse.json({ success: false, error: 'Verification code is required' }, { status: 400 });
     }
 
     const trimmedPhone = String(phone).trim();
@@ -33,8 +37,14 @@ export async function POST(request: NextRequest) {
 
     console.log('[PU-PHONE] Login started and Credentials Verified', username);
 
-    // locate a package for this SSID
+    // Verify OTP before proceeding
     const ssid = env.NEXT_PUBLIC_SSID;
+    const otpResult = await otpService.verify(ssid, msisdn, String(otp).trim());
+    if (!otpResult.success) {
+      return NextResponse.json({ success: false, error: otpResult.error }, { status: 400 });
+    }
+
+    // locate a package for this SSID
     // const packages = await packageService.list(ssid);
     // if (!packages || packages.length === 0) {
     //   console.error('[PU-PHONE] no packages for SSID', ssid);

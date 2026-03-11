@@ -31,6 +31,11 @@ export const env = createEnv({
         RADIUSDESK_PROFILE_ID: z.string().optional(),
         RADIUSDESK_CLOUD_ID: z.string().optional(),
 
+        // EC1 SMS Gateway
+        EC1_SMS_API_URL: z.string().url().optional(),
+        EC1_SMS_USER_ID: z.string().optional(),
+        EC1_SMS_PASSWORD: z.string().optional(),
+
         // Feature flags
         USE_SEED_DATA: z.enum(['true', 'false']).default('false'),
     },
@@ -67,6 +72,9 @@ export const env = createEnv({
         RADIUSDESK_PROFILE_ID: process.env.RADIUSDESK_PROFILE_ID,
         RADIUSDESK_CLOUD_ID: process.env.RADIUSDESK_CLOUD_ID,
         USE_SEED_DATA: process.env.USE_SEED_DATA,
+        EC1_SMS_API_URL: process.env.EC1_SMS_API_URL,
+        EC1_SMS_USER_ID: process.env.EC1_SMS_USER_ID,
+        EC1_SMS_PASSWORD: process.env.EC1_SMS_PASSWORD,
         NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL
     }
 });

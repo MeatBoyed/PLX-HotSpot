@@ -79,3 +79,14 @@ model Packages {
 
   @@unique([ssid, name], map: "packages_ssid_name_unique")
 }
+
+model otp_verification {
+  id         Int      @id @default(autoincrement())
+  ssid       String   @db.VarChar(255)
+  msisdn     String   @db.VarChar(15)
+  otp_code   String   @db.VarChar(4)
+  attempts   Int      @default(0)
+  verified   Boolean  @default(false)
+  expires_at DateTime @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}

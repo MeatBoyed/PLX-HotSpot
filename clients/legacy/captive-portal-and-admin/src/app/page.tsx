@@ -5,8 +5,6 @@ import AdSection from "@/components/ad-section";
 // import VoucherCTA from '@/components/voucher-cta';
 import { Navbar } from '@/components/home-page/head';
 import VoucherCTA from '@/components/voucher-cta';
-import PackagesPlanList from '@/components/packages-plan-list';
-
 
 export default function HomePage() {
   const { theme } = useTheme()
