@@ -47,6 +47,10 @@ export const env = createEnv({
         NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME: z.string().min(1).default('click_to_connect@dev'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD: z.string().min(1).default('click_to_connect'),
         NEXT_PUBLIC_BASE_URL: z.string().min(1).default('http://localhost:3001'),
+
+        // PostHog analytics
+        NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+        NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
     },
     runtimeEnv: {
         NODE_ENV: process.env.NODE_ENV,
@@ -75,6 +79,8 @@ export const env = createEnv({
         EC1_SMS_API_URL: process.env.EC1_SMS_API_URL,
         EC1_SMS_USER_ID: process.env.EC1_SMS_USER_ID,
         EC1_SMS_PASSWORD: process.env.EC1_SMS_PASSWORD,
-        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL
+        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+        NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+        NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     }
 });

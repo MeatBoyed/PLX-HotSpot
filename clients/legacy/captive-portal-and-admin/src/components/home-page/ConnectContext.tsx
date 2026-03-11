@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import posthog from 'posthog-js';
 import { AuthMode, AuthService, AuthCredentials } from '@/lib/services/auth-service';
 
 // State machine types
@@ -66,6 +67,15 @@ export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, 
         if (!result.ok) return { pending: false, error: result.error };
         setCredentials(result.credentials);
         setState('ready');
+
+        // Identify user and capture login event in PostHog
+        posthog.identify(result.credentials.username, {
+            auth_mode: result.credentials.mode,
+        });
+        posthog.capture('user_connected', {
+            auth_mode: result.credentials.mode,
+            username: result.credentials.username,
+        });
 
         // persist pu-phonename creds for auto-login later
         if (result.credentials.mode === 'pu-phonename') {
