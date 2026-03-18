@@ -10,10 +10,10 @@ export default function HomePage() {
 
   return (
     <div
-        className="relative flex flex-col items-center max-w-md w-full h-screen overflow-hidden"
+      className="relative flex flex-col items-center max-w-md w-full h-screen overflow-hidden"
       style={{ background: theme.brandPrimary }}
     >
-      {/* Animated background orbs */}
+      {/* Animated background orbs using venue colors */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20 animate-pulse"
@@ -46,7 +46,7 @@ export default function HomePage() {
       {/* Top section */}
       <div className="relative z-10 w-full flex flex-col items-center px-6 pt-8 pb-16">
 
-        {/* Logo with glass pill */}
+        {/* Logo with glass pill navbar */}
         <div
           className="flex items-center gap-3 px-5 py-3 rounded-full mb-10 w-full justify-between"
           style={{
@@ -63,15 +63,12 @@ export default function HomePage() {
               className="w-8 h-8 object-contain"
             />
           </div>
-          <span className="text-sm font-semibold tracking-wide" style={{ color: theme.textPrimary, textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
+          <span className="text-sm font-semibold tracking-wide" style={{ color: theme.textPrimary }}>
             {theme.name}
           </span>
           <div
             className="text-xs px-3 py-1 rounded-full font-medium"
-            style={{
-              background: theme.brandAccent,
-              color: '#fff'
-            }}
+            style={{ background: theme.brandAccent, color: '#fff' }}
           >
             Free WiFi
           </div>
@@ -79,17 +76,14 @@ export default function HomePage() {
 
         {/* Hero text */}
         <div className="text-center mb-2">
-          {/* <p className="text-sm font-medium tracking-widest uppercase mb-3 opacity-70" style={{ color: theme.textPrimary, textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}> */}
-            {/* You're connecting */}
-          {/* </p> */}
           <h1
             className="text-4xl font-bold leading-tight mb-4"
             style={{ color: theme.textPrimary, textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}
           >
-            {theme.heading || `Connecting to\n${theme.name}`}
+            {theme.heading || `Welcome to ${theme.name}`}
           </h1>
           {theme.subheading && (
-            <p className="text-sm opacity-75" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            <p className="text-sm opacity-75" style={{ color: theme.textPrimary }}>
               {theme.subheading}
             </p>
           )}
@@ -113,7 +107,7 @@ export default function HomePage() {
         </svg>
       </div>
 
-      {/* Bottom card section */}
+      {/* Bottom card section — scrollable internally but page stays fixed */}
       <div
         className="relative z-10 w-full flex-1 px-5 pb-6 pt-2 overflow-y-auto"
         style={{ background: theme.brandSecondary }}
@@ -135,45 +129,36 @@ export default function HomePage() {
               style={{
                 background: 'rgba(255,255,255,0.85)',
                 backdropFilter: 'blur(8px)',
-                border: `1px solid rgba(255,255,255,0.6)`,
+                border: '1px solid rgba(255,255,255,0.6)',
               }}
             >
               <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
             </div>
           )}
-
           {theme.authMethods.includes("voucher") && (
             <div
               className="rounded-2xl overflow-hidden shadow-lg"
               style={{
                 background: 'rgba(255,255,255,0.85)',
                 backdropFilter: 'blur(8px)',
-                border: `1px solid rgba(255,255,255,0.6)`,
+                border: '1px solid rgba(255,255,255,0.6)',
               }}
             >
               <VoucherCTA />
             </div>
           )}
-
           {theme.authMethods.includes("pu-login") && (
             <div
               className="rounded-2xl overflow-hidden shadow-lg"
-              style={{
-                background: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(8px)',
-              }}
+              style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
             >
               <PlanCard variant="pu-login" />
             </div>
           )}
-
           {theme.authMethods.includes("pu-phonename") && (
             <div
               className="rounded-2xl overflow-hidden shadow-lg"
-              style={{
-                background: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(8px)',
-              }}
+              style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
             >
               <PlanCard variant="pu-phonename" />
             </div>
@@ -204,3 +189,6 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+
