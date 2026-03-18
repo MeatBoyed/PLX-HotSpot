@@ -15,21 +15,21 @@ export default function HomePage() {
       {/* Welcome Text */}
       <div className="flex flex-col items-center mt-8 mb-6 w-full">
         <h1 className="text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
-          {/* Welcome to Pluxnet <br /> Public WiFi */}
+          Welcome to {theme.name} <br /> 
           {theme.heading}
         </h1>
       </div>
 
       {/* Main Card Section */}
-      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full">
+      <div className="rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full" style={{ background: theme.brandSecondary }}>
         {/* Plans */}
-        <h2 className="text-gray-500 text-md font-medium mb-4">
+        <h2 className="text-white text-md font-medium mb-4">
           Get Started
         </h2>
 
         <div className="flex justify-center gap-3 overflow-x-auto pb-3">
           {theme.authMethods.includes("free") && (
-            <PlanCard variant="free" totalData='24 Hrs • 5 GB' tag='Promotion' />
+            <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
           )}
         </div>
 

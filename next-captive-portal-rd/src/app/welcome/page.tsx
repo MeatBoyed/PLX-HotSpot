@@ -28,16 +28,16 @@ export default function WelcomePage() {
 
   const affiliateImages = [
     {
-      name: "JCT Vouchers",
-      src: "https://www.sowetotheatre.com/wp-content/uploads/2020/06/JCT-Live-Stream-Icons_voucher-revert-300x253.png",
+      name: "SAP 2000-2008",
+      src: "https://ditsong.org.za/en/wp-content/uploads/2026/01/Article-Cover.jpg",
     },
     {
-      name: "Streaming",
-      src: "https://www.sowetotheatre.com/wp-content/uploads/2020/07/Web-Set_320X270-pixels-Icon__Streaming-300x253.jpg",
+      name: "THE PRIDE OF THE ZULU: A LEGACY OF STRENGTH AND CULTURE",
+      src: "https://ditsong.org.za/en/wp-content/uploads/2025/12/Picture-3-1.jpg",
     },
     {
-      name: "Latest News",
-      src: "https://www.sowetotheatre.com/wp-content/uploads/2020/07/Web-Set_320X270-pixels-Icon__Latest-News-ST-300x253.jpg",
+      name: "THE MILITARY ROLE OF A NEW SOUTH AFRICA (1998-2000)",
+      src: "https://ditsong.org.za/en/wp-content/uploads/2026/01/Picture-2.jpg",
     },
   ];
 
@@ -65,20 +65,20 @@ export default function WelcomePage() {
         <h1 className="text-3xl font-semibold text-center" style={{ color: theme.textPrimary }}>
           Welcome {storedName ? storedName : displayName},
           <br />
-          to Joburg Theatre Wi-Fi
+          to {theme.name} 
         </h1>
       </div>
 
 
       {/* Main Card Section */}
-      <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full">
+      <div className="rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full" style={{ background: theme.brandSecondary }}>
         {/* Plans */}
-        <h2 className="text-gray-500 text-xl text-center  font-medium mb-4">
+        <h2 className="text-white text-xl text-center  font-medium mb-4">
           You are now connected to the internet. Enjoy your browsing experience!
         </h2>
 
         <div className="w-full mt-10">
-          <p className="text-center text-lg font-medium text-gray-500 mb-3">Our affiliates</p>
+          <p className="text-center text-lg font-medium text-black-500 mb-3">Our affiliates</p>
           <div className="w-full overflow-hidden">
             <div className="grid grid-cols-3 gap-2">
               {affiliateImages.map(({ name, src }) => (
@@ -86,7 +86,7 @@ export default function WelcomePage() {
                   <img
                     src={src}
                     alt={name}
-                    className="w-full h-auto rounded-lg border border-gray-200"
+                    className="w-full h-auto rounded-lg border border-black-200"
                     loading="lazy"
                   />
                 </div>
@@ -96,7 +96,7 @@ export default function WelcomePage() {
         </div>
 
         <div className="mt-8 w-full">
-          <p className="text-center text-lg font-lg text-gray-500 mb-3">More of us</p>
+          <p className="text-center text-lg font-medium text-black-500 mb-4">More of us</p>
           <div className="w-full overflow-hidden">
             <div className="flex flex-nowrap items-center justify-center gap-4">
               {socialLinks.map(({ name, href, Icon }) => (

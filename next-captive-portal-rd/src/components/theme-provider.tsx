@@ -1,13 +1,12 @@
 'use client';
 
-
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { pluxnetTheme } from '@/lib/theme';
 import { BrandingConfig } from '@/lib/types';
-import { normalizeBranding } from '@/lib/utils/branding-normalize';
+import { normalizeBranding, brandingToCssVars } from '@/lib/utils/branding-normalize';
 import { fetchBrandingConfigAction } from '@/lib/actions/branding-actions';
 
-const STALE_CLIENT_TTL_MS = 6 * 60 * 1000; // 6 minutes after which client will background refresh
+const STALE_CLIENT_TTL_MS = 6 * 60 * 1000;
 
 interface ThemeContextType {
   theme: BrandingConfig;
@@ -29,9 +28,9 @@ export function useTheme() {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  initialTheme?: BrandingConfig; // optional fast paint
-  ssid: string; // branding identifier
-  showInitialSpinner?: boolean; // default true
+  initialTheme?: BrandingConfig;
+  ssid: string;
+  showInitialSpinner?: boolean;
 }
 
 function getStoredTheme(ssid: string): BrandingConfig | null {
@@ -52,20 +51,26 @@ function storeTheme(ssid: string, theme: BrandingConfig) {
 }
 
 export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner = true }: ThemeProviderProps) {
-  // Track loading & error state
   const [loading, setLoading] = useState<boolean>(() => !initialTheme && showInitialSpinner);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
 
-  // Use provided initialTheme, or stored theme, or fallback
   const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme(ssid) || pluxnetTheme);
+
+  // ✅ THIS IS THE KEY FIX — apply CSS vars to :root whenever theme changes
+  useEffect(() => {
+    const vars = brandingToCssVars(theme);
+    const root = document.documentElement;
+    for (const [key, value] of Object.entries(vars)) {
+      if (value) root.style.setProperty(key, value);
+    }
+  }, [theme]);
 
   // Persist theme to localStorage on change
   useEffect(() => { storeTheme(ssid, theme); }, [theme, ssid]);
 
   const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
     if (!incoming) return;
-    // Shallow diff on updatedAt or id
     if (theme.updatedAt !== incoming.updatedAt || theme.id !== incoming.id) {
       setThemeState(incoming);
     }
@@ -81,12 +86,11 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     if (fetchingRef.current) return;
     if (!force && initialTheme && isFreshEnough(initialTheme)) {
       setLoading(false);
-      return; // server provided fresh theme
+      return;
     }
     fetchingRef.current = true;
     setError(null);
     try {
-      // Request normalized branding config via server action
       const incoming = await fetchBrandingConfigAction(ssid);
       const normalized = normalizeBranding(incoming);
       applyThemeIfChanged(normalized);
@@ -102,11 +106,9 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     }
   };
 
-  // Initial fetch (always perform at least one client refresh so backend changes propagate even if server supplied initialTheme)
   useEffect(() => {
     const stored = getStoredTheme(ssid);
     if (!initialTheme && stored) {
-      // Use stored immediately if no initialTheme
       applyThemeIfChanged(stored);
     }
     const force = stored?.ssid && stored.ssid !== ssid;
@@ -114,10 +116,7 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ssid, initialTheme]);
 
-  // Manual setTheme exposed to consumers
   const setTheme = (newTheme: BrandingConfig) => setThemeState(newTheme || pluxnetTheme);
-
-  // Manual refresh function (exposed)
   const refreshTheme = async () => { await fetchTheme(true); };
 
   return (
@@ -127,7 +126,6 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
           <div className="flex flex-col items-center gap-4">
             <Spinner />
             <p className="text-sm text-gray-500">Loading theme…</p>
-            {/* {error && <p className="text-xs text-red-500">{error}</p>} */}
           </div>
         </div>
       ) : (
