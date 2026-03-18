@@ -39,7 +39,7 @@ export default function Dashboard() {
             {/* Welcome Text */}
             <div className="flex flex-col items-center mt-8 mb-2 w-full">
                 <h1 className="text-white text-2xl font-semibold text-center" style={{ color: theme.textPrimary }}>
-                    Welcome back <span className="inline-block">👋</span>
+                    Welcome to your usage <span className="inline-block">👋</span>
                 </h1>
                 <span className=" text-base mt-1" style={{ color: theme.textTertiary }}>
                     View your connection details below
@@ -47,10 +47,10 @@ export default function Dashboard() {
             </div>
 
             {/* Main Card Section */}
-            <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full mt-5">
+            <div className="bg-white rounded-t-3xl pt-6 pb-3 px-4 min-h-[50vh] w-full mt-5" style={{ background: theme.brandSecondary }}>
                 {/* Current Plan */}
-                <h2 className="text-gray-500 text-lg font-medium mb-2">Current plan</h2>
-                <div className="bg-gray-100 rounded-xl p-4 flex flex-col gap-2 mb-4">
+                <h2 className="text-gray-500 text-lg font-medium mb-2" style={{ color: theme.textSecondary }}>Current plan</h2>
+                <div className="bg-gray-100 rounded-xl p-4 flex flex-col gap-2 mb-4" >
                     <div className="flex justify-between items-center">
                         <span className="text-gray-500 text-base">Free plan</span>
                         <span className="font-semibold text-gray-700">$0.00</span>
@@ -65,7 +65,7 @@ export default function Dashboard() {
                     <div className="w-full h-2 bg-gray-300 rounded-full mb-2">
                         <div className="h-2 rounded-full" style={{ width: "70%", backgroundColor: theme.brandPrimary }} />
                     </div>
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-gray-500" >
                         <span>
                             Expires on <br /><span className="font-medium text-black">4th Apr, 2025</span>
                         </span>
@@ -76,7 +76,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Change Plan */}
-                <h2 className="text-gray-500 text-lg font-medium mb-2">Change your plan</h2>
+                <h2 className="text-gray-500 text-lg font-medium mb-2" style={{ color: theme.textSecondary }}>Change your plan</h2>
                 {/* <div className="flex gap-3 overflow-x-auto pb-3 items-center"> */}
                 {/* <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' /> */}
                 {/* <PlanCard variant="paid" price='R50' totalData='50 Hrs • 2GB' tag='Mini' />
