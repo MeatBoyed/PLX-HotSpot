@@ -21,7 +21,7 @@ export default function SplashPage() {
                     className="w-full h-full object-cover"
                 />
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-pink-400 opacity-80" />
+                {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-pink-400 opacity-80" /> */}
             </div>
 
             {/* Splash content */}
