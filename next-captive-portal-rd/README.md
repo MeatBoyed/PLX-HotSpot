@@ -8,40 +8,54 @@ This app uses T3 Env (`src/env.ts`) to validate environment variables for both s
 	- `PAYFAST_*`, `RADIUSDESK_*`, `MIKROTIK_RADIUS_DESK_BASE_URL`, `VOUCHER_DEFAULT_TTL_HOURS`, `USE_SEED_DATA`, `SITE_TITLE`, `SITE_DESCRIPTION`, `BRAND_NAME`.
 
 - Public/client variables (prefixed with `NEXT_PUBLIC_`) are compiled into the client bundle at build time. Changing these requires rebuilding the image. Examples:
-	- `NEXT_PUBLIC_SSID`, `NEXT_PUBLIC_MIKROTIK_*`, `NEXT_PUBLIC_BASE_URL`.
+	- `NEXT_PUBLIC_SSID`, `NEXT_PUBLIC_MIKROTIK_*`.
 
 Rule of thumb:
 - Change only server vars → restart container (no rebuild required).
 - Change any `NEXT_PUBLIC_*` or anything that affects build output → rebuild image.
 
-## Docker: build and run
+## Docker Compose: site-specific deployments
 
-The Dockerfile copies `.env` into the build stage so Next can inline any required build-time values. At runtime, Compose injects environment variables from `.env` into the container process.
+The Compose files now support per-site env files, ports, project names, and image names without copying anything to `.env` first.
 
-Development (rebuild on changes):
-
-```bash
-docker compose up --build -d
-```
-
-Production (use prebuilt image):
-
-1) Build the image locally (or pull from your registry):
+Standard build and deploy:
 
 ```bash
-docker build -t vv-hotspot:latest .
+docker compose --env-file .env.joburg-theatre up --build -d
 ```
 
-2) Run with the production compose file:
+Run a prebuilt image:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml --env-file .env.joburg-theatre up -d
 ```
+
+Each site env file should include both the app variables and a small deployment block for Compose interpolation:
+
+```env
+COMPOSE_PROJECT_NAME=vv-hotspot-joburg-theatre
+IMAGE_REF=vv-hotspot-joburg-theatre:latest
+BUILD_ENV_FILE=.env.joburg-theatre
+RUNTIME_ENV_FILE=.env.joburg-theatre
+HOST_PORT=3001
+
+NEXT_PUBLIC_SSID=joburg-theatre
+BASE_URL=https://joburg-theatre.example.com
+BRAND_NAME=Joburg Theatre
+```
+
+What these variables do:
+- `COMPOSE_PROJECT_NAME`: isolates the stack name, network, and container names per site.
+- `IMAGE_REF`: gives each site its own image tag so builds do not overwrite each other.
+- `BUILD_ENV_FILE`: the env file copied into the Docker build stage so Next.js gets the correct build-time `NEXT_PUBLIC_*` values.
+- `RUNTIME_ENV_FILE`: the env file loaded into the running container.
+- `HOST_PORT`: the host port mapped to container port `3000`.
 
 Notes:
-- Ensure `.env` exists at the project root. It is used at both build time (baked where needed) and runtime (via Compose `env_file`).
-- Changing `NEXT_PUBLIC_*` after an image is built will not affect the already built client code; rebuild the image to apply.
-- Server-only changes (e.g., PayFast or RadiusDesk tokens/IDs) can be applied by updating `.env` and restarting the container.
+- `docker-compose.yml` is the build-and-run compose file.
+- `docker-compose.prod.yml` expects the image in `IMAGE_REF` to already exist locally or in your registry.
+- Changing any `NEXT_PUBLIC_*` values still requires a rebuild because Next.js inlines them into the client bundle.
+- Server-only changes can be applied with `docker compose up -d` or a container restart once the runtime env file is updated.
 
 What I built
 - File: deploy-ssid.sh

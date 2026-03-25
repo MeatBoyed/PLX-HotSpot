@@ -18,6 +18,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat openssl
+ARG BUILD_ENV_FILE=.env
 
 # Install deps from previous stage
 COPY --from=deps /app/node_modules ./node_modules
@@ -31,9 +32,9 @@ COPY prisma ./prisma
 COPY public ./public
 COPY src ./src
 
-# Important: copy .env so Next has all env at build time (only in builder layer).
-# This will not be present in the final runtime image. Ensure .dockerignore allows .env.
-COPY .env ./.env
+# Copy the selected env file so Next has the right build-time values.
+# This only exists in the builder stage and is not shipped in the runtime image.
+COPY ${BUILD_ENV_FILE} ./.env
 
 # Generate Prisma client and build Next
 RUN npx prisma generate
