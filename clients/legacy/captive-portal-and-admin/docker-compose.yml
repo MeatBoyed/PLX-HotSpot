@@ -1,34 +1,40 @@
+# --- Shared portal defaults (merged via YAML anchor) ---
+x-portal-base: &portal-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    NODE_ENV: production
+    NEXT_TELEMETRY_DISABLED: "1"
+  restart: unless-stopped
+
+# --- Portal services ---
+# To add a new portal:
+#   1. Create .env.<portal> with both build-time (NEXT_PUBLIC_*) and runtime vars
+#   2. Copy one of the service blocks below, update the name, BUILD_ENV_FILE, image, and port
 services:
-  web:
+  zandspruit:
+    <<: *portal-base
     build:
       context: .
       dockerfile: Dockerfile
-      # If you later need build-time args, you can pass them here; currently we COPY .env during build.
-      # args:
-      #   - NEXT_PUBLIC_BASE_URL
-    image: vv-hotspot:latest
+      args:
+        BUILD_ENV_FILE: .env.zandspruit
+    image: auraconnect-zandspruit:latest
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
-      - .env
-    environment:
-      # Ensure production mode in container
-      NODE_ENV: production
-      NEXT_TELEMETRY_DISABLED: "1"
-    depends_on:
-      # Uncomment if you run Postgres here
-      # - db
-      []
-    restart: unless-stopped
-  # Example Postgres service if you want it here (optional)
-  # db:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_PASSWORD: example
-  #   volumes:
-  #     - dbdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+      - .env.zandspruit
 
-  # volumes:
-  #   dbdata:
+  joburg-theatre:
+    <<: *portal-base
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV_FILE: .env.joburg-theatre
+    image: auraconnect-joburg-theatre:latest
+    ports:
+      - "3002:3000"
+    env_file:
+      - .env.joburg-theatre

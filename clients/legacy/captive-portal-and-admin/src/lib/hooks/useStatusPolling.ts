@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MikroTikStatus, RadiusDeskUsageResponse } from '@/lib/mikrotik/mikrotik-types';
+import { MikroTikStatus, RadiusDeskUsageResponse } from '@/lib/hooks/mikrotik-types';
 
 interface PollResponse {
     success: boolean;

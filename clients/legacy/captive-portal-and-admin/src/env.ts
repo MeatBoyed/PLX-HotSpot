@@ -38,6 +38,9 @@ export const env = createEnv({
 
         // Feature flags
         USE_SEED_DATA: z.enum(['true', 'false']).default('false'),
+
+        // Base URL for server-side absolute URL construction (e.g. PayFast callbacks)
+        BASE_URL: z.string().min(1).default('http://localhost:3001'),
     },
     client: {
         // Expose only safe public vars (prefix NEXT_PUBLIC_). Add as needed.
@@ -46,7 +49,6 @@ export const env = createEnv({
         NEXT_PUBLIC_MIKROTIK_BASE_URL: z.string().url().default('https://gateway.pluxnet.co.za'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME: z.string().min(1).default('click_to_connect@dev'),
         NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD: z.string().min(1).default('click_to_connect'),
-        NEXT_PUBLIC_BASE_URL: z.string().min(1).default('http://localhost:3001'),
 
         // PostHog analytics
         NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
@@ -79,7 +81,7 @@ export const env = createEnv({
         EC1_SMS_API_URL: process.env.EC1_SMS_API_URL,
         EC1_SMS_USER_ID: process.env.EC1_SMS_USER_ID,
         EC1_SMS_PASSWORD: process.env.EC1_SMS_PASSWORD,
-        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+        BASE_URL: process.env.BASE_URL,
         NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
         NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     }
