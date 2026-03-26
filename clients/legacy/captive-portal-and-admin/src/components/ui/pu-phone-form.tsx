@@ -30,8 +30,26 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                 </div>
             )}
 
-            {/* Step 1: Phone + Name form */}
-            {step === 'form' && (
+            {/* When credentials are set (returning user or post-OTP), show connect form */}
+            {credentials && credentials.mode === 'pu-phonename' && (
+                <>
+                    {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
+                    <form ref={formRef} method="GET" action={action} className="inline-block w-full">
+                        <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
+                        <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
+                        <button
+                            type="submit"
+                            className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
+                            style={style}
+                        >
+                            {label}
+                        </button>
+                    </form>
+                </>
+            )}
+
+            {/* Step 1: Phone + Name form (new users only, no creds yet) */}
+            {!credentials && step === 'form' && (
                 <>
                     <div className="flex gap-3 flex-col w-full mb-2">
                         <Label>Phone</Label>
@@ -72,8 +90,8 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                 </>
             )}
 
-            {/* Step 2: OTP verification */}
-            {step === 'otp' && (
+            {/* Step 2: OTP verification (only when no creds yet) */}
+            {!credentials && step === 'otp' && (
                 <>
                     <p className="text-sm text-gray-600 mb-3">
                         A 4-digit code has been sent to <strong>{phone}</strong>
@@ -94,21 +112,15 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                     </div>
                     {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
 
-                    {/* Hidden form for MikroTik submission */}
-                    <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onVerifyOtp}>
-                        {credentials && (
-                            <>
-                                <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
-                                <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
-                            </>
-                        )}
+                    {/* OTP verify button */}
+                    <form className="inline-block w-full" onSubmit={onVerifyOtp}>
                         <button
                             type="submit"
                             disabled={loading}
                             className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
                             style={style}
                         >
-                            {loading ? 'Verifying...' : label}
+                            {loading ? 'Verifying...' : 'Verify Code'}
                         </button>
                     </form>
 
