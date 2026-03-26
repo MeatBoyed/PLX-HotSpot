@@ -35,6 +35,6 @@ services:
         BUILD_ENV_FILE: .env.joburg-theatre
     image: auraconnect-joburg-theatre:latest
     ports:
-      - "3002:3000"
+      - "3008:3000"
     env_file:
       - .env.joburg-theatre
