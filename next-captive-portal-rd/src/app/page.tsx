@@ -44,24 +44,24 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Top section */}
-      <div className="relative z-10 w-full flex flex-col items-center px-6 pt-8 pb-16">
+      {/* Top section — compact on mobile, roomier on larger screens */}
+      <div className="relative z-10 w-full flex flex-col items-center px-5 pt-4 pb-8 sm:px-6 sm:pt-8 sm:pb-16">
 
         {/* Logo with glass pill navbar */}
         <div
-          className="flex items-center gap-3 px-5 py-3 rounded-full mb-10 w-full justify-between"
+          className="flex items-center gap-3 px-4 py-2 sm:px-5 sm:py-3 rounded-full mb-4 sm:mb-10 w-full justify-between"
           style={{
             background: 'rgba(255,255,255,0.12)',
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.2)',
           }}
         >
-          <div className="bg-white rounded-full p-2 shadow-lg">
+          <div className="bg-white rounded-full p-1.5 sm:p-2 shadow-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl(theme.logo, theme.ssid)}
               alt="Brand logo"
-              className="w-8 h-8 object-contain"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
             />
           </div>
           <span className="text-sm font-semibold tracking-wide" style={{ color: theme.textPrimary }}>
@@ -76,15 +76,15 @@ export default function HomePage() {
         </div>
 
         {/* Hero text */}
-        <div className="text-center mb-2">
+        <div className="text-center mb-1 sm:mb-2">
           <h1
-            className="text-4xl font-bold leading-tight mb-4"
+            className="text-2xl sm:text-4xl font-bold leading-tight mb-2 sm:mb-4"
             style={{ color: theme.textPrimary, textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}
           >
             {theme.heading || `Welcome to ${theme.name}`}
           </h1>
           {theme.subheading && (
-            <p className="text-sm opacity-75" style={{ color: theme.textPrimary }}>
+            <p className="text-xs sm:text-sm opacity-75" style={{ color: theme.textPrimary }}>
               {theme.subheading}
             </p>
           )}
@@ -92,14 +92,14 @@ export default function HomePage() {
       </div>
 
       {/* Wave SVG divider */}
-      <div className="relative z-10 w-full -mt-8">
+      <div className="relative z-10 w-full -mt-4 sm:-mt-8">
         <svg
           viewBox="0 0 428 48"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="w-full"
           preserveAspectRatio="none"
-          style={{ display: 'block', height: '48px' }}
+          style={{ display: 'block', height: '32px' }}
         >
           <path
             d="M0 48 C80 10, 160 0, 214 20 C268 40, 348 50, 428 20 L428 48 Z"
@@ -108,13 +108,13 @@ export default function HomePage() {
         </svg>
       </div>
 
-      {/* Bottom card section — scrollable internally but page stays fixed */}
+      {/* Bottom card section — fits remaining space without scrolling */}
       <div
-        className="relative z-10 w-full flex-1 px-5 pb-6 pt-2 overflow-y-auto"
+        className="relative z-10 w-full flex-1 flex flex-col px-5 pb-4 pt-1 sm:pb-6 sm:pt-2 overflow-hidden"
         style={{ background: theme.brandSecondary }}
       >
         {/* Section label */}
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3 mb-3 sm:mb-5">
           <div className="flex-1 h-px opacity-20" style={{ background: theme.textSecondary }} />
           <span className="text-xs font-bold tracking-widest uppercase" style={{ color: theme.textSecondary }}>
             Get Started
@@ -124,7 +124,7 @@ export default function HomePage() {
 
         <AuthMethodsCard />
         {/* Signal strength decorative element */}
-        <div className="flex items-center justify-center gap-1 mt-6 mb-2">
+        <div className="flex items-center justify-center gap-1 mt-3 sm:mt-6 mb-2 sm:mb-4">
           {[1, 2, 3, 4].map((bar) => (
             <div
               key={bar}
@@ -142,7 +142,10 @@ export default function HomePage() {
           </span>
         </div>
 
-        <AdSection />
+        {/* Ad pinned to bottom of viewport */}
+        <div className="mt-5">
+          <AdSection />
+        </div>
       </div>
     </div>
   );
