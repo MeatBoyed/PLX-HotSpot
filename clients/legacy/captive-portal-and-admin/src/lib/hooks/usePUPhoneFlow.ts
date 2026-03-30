@@ -109,7 +109,7 @@ export function usePUPhoneFlow() {
                 setError(data.error || 'Verification failed');
                 return;
             }
-            // Build credentials and submit to MikroTik
+            // Build credentials — form will show connect button
             const result = connect(undefined, { username: data.username, password: data.password, mode: 'pu-phonename' });
             if (!result.pending) {
                 if ('error' in result) {
@@ -118,7 +118,6 @@ export function usePUPhoneFlow() {
                     try {
                         localStorage.setItem('pu-phonename-display', name?.trim() || '');
                     } catch { }
-                    setTimeout(() => submit(), 0);
                 }
             }
         } catch (err) {
