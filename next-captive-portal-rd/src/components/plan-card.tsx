@@ -11,10 +11,33 @@ interface PlanCardProps {
     name?: string
     variant: PlanVariant;
     tag?: string;
-    price?: string; // required for paid variant
+    price?: string;
     totalData?: string;
-    onDismiss?: () => void; // voucher only
+    onDismiss?: () => void;
     className?: string;
+}
+
+// Shimmer wrapper — wraps any button with the sweep animation
+function ShimmerButton({ children, style, className }: { children: React.ReactNode; style?: React.CSSProperties; className?: string }) {
+    return (
+        <div className={`relative overflow-hidden rounded-full ${className || ''}`} style={style}>
+            {children}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)',
+                    animation: 'shimmer 2.5s infinite',
+                    borderRadius: 'inherit',
+                }}
+            />
+            <style>{`
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            `}</style>
+        </div>
+    );
 }
 
 export function PlanCard({ name, variant, tag, price, totalData, onDismiss, className }: PlanCardProps) {
@@ -27,6 +50,9 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
     const isPURegister = variant === 'pu-register';
     const isPUPhone = variant === 'pu-phonename';
 
+    const btnStyle = { backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText };
+    const btnClass = "text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full";
+
     return (
         <div className={[
             "bg-gray-100 rounded-xl p-4 flex flex-col w-full text-center",
@@ -38,9 +64,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
 
             {isFree && <span className="mb-2 font-bold text-lg">Connect for Free</span>}
-            {isPaid && (
-                <span className="text-black font-bold text-xl mb-1">{price}</span>
-            )}
+            {isPaid && <span className="text-black font-bold text-xl mb-1">{price}</span>}
             {isVoucher && (
                 <div className="flex justify-between items-center w-full mb-1">
                     <span className="font-bold text-lg">Enter your Wifi Code</span>
@@ -58,51 +82,61 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
 
             {isPaid && (
-                <Link
-                    href={`/checkout/${name}`}
-                    className="text-white rounded-full w-full py-3 font-semibold mt-2 text-sm"
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                >
-                    Buy now
-                </Link>
+                <ShimmerButton style={btnStyle}>
+                    <Link
+                        href={`/checkout/${name}`}
+                        className="text-white rounded-full w-full py-3 font-semibold mt-2 text-sm block"
+                        style={btnStyle}
+                    >
+                        Buy now
+                    </Link>
+                </ShimmerButton>
             )}
 
             {isFree && (
-                <FreeLoginFormButton
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                    className="text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"
-                />
+                <ShimmerButton style={btnStyle} className="mt-2 w-full">
+                    <FreeLoginFormButton
+                        style={btnStyle}
+                        className={btnClass}
+                    />
+                </ShimmerButton>
             )}
 
             {isVoucher && (
-                <VoucherLoginForm
-                    // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
-                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                    label="Connect"
-                />
+                <ShimmerButton style={btnStyle} className="mt-2 w-full">
+                    <VoucherLoginForm
+                        className={btnClass}
+                        style={btnStyle}
+                        label="Connect"
+                    />
+                </ShimmerButton>
             )}
 
             {isPURegister && (
-                <PURegisterForm
-                    // className={'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed  '}
-                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                // label="Redeem"
-                />
+                <ShimmerButton style={btnStyle} className="mt-2 w-full">
+                    <PURegisterForm
+                        className={btnClass}
+                        style={btnStyle}
+                    />
+                </ShimmerButton>
             )}
 
             {isPULogin && (
-                <PULoginForm
-                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                />
+                <ShimmerButton style={btnStyle} className="mt-2 w-full">
+                    <PULoginForm
+                        className={btnClass}
+                        style={btnStyle}
+                    />
+                </ShimmerButton>
             )}
+
             {isPUPhone && (
-                <PUPhoneForm
-                    className={"text-white rounded-full px-8 py-2 font-semibold mt-2 text-sm w-full"}
-                    style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
-                />
+                <ShimmerButton style={btnStyle} className="mt-2 w-full">
+                    <PUPhoneForm
+                        className={btnClass}
+                        style={btnStyle}
+                    />
+                </ShimmerButton>
             )}
         </div>
     );

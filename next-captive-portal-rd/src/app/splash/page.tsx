@@ -2,75 +2,214 @@
 import { useTheme } from "@/components/theme-provider";
 import { imageUrl } from "@/lib/image-url";
 import Link from "next/dist/client/link";
-import React from "react";
+import React, { useState } from "react";
 
 export default function SplashPage() {
-    const { theme } = useTheme()
-    // const [agreed, setAgreed] = useState(false);
+    const { theme } = useTheme();
+    const [checked, setChecked] = useState(false);
 
     return (
-        // <div style={{ background: theme.brandPrimary }} className="flex items-center justify-center flex-col max-w-md w-full" >
-        <div className="relative h-[90vh] overflow-hidden">
+        <div className="relative w-full h-screen overflow-hidden" style={{ maxWidth: '430px' }}>
 
-            {/* Background image */}
-            <div className="fixed inset-0 z-0">
+            {/* Full bleed background image */}
+            <div className="absolute inset-0 z-0">
                 <img
                     src={imageUrl(theme.splashBackground, theme.ssid)}
-                    // src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                     alt=""
                     className="w-full h-full object-cover"
+                    style={{ filter: 'brightness(0.80)' }}
                 />
-                {/* Gradient overlay */}
-                {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-pink-400 opacity-80" /> */}
+                {/* Cinematic gradient overlay — brand color bleeds in from bottom */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: `linear-gradient(
+                            to bottom,
+                            rgba(0,0,0,0.15) 0%,
+                            rgba(0,0,0,0.05) 50%,
+                            ${theme.brandPrimary}99 70%,
+                            ${theme.brandPrimary} 100%
+                        )`
+                    }}
+                />
+                {/* Subtle diagonal color stripe */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: `linear-gradient(
+                            135deg,
+                            ${theme.brandAccent}22 50%,
+                            transparent 53%
+                        )`
+                    }}
+                />
             </div>
 
-            {/* Splash content */}
-            <form method="POST" action="/" className="max-w-md w-full flex flex-col justify-center items-center">
-                <div className="relative z-10 flex flex-col justify-end h-[90vh] px-6 pb-4">
-                    <div className="mb-8">
-                        {/* <h1 className="text-white text-4xl font-bold mb-2">PluxNet</h1> */}
-                        <div className="text-white text-xl font-semibold">{theme.splashHeading}</div>
-                        {/* <div className="text-white text-base">This service is provided by PluxNet</div> */}
+            {/* Top — Logo + venue badge */}
+            <div className="absolute top-0 left-0 right-0 z-20 flex items-start justify-between px-6 pt-10">
+                {/* Logo with animated ripple rings */}
+                <div className="relative flex items-center justify-center">
+                    {/* Ripple rings */}
+                    <div className="absolute rounded-full animate-ping"
+                        style={{
+                            width: '64px', height: '64px',
+                            background: `${theme.brandPrimary}33`,
+                            animationDuration: '2s'
+                        }}
+                    />
+                    <div className="absolute rounded-full animate-ping"
+                        style={{
+                            width: '80px', height: '80px',
+                            background: `${theme.brandPrimary}1A`,
+                            animationDuration: '2s',
+                            animationDelay: '0.4s'
+                        }}
+                    />
+                    {/* Logo pill */}
+                    <div
+                        className="relative z-10 rounded-2xl p-2 shadow-2xl"
+                        style={{
+                            background: 'rgba(255,255,255,0.95)',
+                            backdropFilter: 'blur(12px)',
+                        }}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={imageUrl(theme.logo, theme.ssid)}
+                            alt="Logo"
+                            className="w-10 h-10 object-contain"
+                        />
                     </div>
-                    {/* Terms */}
-                    <label className="flex items-start gap-3 mb-6">
-                        <span className="mt-1">
-                            <input
-                                type="checkbox"
-                                // checked={agreed}
-                                // onChange={() => setAgreed(!agreed)}
-                                required
-                            />
-                        </span>
-                        <span className="text-white text-base">
-                            Agree with the{" "}
-                            <Link href={"/terms-and-conditions"} className={`text-[${theme.brandPrimary}] underline`}>terms and conditions</Link>{" "}
-                            related to the processing of data for commercial purposes.
+                </div>
+
+                {/* Free WiFi badge */}
+                <div
+                    className="px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg"
+                    style={{
+                        background: 'rgba(255,255,255,0.15)',
+                        backdropFilter: 'blur(12px)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        color: theme.textPrimary,
+                    }}
+                >
+                    Free WiFi
+                </div>
+            </div>
+
+            {/* Middle — Venue name floating over image */}
+            <div className="absolute z-20 px-6" style={{ top: '35%' }}>
+                <p
+                    className="text-xs font-bold tracking-widest uppercase mb-2"
+                    style={{ color: theme.textSecondary }}
+                >
+                    {theme.name}
+                </p>
+                <h2
+                    className="text-3xl font-black leading-none mb-3"
+                    style={{
+                        color: theme.textSecondary,
+                        textShadow: '0 4px 30px rgba(0,0,0,0.4)',
+                        letterSpacing: '-0.02em',
+                    }}
+                >
+                    {theme.splashHeading || 'Welcome to\nthe Hotspot'}
+                </h2>
+                {/* Decorative line */}
+                <div className="flex items-center gap-3 mt-4">
+                    <div className="h-px w-8" style={{ background: theme.brandAccent }} />
+                    <div className="h-px flex-1 opacity-30" style={{ background: theme.textMuted }} />
+                </div>
+            </div>
+
+            {/* Bottom — Glass acceptance card */}
+            <div
+                className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-5 pt-3"
+                style={{
+                    background: `linear-gradient(to top, ${theme.brandPrimary} 60%, transparent)`,
+                }}
+            >
+                <form method="POST" action="/">
+
+                    {/* Terms checkbox row */}
+                    <label className="flex items-start gap-3 mb-5 cursor-pointer">
+                        {/* Hidden native checkbox — drives all state */}
+                        <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => setChecked(e.target.checked)}
+                            className="sr-only"
+                            required
+                        />
+                        {/* Custom visual checkbox */}
+                        <div
+                            className="mt-0.5 w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center transition-all duration-200 shadow-md"
+                            style={{
+                                background: checked ? theme.brandAccent : 'rgba(255,255,255,0.15)',
+                                border: `2px solid ${checked ? theme.brandAccent : 'rgba(255,255,255,0.4)'}`,
+                                backdropFilter: 'blur(8px)',
+                            }}
+                        >
+                            {checked && (
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            )}
+                        </div>
+                        <span className="text-sm leading-relaxed" style={{ color: theme.textPrimary }}>
+                            I agree to the{' '}
+                            <Link
+                                href="/terms-and-conditions"
+                                style={{ color: theme.textPrimary, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                            >
+                                terms and conditions
+                            </Link>{' '}
+                            for use of this service.
                         </span>
                     </label>
-                    {/* Accept button */}
-                    <button
-                        className={`w-full rounded-full text-white text-lg font-semibold py-4 mb-2 flex items-center justify-center gap-2`}
-                        // disabled={!agreed}
-                        style={{
-                            backgroundColor: theme.buttonPrimary,
-                            color: theme.buttonPrimaryText,
-                        }}
-                        type="submit"
-                    >
-                        Accept &amp; continue <span className="text-2xl">&rarr;</span>
-                        {/* <Link href={agreed ? "/" : "#"} >
-                        Accept &amp; continue <span className="text-2xl">&rarr;</span>
-                    </Link> */}
-                    </button>
-                </div>
-            </form>
 
-            {/* Powered by
-            <div className="text-center mb-3 mt-2 text-gray-300 text-xs relative z-20">
-                Powered by <span className="font-bold text-[#F55C7A]">N</span> <span className="font-semibold text-white">PluxNet</span>
-            </div> */}
+                    {/* Accept button — shimmer effect */}
+                    <button
+                        type="submit"
+                        disabled={!checked}
+                        className="relative w-full rounded-2xl text-base font-bold py-4 flex items-center justify-center gap-3 overflow-hidden transition-all duration-300"
+                        style={{
+                            background: theme.buttonPrimary,
+                            color: theme.buttonPrimaryText,
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid transparent',
+                            boxShadow: checked ? `0 8px 32px ${theme.buttonPrimary}66` : 'none',
+                            opacity: checked ? 1 : 0.45,
+                            cursor: checked ? 'pointer' : 'not-allowed',
+                        }}
+                    >
+                        {/* Shimmer overlay when active */}
+                        {checked && (
+                            <div
+                                className="absolute inset-0 opacity-20"
+                                style={{
+                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                                    animation: 'shimmer 2s infinite',
+                                }}
+                            />
+                        )}
+                        <span className="relative z-10 tracking-wide">Accept &amp; Connect</span>
+                        <span className="relative z-10 text-xl">→</span>
+                    </button>
+
+                    {/* Powered by */}
+                    <p className="text-center text-xs mt-4" style={{ color: theme.textMuted }}>
+                        Powered by <span style={{ color: theme.textPrimary, fontWeight: 600 }}>Vega Vision</span>
+                    </p>
+                </form>
+            </div>
+
+            {/* Shimmer keyframe */}
+            <style>{`
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            `}</style>
         </div>
-        // </div>
     );
 }
