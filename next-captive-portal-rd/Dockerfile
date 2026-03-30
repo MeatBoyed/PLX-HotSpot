@@ -1,0 +1,67 @@
+## syntax=docker/dockerfile:1.5
+
+FROM node:20-alpine AS deps
+WORKDIR /app
+# Prisma on alpine needs openssl and libc6-compat
+RUN apk add --no-cache libc6-compat openssl
+COPY package.json package-lock.json* ./
+RUN npm config set registry https://registry.npmjs.org/ \
+    && npm config set fetch-retries 6 \
+    && npm config set fetch-retry-factor 2 \
+    && npm config set fetch-retry-mintimeout 20000 \
+    && npm config set fetch-retry-maxtimeout 120000 \
+    && npm config set fetch-timeout 600000
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --legacy-peer-deps
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache libc6-compat openssl
+ARG BUILD_ENV_FILE=.env
+ARG SHARED_BUILD_ENV_FILE=docker/env/.env.shared
+
+# Install deps from previous stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy app sources
+COPY package.json package-lock.json* ./
+COPY tsconfig.json ./
+COPY next.config.ts ./
+COPY postcss.config.mjs ./
+COPY prisma ./prisma
+COPY public ./public
+COPY src ./src
+
+# Build-time env is layered: shared first, then site-specific overrides.
+# These only exist in the builder stage and are not shipped in the runtime image.
+COPY ${SHARED_BUILD_ENV_FILE} ./.env.shared.build
+COPY ${BUILD_ENV_FILE} ./.env.site.build
+RUN cat ./.env.shared.build ./.env.site.build > ./.env
+
+# Generate Prisma client and build Next
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+# Copy public (static files)
+COPY --from=builder /app/public ./public
+
+# Copy Next standalone server and static assets
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Copy generated Prisma client (your schema outputs to ../generated/prisma)
+COPY --from=builder /app/generated ./generated
+
+# If you use any runtime assets (e.g., migrations or schema), copy as needed:
+# COPY --from=builder /app/prisma ./prisma
+
+EXPOSE 3000
+# The standalone output includes server.js at root
+CMD ["node", "server.js"]
