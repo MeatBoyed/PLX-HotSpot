@@ -120,3 +120,18 @@ services:
     env_file:
       - ./env/.env.shared
       - ./env/sandbox.env
+
+  coj:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/coj.env
+    image: auraconnect-coj:latest
+    ports:
+      - "4008:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/coj.env
