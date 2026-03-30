@@ -34,6 +34,14 @@ yarn-error.log*
 .env
 .env.*
 .env.local
+docker/env/.env.shared
+!docker/env/.env.shared.example
+
+# docker env layout
+docker/env/shared.runtime.secret
+docker/env/*.secret
+docker/env/*.secret.*
+!docker/env/shared.runtime.secret.example
 
 # vercel
 .vercel
