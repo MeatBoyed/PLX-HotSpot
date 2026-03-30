@@ -143,7 +143,7 @@ export default function HomePage() {
         </div>
 
         {/* Ad pinned to bottom of viewport */}
-        <div className="mt-5">
+        <div className="mt-4">
           <AdSection />
         </div>
       </div>
