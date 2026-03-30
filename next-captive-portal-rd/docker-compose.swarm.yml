@@ -1,0 +1,53 @@
+# Swarm stack for captive portals (image-only; no build section).
+# Build and push images first, then deploy this file with `docker stack deploy`.
+
+x-portal-base: &portal-base
+  environment:
+    NODE_ENV: production
+    NEXT_TELEMETRY_DISABLED: "1"
+  deploy:
+    replicas: 2
+    restart_policy:
+      condition: on-failure
+      delay: 5s
+      max_attempts: 0
+      window: 120s
+    update_config:
+      parallelism: 1
+      delay: 10s
+      order: start-first
+      failure_action: rollback
+    rollback_config:
+      parallelism: 1
+      delay: 5s
+      order: stop-first
+  networks:
+    - captive_portals
+
+services:
+  zandspruit:
+    <<: *portal-base
+    image: auraconnect-zandspruit:latest
+    env_file:
+      - .env.zandspruit
+    ports:
+      - target: 3000
+        published: 3001
+        protocol: tcp
+        mode: ingress
+
+  joburg-theatre:
+    <<: *portal-base
+    image: auraconnect-joburg-theatre:latest
+    env_file:
+      - .env.joburg-theatre
+    ports:
+      - target: 3000
+        published: 3002
+        protocol: tcp
+        mode: ingress
+
+networks:
+  captive_portals:
+    driver: overlay
+    attachable: true

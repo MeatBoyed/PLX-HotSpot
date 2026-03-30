@@ -7,7 +7,6 @@ import { env } from "@/env";
 import Footer from "@/components/footer";
 import { BrandingService } from "@/lib/services/branding-service";
 import { ClerkProvider } from "@clerk/nextjs";
-// Removed server-side fetch; ThemeProvider will fetch client-side for runtime updates
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -19,16 +18,24 @@ import { ClerkProvider } from "@clerk/nextjs";
 //   subsets: ["latin"],
 // });
 
-const isJoburgTheatre = env.NEXT_PUBLIC_SSID === "joburg-theatre";
-
-export const metadata: Metadata = {
-  title: env.SITE_TITLE,
-  description: env.SITE_DESCRIPTION,
-  icons: {
-    icon: isJoburgTheatre ? "/jt-theatre-favicon.png" : "/favicon.svg",
-    shortcut: isJoburgTheatre ? "/jt-theatre-favicon.png" : "/favicon.svg",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const ssid = env.NEXT_PUBLIC_SSID;
+  let favicon = '/favicon.svg';
+  try {
+    const branding = await BrandingService.get(ssid);
+    favicon = branding?.favicon ?? '/favicon.svg';
+  } catch {
+    // fallback to default favicon
+  }
+  return {
+    title: env.SITE_TITLE,
+    description: env.SITE_DESCRIPTION,
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
+    },
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const ssid = env.NEXT_PUBLIC_SSID;
