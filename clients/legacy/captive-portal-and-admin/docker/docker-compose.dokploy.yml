@@ -1,0 +1,140 @@
+# --- Dokploy variant ---
+# Shared env vars are sourced from the .env file created by Dokploy (UI → Environment tab).
+# Site-specific env vars are sourced from ./env/<portal>.env (tracked in repo).
+#
+# Add all vars from docker/env/.env.shared.example to the Dokploy Environment tab.
+# Dokploy writes them to a .env file in this directory at deploy time.
+
+# --- Shared portal defaults (merged via YAML anchor) ---
+x-portal-base: &portal-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  environment:
+    NODE_ENV: production
+    NEXT_TELEMETRY_DISABLED: "1"
+  restart: unless-stopped
+
+# --- Portal services ---
+services:
+  ### PluxNet Branded Portals
+  randburg-taxi:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/randburg-taxi.env
+    image: auraconnect-randburg-taxi:latest
+    ports:
+      - "4001:3000"
+    env_file:
+      - .env
+      - ./env/randburg-taxi.env
+
+  cosmo-taxi:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/cosmo-taxi.env
+    image: auraconnect-cosmo-taxi:latest
+    ports:
+      - "4002:3000"
+    env_file:
+      - .env
+      - ./env/cosmo-taxi.env
+
+  zandspruit:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/zandspruit.env
+    image: auraconnect-zandspruit:latest
+    ports:
+      - "4003:3000"
+    env_file:
+      - .env
+      - ./env/zandspruit.env
+
+  kwamaimai:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/kwamaimai.env
+    image: auraconnect-kwamaimai:latest
+    ports:
+      - "4004:3000"
+    env_file:
+      - .env
+      - ./env/kwamaimai.env
+
+  # Auraconnect / Pronet branded portals
+  joburg-theatre:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/joburg-theatre.env
+    image: auraconnect-joburg-theatre:latest
+    ports:
+      - "4005:3000"
+    env_file:
+      - .env
+      - ./env/joburg-theatre.env
+
+  ditsong-museum:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/ditsong-museum.env
+    image: auraconnect-ditsong-museum:latest
+    ports:
+      - "4006:3000"
+    env_file:
+      - .env
+      - ./env/ditsong-museum.env
+
+  sandbox:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/sandbox.env
+    image: auraconnect-sandbox:latest
+    ports:
+      - "4007:3000"
+    env_file:
+      - .env
+      - ./env/sandbox.env
+
+  coj:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/coj.env
+    image: auraconnect-coj:latest
+    ports:
+      - "4008:3000"
+    env_file:
+      - .env
+      - ./env/coj.env
