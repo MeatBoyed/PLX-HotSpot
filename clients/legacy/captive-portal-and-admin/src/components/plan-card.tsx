@@ -103,40 +103,32 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
 
             {isVoucher && (
-                <ShimmerButton style={btnStyle} className="mt-2 w-full">
-                    <VoucherLoginForm
-                        className={btnClass}
-                        style={btnStyle}
-                        label="Connect"
-                    />
-                </ShimmerButton>
+                <VoucherLoginForm
+                    className={btnClass}
+                    style={btnStyle}
+                    label="Connect"
+                />
             )}
 
             {isPURegister && (
-                <ShimmerButton style={btnStyle} className="mt-2 w-full">
-                    <PURegisterForm
-                        className={btnClass}
-                        style={btnStyle}
-                    />
-                </ShimmerButton>
+                <PURegisterForm
+                    className={btnClass}
+                    style={btnStyle}
+                />
             )}
 
             {isPULogin && (
-                <ShimmerButton style={btnStyle} className="mt-2 w-full">
-                    <PULoginForm
-                        className={btnClass}
-                        style={btnStyle}
-                    />
-                </ShimmerButton>
+                <PULoginForm
+                    className={btnClass}
+                    style={btnStyle}
+                />
             )}
 
             {isPUPhone && (
-                <ShimmerButton style={btnStyle} className="mt-2 w-full">
-                    <PUPhoneForm
-                        className={btnClass}
-                        style={btnStyle}
-                    />
-                </ShimmerButton>
+                <PUPhoneForm
+                    className={btnClass}
+                    style={btnStyle}
+                />
             )}
         </div>
     );

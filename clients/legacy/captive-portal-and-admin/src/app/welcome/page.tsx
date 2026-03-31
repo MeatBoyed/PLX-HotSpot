@@ -6,6 +6,89 @@ import { imageUrl } from "@/lib/image-url";
 import AdSection from "@/components/ad-section";
 import { Youtube, Instagram, Facebook } from "lucide-react";
 
+function MarketingOptInCard() {
+  const { theme } = useTheme();
+  const [email, setEmail] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const onSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (!agreed || !email.trim()) return;
+    setSubmitting(true);
+    try {
+      const { toast } = await import('sonner');
+      const res = await fetch('/api/marketing-optin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), ssid: theme.ssid }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Thanks! You're subscribed.");
+        setSubmitted(true);
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+    } catch {
+      const { toast } = await import('sonner');
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="rounded-2xl p-4 text-center shadow-lg"
+        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.6)' }}>
+        <p className="font-semibold text-sm" style={{ color: theme.textPrimary }}>You&apos;re subscribed!</p>
+        <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>We&apos;ll keep you in the loop.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl p-4 shadow-lg"
+      style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.6)' }}>
+      <p className="font-bold text-base mb-1" style={{ color: theme.textPrimary }}>Stay in the loop</p>
+      <p className="text-xs mb-3" style={{ color: theme.textSecondary }}>Get the latest news and offers from {theme.name}.</p>
+      <form onSubmit={onSubmit} className="flex flex-col gap-2">
+        <input
+          type="email"
+          required
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={submitting}
+          className="w-full border border-gray-300 rounded p-2 text-sm disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
+        />
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            disabled={submitting}
+            className="mt-0.5 shrink-0"
+          />
+          <span className="text-xs" style={{ color: theme.textSecondary }}>
+            I agree to receive marketing communications
+          </span>
+        </label>
+        <button
+          type="submit"
+          disabled={submitting || !agreed || !email.trim()}
+          className="rounded-full px-6 py-2 text-sm font-semibold mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
+        >
+          {submitting ? 'Subscribing...' : 'Subscribe'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function normalizeName(value: string | null | undefined) {
   if (!value) return "";
   const cleaned = decodeURIComponent(value).replace(/[_+]/g, " ").trim();
@@ -21,12 +104,6 @@ export default function WelcomePage() {
     { name: "YouTube", href: "https://www.youtube.com", Icon: Youtube },
     { name: "Instagram", href: "https://www.instagram.com", Icon: Instagram },
     { name: "Facebook", href: "https://www.facebook.com", Icon: Facebook },
-  ];
-
-  const affiliateImages = [
-    { name: "SAP 2000-2008", src: "https://ditsong.org.za/en/wp-content/uploads/2026/01/Article-Cover.jpg" },
-    { name: "Pride of the Zulu", src: "https://ditsong.org.za/en/wp-content/uploads/2025/12/Picture-3-1.jpg" },
-    { name: "Military Role", src: "https://ditsong.org.za/en/wp-content/uploads/2026/01/Picture-2.jpg" },
   ];
 
   useEffect(() => {
@@ -100,19 +177,8 @@ export default function WelcomePage() {
           </p>
         </div>
 
-        <p className="text-xs font-bold tracking-widest uppercase mb-1.5" style={{ color: theme.textSecondary }}>Our affiliates</p>
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {affiliateImages.map(({ name, src }) => (
-            <div key={name} className="w-full rounded-xl overflow-hidden shadow-md"
-              style={{ border: '1px solid rgba(255,255,255,0.4)' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={name} className="w-full h-auto" loading="lazy" />
-            </div>
-          ))}
-        </div>
-
         <p className="text-xs font-bold tracking-widest uppercase mb-1.5" style={{ color: theme.textSecondary }}>More of us</p>
-        <div className="flex items-center justify-center gap-4 mb-2">
+        <div className="flex items-center justify-center gap-4 mb-3">
           {socialLinks.map(({ name, href, Icon }) => (
             <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={name}
               className="h-10 w-10 shrink-0 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110"
@@ -121,6 +187,8 @@ export default function WelcomePage() {
             </a>
           ))}
         </div>
+
+        {theme.marketingOptIn && <MarketingOptInCard />}
 
         <AdSection />
       </div>

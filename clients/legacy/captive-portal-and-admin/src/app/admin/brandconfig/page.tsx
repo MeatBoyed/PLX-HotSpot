@@ -34,6 +34,7 @@ const brandingFields: FormFieldConfig[] = [
             { value: "pu-phonename", label: "PU Phone Login" },
         ]
     },
+    { name: "marketingOptIn", label: "Marketing Opt-In Email Field", type: "checkbox" },
 ];
 
 // Image fields moved to their own section

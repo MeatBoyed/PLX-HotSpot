@@ -18,6 +18,7 @@ const identitySchema = z.object({
     splashBackground: z.string().max(255).nullable().optional(),
     splashHeading: z.string().max(255).nullable().optional(),
     authMethods: z.array(z.enum(['free', 'voucher', 'pu-login', 'pu-phonename'])).optional(),
+    marketingOptIn: z.boolean().optional(),
 });
 
 const colorsSchema = z.object({
