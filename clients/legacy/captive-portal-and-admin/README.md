@@ -14,7 +14,40 @@ Rule of thumb:
 - Change only server vars → restart container (no rebuild required).
 - Change any `NEXT_PUBLIC_*` or anything that affects build output → rebuild image.
 
+## Recommended Env Strategy (Shared + Site-specific)
+
+Use two env layers per service:
+- `docker/env/.env.shared`: shared configuration (kept local/secret, git-ignored)
+- `docker/env/sites/<portal>.env`: only site-specific values (branding + `NEXT_PUBLIC_*` + `BASE_URL` + portal RadiusDesk overrides)
+
+Versioned template:
+- `docker/env/.env.shared.example` is committed for structure/reference
+
+Why this works:
+- Docker Compose supports multiple `env_file` entries and applies them in order.
+- Shared values stay in one place.
+- Each portal only keeps minimal differences.
+- Site-specific files can be committed, while shared secrets stay local-only.
+
+For each portal service in `docker-compose.yml`:
+- `build.args.SHARED_BUILD_ENV_FILE` points to `docker/env/.env.shared`
+- `build.args.BUILD_ENV_FILE` points to `docker/env/sites/<portal>.env` (build-time `NEXT_PUBLIC_*` values)
+- `env_file` includes both:
+  - `docker/env/.env.shared`
+  - `docker/env/sites/<portal>.env`
+
+This keeps runtime secrets out of per-portal files and reduces duplication significantly.
+
 ## Docker Compose: site-specific deployments
+
+Docker assets are organized under `docker/`:
+- `docker/Dockerfile`
+- `docker/docker-compose.yml`
+- `docker/docker-compose.swarm.yml`
+
+Compatibility files remain at repo root, so both command styles work:
+- `docker compose up -d --build`
+- `docker compose -f docker/docker-compose.yml up -d --build`
 
 The Compose files now support per-site env files, ports, project names, and image names without copying anything to `.env` first.
 

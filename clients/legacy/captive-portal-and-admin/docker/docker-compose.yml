@@ -1,7 +1,7 @@
 # --- Shared portal defaults (merged via YAML anchor) ---
 x-portal-base: &portal-base
   build:
-    context: .
+    context: ..
     dockerfile: docker/Dockerfile
   environment:
     NODE_ENV: production
@@ -18,7 +18,7 @@ services:
   randburg-taxi:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -27,13 +27,13 @@ services:
     ports:
       - "4001:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/randburg-taxi.env
+      - ./env/.env.shared
+      - ./env/randburg-taxi.env
 
   cosmo-taxi:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -42,13 +42,13 @@ services:
     ports:
       - "4002:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/cosmo-taxi.env
+      - ./env/.env.shared
+      - ./env/cosmo-taxi.env
 
   zandspruit:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -57,13 +57,13 @@ services:
     ports:
       - "4003:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/zandspruit.env
+      - ./env/.env.shared
+      - ./env/zandspruit.env
 
   kwamaimai:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -72,14 +72,14 @@ services:
     ports:
       - "4004:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/kwamaimai.env
+      - ./env/.env.shared
+      - ./env/kwamaimai.env
 
   # Auraconnect / Pronet branded portals
   joburg-theatre:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -88,13 +88,13 @@ services:
     ports:
       - "4005:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/joburg-theatre.env
+      - ./env/.env.shared
+      - ./env/joburg-theatre.env
 
   ditsong-museum:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -103,13 +103,13 @@ services:
     ports:
       - "4006:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/ditsong-museum.env
+      - ./env/.env.shared
+      - ./env/ditsong-museum.env
 
   sandbox:
     <<: *portal-base
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         SHARED_BUILD_ENV_FILE: docker/env/.env.shared
@@ -118,5 +118,20 @@ services:
     ports:
       - "4007:3000"
     env_file:
-      - docker/env/.env.shared
-      - docker/env/sandbox.env
+      - ./env/.env.shared
+      - ./env/sandbox.env
+
+  coj:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/coj.env
+    image: auraconnect-coj:latest
+    ports:
+      - "4008:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/coj.env

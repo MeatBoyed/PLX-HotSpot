@@ -21,6 +21,10 @@ dist/
 .env.test.local
 .env.production.local
 
+# Shared runtime secret should never be sent to build context
+docker/env/shared.runtime.secret
+docker/env/*.secret
+
 # Runtime data
 pids
 *.pid
