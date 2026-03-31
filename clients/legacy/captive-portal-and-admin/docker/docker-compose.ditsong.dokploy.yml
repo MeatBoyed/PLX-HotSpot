@@ -1,0 +1,35 @@
+# --- Dokploy variant ---
+# Shared env vars are sourced from the .env file created by Dokploy (UI → Environment tab).
+# Site-specific env vars are sourced from ./env/<portal>.env (tracked in repo).
+#
+# Add all vars from docker/env/.env.shared.example to the Dokploy Environment tab.
+# Dokploy writes them to a .env file in this directory at deploy time.
+
+# --- Shared portal defaults (merged via YAML anchor) ---
+x-portal-base: &portal-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  environment:
+    NODE_ENV: production
+    NEXT_TELEMETRY_DISABLED: "1"
+  restart: unless-stopped
+
+# --- Portal services ---
+services:
+  ### PluxNet Branded Portals
+
+  ditsong-museum:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/ditsong-museum.env
+    image: auraconnect-ditsong-museum:latest
+    ports:
+      - "4006:3000"
+    env_file:
+      - .env
+      - ./env/ditsong-museum.env
