@@ -29,8 +29,8 @@ services:
     <<: *portal-base
     image: auraconnect-zandspruit:latest
     env_file:
-      - docker/env/.env.shared
-      - docker/env/zandspruit.env
+      - ./env/.env.shared
+      - ./env/zandspruit.env
     ports:
       - target: 3000
         published: 3001
@@ -41,8 +41,8 @@ services:
     <<: *portal-base
     image: auraconnect-joburg-theatre:latest
     env_file:
-      - docker/env/.env.shared
-      - docker/env/joburg-theatre.env
+      - ./env/.env.shared
+      - ./env/joburg-theatre.env
     ports:
       - target: 3000
         published: 3002
