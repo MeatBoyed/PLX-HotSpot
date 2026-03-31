@@ -33,3 +33,15 @@ services:
     env_file:
       - .env
       - ./env/ditsong-museum.env
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      # - traefik.http.routers.ditsong-museum.rule=Host(`ditsong-auraconnect.traefik.me`)
+      - traefik.http.routers.ditsong-museum.rule=Host(`192.168.100.88:4006`)
+      - traefik.http.routers.ditsong-museum.entrypoints=web
+      - traefik.http.services.ditsong-museum.loadbalancer.server.port=3000
+
+networks:
+  dokploy-network:
+    external: true
