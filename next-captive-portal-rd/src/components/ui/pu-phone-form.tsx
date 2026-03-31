@@ -63,7 +63,7 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                             placeholder={"+27 82 123 4567"}
                             value={phone}
                             onChange={(v) => setPhone(typeof v === 'string' ? v : undefined)}
-                            className="w-full border border-gray-500 rounded-lg disabled:opacity-60"
+                            className="w-full border border-gray-300 rounded-lg disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                             disabled={loading}
                         />
                     </div>
@@ -71,7 +71,7 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                         <Label>Name</Label>
                         <Input
                             type="text"
-                            className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                            className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                             placeholder="First Name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -102,7 +102,7 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                             type="text"
                             inputMode="numeric"
                             maxLength={4}
-                            className="w-full border border-gray-500 rounded p-2 mb-1 disabled:opacity-60 text-center text-lg tracking-widest"
+                            className="w-full border border-gray-300 rounded p-2 mb-1 disabled:opacity-60 text-center text-lg tracking-widest bg-white text-gray-800 placeholder:text-gray-400"
                             placeholder="0000"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}

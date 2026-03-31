@@ -113,7 +113,7 @@ function PULoginInnerForm({ label = 'Login to Connect', style, className }: Base
                 <Label>Email</Label>
                 <Input
                     type="email"
-                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                     placeholder="Enter your email"
                     disabled={disabled}
                     value={email}
@@ -124,7 +124,7 @@ function PULoginInnerForm({ label = 'Login to Connect', style, className }: Base
                 <Label>Password</Label>
                 <Input
                     type="password"
-                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                     placeholder="Enter your Password code"
                     disabled={disabled}
                     value={password}
@@ -228,7 +228,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
                 <Label>Email</Label>
                 <Input
                     type="email"
-                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                     placeholder="Enter your email"
                     disabled={isRegistering}
                     value={email}
@@ -239,7 +239,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
                 <Label>Password</Label>
                 <Input
                     type="password"
-                    className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                     placeholder="Enter your Password (min 6 characters)"
                     disabled={isRegistering}
                     value={password}
@@ -295,7 +295,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
         <div className="inline-block w-full">
             <input
                 type="text"
-                className="w-full border border-gray-500 rounded p-2 mb-3 disabled:opacity-60"
+                className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
                 placeholder="Enter your Wifi Code to connect"
                 disabled={disabled}
                 value={voucherCode}

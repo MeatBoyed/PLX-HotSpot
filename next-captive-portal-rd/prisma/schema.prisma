@@ -47,6 +47,7 @@ model branding_config {
   splash_background       String?   @db.VarChar(255)
   splash_heading          String?   @db.VarChar(255)
   auth_methods            String[]  @default(["free"])
+  marketing_opt_in        Boolean   @default(false)
 }
 
 model branding_image {

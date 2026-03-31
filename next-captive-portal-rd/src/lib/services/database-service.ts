@@ -49,6 +49,7 @@ export type BrandingConfigAppUpdate = {
 	splashHeading?: string | null;
 	// auth
 	authMethods?: string[];
+	marketingOptIn?: boolean;
 };
 
 // Reuse a single Prisma client instance across HMR in dev
@@ -107,6 +108,7 @@ const brandingConfigSelect = {
 	splash_background: true,
 	splash_heading: true,
 	auth_methods: true,
+	marketing_opt_in: true,
 } satisfies Prisma.branding_configSelect;
 
 export class DatabaseService {
@@ -152,6 +154,7 @@ export class DatabaseService {
 			splashBackground: row.splash_background ?? null,
 			splashHeading: row.splash_heading ?? null,
 			authMethods: filteredAuth,
+			marketingOptIn: row.marketing_opt_in,
 			createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
 			updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
 		};
@@ -240,6 +243,7 @@ export class DatabaseService {
 			splashBackground: 'splash_background',
 			splashHeading: 'splash_heading',
 			authMethods: 'auth_methods',
+			marketingOptIn: 'marketing_opt_in',
 		};
 		const prismaUpdate: Record<string, unknown> = {};
 		for (const [ckey, value] of Object.entries(updates)) {

@@ -106,6 +106,7 @@ const BrandingConfigCreate = z
     splashBackground: z.string().max(255).nullish(),
     splashHeading: z.string().max(255).nullish(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])).optional(),
+    marketingOptIn: z.boolean().optional(),
   })
   .strict();
 const BrandingConfigCreateResponse = z
@@ -201,6 +202,7 @@ const BrandingConfig = z
     splashBackground: z.string().max(255).nullish(),
     splashHeading: z.string().max(255).nullish(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])),
+    marketingOptIn: z.boolean().optional(),
     createdAt: z.string().datetime({ offset: true }).optional(),
     updatedAt: z.string().datetime({ offset: true }).optional(),
   })
@@ -294,6 +296,7 @@ const BrandingConfigUpdateBody = z
     splashBackground: z.string().max(255).nullable(),
     splashHeading: z.string().max(255).nullable(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])),
+    marketingOptIn: z.boolean().optional(),
   })
   .partial()
   .strict();
