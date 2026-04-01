@@ -19,6 +19,10 @@ const identitySchema = z.object({
     splashHeading: z.string().max(255).nullable().optional(),
     authMethods: z.array(z.enum(['free', 'voucher', 'pu-login', 'pu-phonename'])).optional(),
     marketingOptIn: z.boolean().optional(),
+    parentSsid: z.string().nullable().optional(),
+    venueLabel: z.string().nullable().optional(),
+    venueRoute: z.string().nullable().optional(),
+    sortOrder: z.coerce.number().optional(),
 });
 
 const colorsSchema = z.object({

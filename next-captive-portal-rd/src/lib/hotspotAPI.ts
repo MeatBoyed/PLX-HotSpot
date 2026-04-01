@@ -107,6 +107,10 @@ const BrandingConfigCreate = z
     splashHeading: z.string().max(255).nullish(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])).optional(),
     marketingOptIn: z.boolean().optional(),
+    parentSsid: z.string().max(255).nullable().optional(),
+    venueLabel: z.string().max(255).nullable().optional(),
+    venueRoute: z.string().max(255).nullable().optional(),
+    sortOrder: z.coerce.number().optional(),
   })
   .strict();
 const BrandingConfigCreateResponse = z
@@ -203,6 +207,10 @@ const BrandingConfig = z
     splashHeading: z.string().max(255).nullish(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])),
     marketingOptIn: z.boolean().optional(),
+    parentSsid: z.string().max(255).nullable().optional(),
+    venueLabel: z.string().max(255).nullable().optional(),
+    venueRoute: z.string().max(255).nullable().optional(),
+    sortOrder: z.coerce.number().optional(),
     createdAt: z.string().datetime({ offset: true }).optional(),
     updatedAt: z.string().datetime({ offset: true }).optional(),
   })
@@ -297,6 +305,10 @@ const BrandingConfigUpdateBody = z
     splashHeading: z.string().max(255).nullable(),
     authMethods: z.array(z.enum(["free", "voucher", "pu-login", "pu-phonename"])),
     marketingOptIn: z.boolean().optional(),
+    parentSsid: z.string().max(255).nullable().optional(),
+    venueLabel: z.string().max(255).nullable().optional(),
+    venueRoute: z.string().max(255).nullable().optional(),
+    sortOrder: z.coerce.number().optional(),
   })
   .partial()
   .strict();

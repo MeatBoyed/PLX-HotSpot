@@ -50,6 +50,11 @@ export type BrandingConfigAppUpdate = {
 	// auth
 	authMethods?: string[];
 	marketingOptIn?: boolean;
+	// sub-venue
+	parentSsid?: string | null;
+	venueLabel?: string | null;
+	venueRoute?: string | null;
+	sortOrder?: number;
 };
 
 // Reuse a single Prisma client instance across HMR in dev
@@ -109,6 +114,10 @@ const brandingConfigSelect = {
 	splash_heading: true,
 	auth_methods: true,
 	marketing_opt_in: true,
+	parent_ssid: true,
+	venue_label: true,
+	venue_route: true,
+	sort_order: true,
 } satisfies Prisma.branding_configSelect;
 
 export class DatabaseService {
@@ -155,6 +164,10 @@ export class DatabaseService {
 			splashHeading: row.splash_heading ?? null,
 			authMethods: filteredAuth,
 			marketingOptIn: row.marketing_opt_in,
+			parentSsid: row.parent_ssid ?? null,
+			venueLabel: row.venue_label ?? null,
+			venueRoute: row.venue_route ?? null,
+			sortOrder: row.sort_order ?? 0,
 			createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
 			updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
 		};
@@ -244,6 +257,10 @@ export class DatabaseService {
 			splashHeading: 'splash_heading',
 			authMethods: 'auth_methods',
 			marketingOptIn: 'marketing_opt_in',
+			parentSsid: 'parent_ssid',
+			venueLabel: 'venue_label',
+			venueRoute: 'venue_route',
+			sortOrder: 'sort_order',
 		};
 		const prismaUpdate: Record<string, unknown> = {};
 		for (const [ckey, value] of Object.entries(updates)) {
@@ -265,6 +282,15 @@ export class DatabaseService {
 			select: brandingConfigSelect,
 		});
 		return this.#toAppBrandingConfig(result);
+	}
+
+	async getSubVenues(parentSsid: string): Promise<BrandingConfig[]> {
+		const rows = await prisma.branding_config.findMany({
+			where: { parent_ssid: parentSsid },
+			orderBy: { sort_order: 'asc' },
+			select: brandingConfigSelect,
+		});
+		return rows.map(row => this.#toAppBrandingConfig(row));
 	}
 
 	#isPrismaKnownError(err: unknown): err is Prisma.PrismaClientKnownRequestError {
