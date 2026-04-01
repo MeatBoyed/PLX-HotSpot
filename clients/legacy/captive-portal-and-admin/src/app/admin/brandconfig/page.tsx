@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { schemas } from "@/lib/hotspotAPI";
-import { FormFieldConfig } from "@/lib/types";
+import { FormFieldConfig, BrandingConfig } from "@/lib/types";
 import { useTheme } from "@/components/theme-provider";
 import { Navbar } from "@/components/home-page/head";
 import { z } from "zod";
@@ -11,6 +12,7 @@ import useBrandConfigForm from "./useBrandConfigForm";
 import { updateBrandIdentityAction, updateButtonsAction, updateColorsAction, updateAdsAction } from './actions';
 import SectionForm from "./SectionForm";
 import AdSection from "@/components/ad-section";
+import { fetchBrandingConfigAction } from "@/lib/actions/branding-actions";
 
 // Canonical update schema (partial & strict) reused directly; create a stripped variant to auto-drop unknown keys
 const UpdateSchema = schemas.BrandingConfigUpdateBody; // partial().strict()
@@ -35,6 +37,10 @@ const brandingFields: FormFieldConfig[] = [
         ]
     },
     { name: "marketingOptIn", label: "Marketing Opt-In Email Field", type: "checkbox" },
+    { name: "venueLabel", label: "Venue Dropdown Label", type: "text", placeholder: "e.g. Soweto Theatre" },
+    { name: "venueRoute", label: "Venue Route", type: "text", placeholder: "e.g. /soweto-theatre" },
+    { name: "parentSsid", label: "Parent SSID (sub-venue only)", type: "text", placeholder: "e.g. joburg-theatre" },
+    { name: "sortOrder", label: "Dropdown Sort Order", type: "text", placeholder: "0" },
 ];
 
 // Image fields moved to their own section
@@ -79,16 +85,58 @@ const adFields: FormFieldConfig[] = [
 
 // Note: sections constant removed to avoid unused variable lint.
 
+const KNOWN_SSIDS = ["joburg-theatre", "roodepoort-theatre", "soweto-theatre"];
+
 export default function BrandConfigAdminPage() {
-    const { theme, refreshTheme, setTheme } = useTheme();
+    const { theme: rootTheme } = useTheme(); // root ThemeProvider — never mutated by admin
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Local editing state — completely isolated from the root ThemeProvider
+    const [editingTheme, setEditingTheme] = useState<BrandingConfig | null>(null);
+    const [loadingTheme, setLoadingTheme] = useState(false);
+
+    const activeTheme = editingTheme ?? rootTheme;
+    const activeSsid = activeTheme?.ssid ?? "";
+
+    const switchSsid = useCallback(async (ssid: string) => {
+        router.replace(`/admin/brandconfig?ssid=${ssid}`);
+        setLoadingTheme(true);
+        try {
+            const config = await fetchBrandingConfigAction(ssid);
+            setEditingTheme(config);
+        } catch {
+            // keep current
+        } finally {
+            setLoadingTheme(false);
+        }
+    }, [router]);
+
+    // On mount, load ?ssid= param if present
+    useEffect(() => {
+        const paramSsid = searchParams.get("ssid");
+        if (paramSsid) {
+            switchSsid(paramSsid);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // refreshTheme for this admin context — re-fetches the currently editing SSID into local state only
+    const refreshEditingTheme = useCallback(async () => {
+        if (!activeSsid) return;
+        try {
+            const config = await fetchBrandingConfigAction(activeSsid);
+            setEditingTheme(config);
+        } catch { /* noop */ }
+    }, [activeSsid]);
+
     const { initialValues, objectUrlsRef, handleFileChange, uploadImage, uploadingByField } = useBrandConfigForm<UpdateInput>({
-        theme,
-        setTheme,
-        refreshTheme,
+        theme: activeTheme,
+        setTheme: setEditingTheme,
+        refreshTheme: refreshEditingTheme,
         StripSchema,
     });
 
-    // Unmount cleanup for previews handled in hook; retain to satisfy dependency array lint for now
     useEffect(() => { return () => { /* noop */ } }, []);
 
     return (
@@ -96,11 +144,24 @@ export default function BrandConfigAdminPage() {
             <nav className="flex items-center justify-center w-full">
                 <Navbar />
             </nav>
-            <div>
-                <h1 className="text-2xl font-semibold">Brand Configuration</h1>
-                <p className="text-sm text-muted-foreground">
-                    Update the active branding for SSID: <span className="font-medium">{theme?.ssid}</span>
-                </p>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h1 className="text-2xl font-semibold">Brand Configuration</h1>
+                    <p className="text-sm text-muted-foreground">
+                        Editing SSID: <span className="font-medium">{activeSsid}</span>
+                        {loadingTheme && <span className="ml-2 text-xs text-gray-400">Loading...</span>}
+                    </p>
+                </div>
+                <select
+                    value={activeSsid}
+                    onChange={(e) => switchSsid(e.target.value)}
+                    className="border rounded px-3 py-1.5 text-sm bg-white"
+                    disabled={loadingTheme}
+                >
+                    {KNOWN_SSIDS.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                    ))}
+                </select>
             </div>
             {initialValues && (
                 <div className="space-y-10">
@@ -111,9 +172,9 @@ export default function BrandConfigAdminPage() {
                         fields={brandingFields}
                         schema={StripSchema}
                         defaultValues={initialValues}
-                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        ssid={activeSsid}
                         action={updateBrandIdentityAction}
-                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        onUpdated={async (updated) => { setEditingTheme(updated); await refreshEditingTheme(); }}
                     />
 
                     {/* Images Section - handles uploads separately */}
@@ -123,9 +184,9 @@ export default function BrandConfigAdminPage() {
                         fields={imageFields}
                         schema={StripSchema}
                         defaultValues={initialValues}
-                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        ssid={activeSsid}
                         action={updateBrandIdentityAction}
-                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        onUpdated={async (updated) => { setEditingTheme(updated); await refreshEditingTheme(); }}
                         fieldRenderers={{
                             logo: ({ value }: { value: unknown }) => (
                                 <ImageField
@@ -136,7 +197,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logo"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                             logoWhite: ({ value }: { value: unknown }) => (
@@ -148,7 +209,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["logoWhite"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                             connectCardBackground: ({ value }: { value: unknown }) => (
@@ -160,7 +221,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["connectCardBackground"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                             bannerOverlay: ({ value }: { value: unknown }) => (
@@ -172,7 +233,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["bannerOverlay"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                             favicon: ({ value }: { value: unknown }) => (
@@ -184,7 +245,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["favicon"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                             splashBackground: ({ value }: { value: unknown }) => (
@@ -196,7 +257,7 @@ export default function BrandConfigAdminPage() {
                                     previewUrls={objectUrlsRef.current}
                                     onUpload={uploadImage}
                                     uploading={!!uploadingByField["splashBackground"]}
-                                    ssid={(theme?.ssid || initialValues?.ssid) as string}
+                                    ssid={activeSsid}
                                 />
                             ),
                         }}
@@ -209,9 +270,9 @@ export default function BrandConfigAdminPage() {
                         fields={colorFields}
                         schema={StripSchema}
                         defaultValues={initialValues}
-                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        ssid={activeSsid}
                         action={updateColorsAction}
-                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        onUpdated={async (updated) => { setEditingTheme(updated); await refreshEditingTheme(); }}
                     />
 
                     {/* Buttons Section */}
@@ -221,9 +282,9 @@ export default function BrandConfigAdminPage() {
                         fields={buttonFields}
                         schema={StripSchema}
                         defaultValues={initialValues}
-                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        ssid={activeSsid}
                         action={updateButtonsAction}
-                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        onUpdated={async (updated) => { setEditingTheme(updated); await refreshEditingTheme(); }}
                     />
 
                     {/* Advertising Section */}
@@ -233,9 +294,9 @@ export default function BrandConfigAdminPage() {
                         fields={adFields}
                         schema={StripSchema}
                         defaultValues={initialValues}
-                        ssid={(theme?.ssid || initialValues?.ssid) as string}
+                        ssid={activeSsid}
                         action={updateAdsAction}
-                        onUpdated={async (updated) => { setTheme(updated); await refreshTheme(); }}
+                        onUpdated={async (updated) => { setEditingTheme(updated); await refreshEditingTheme(); }}
                     />
 
                     {/* Advertising Preview (uses shared component) */}

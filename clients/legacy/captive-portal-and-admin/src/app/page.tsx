@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from 'react';
 import { PlanCard } from '@/components/plan-card';
 import { useTheme } from "@/components/theme-provider";
 import AdSection from "@/components/ad-section";
@@ -7,6 +8,16 @@ import VoucherCTA from '@/components/voucher-cta';
 
 export default function HomePage() {
   const { theme } = useTheme()
+
+  useEffect(() => {
+    try {
+      const redirect = sessionStorage.getItem("post-connect-redirect");
+      if (redirect && redirect !== "/") {
+        sessionStorage.removeItem("post-connect-redirect");
+        window.location.href = redirect;
+      }
+    } catch { /* sessionStorage unavailable */ }
+  }, []);
 
   return (
     <div
