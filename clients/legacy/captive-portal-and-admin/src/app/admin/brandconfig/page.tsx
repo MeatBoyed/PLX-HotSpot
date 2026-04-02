@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { schemas } from "@/lib/hotspotAPI";
 import { FormFieldConfig, BrandingConfig } from "@/lib/types";
@@ -87,7 +87,7 @@ const adFields: FormFieldConfig[] = [
 
 const KNOWN_SSIDS = ["joburg-theatre", "roodepoort-theatre", "soweto-theatre"];
 
-export default function BrandConfigAdminPage() {
+function BrandConfigAdminPageInner() {
     const { theme: rootTheme } = useTheme(); // root ThemeProvider — never mutated by admin
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -308,6 +308,14 @@ export default function BrandConfigAdminPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function BrandConfigAdminPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Loading...</div>}>
+            <BrandConfigAdminPageInner />
+        </Suspense>
     );
 }
 
