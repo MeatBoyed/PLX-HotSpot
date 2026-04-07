@@ -85,6 +85,23 @@ model Packages {
   @@unique([ssid, name], map: "packages_ssid_name_unique")
 }
 
+model marketing_opt_in_submission {
+  id              Int       @id @default(autoincrement())
+  ssid            String    @db.VarChar(255)          // which venue/portal they signed up on
+  email           String    @db.VarChar(255)          // submitted email address
+  agreed          Boolean   @default(true)            // confirmed marketing consent checkbox
+  ip_address      String?   @db.VarChar(45)           // IPv4 or IPv6 for audit trail
+  user_agent      String?   @db.VarChar(512)          // browser/device info
+  sent_at         DateTime? @db.Timestamp(6)          // when first campaign email was sent (null = not yet sent)
+  unsubscribed    Boolean   @default(false)           // soft opt-out flag
+  unsubscribed_at DateTime? @db.Timestamp(6)
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+
+  @@unique([ssid, email], map: "marketing_opt_in_ssid_email_unique")
+  @@index([ssid], map: "marketing_opt_in_ssid_idx")
+  @@index([unsubscribed], map: "marketing_opt_in_unsubscribed_idx")
+}
+
 model otp_verification {
   id         Int      @id @default(autoincrement())
   ssid       String   @db.VarChar(255)

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/services/database-service';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,9 +24,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'ssid required' }, { status: 400 });
     }
 
-    console.log('[marketing-optin]', { email, ssid, ts: new Date().toISOString() });
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        ?? req.headers.get('x-real-ip')
+        ?? null;
+    const userAgent = req.headers.get('user-agent') ?? null;
 
-    // TODO: connect to real marketing service (e.g. Mailchimp, SendGrid, etc.)
+    try {
+        await prisma.marketing_opt_in_submission.upsert({
+            where: { marketing_opt_in_ssid_email_unique: { ssid, email } },
+            create: { ssid, email, agreed: true, ip_address: ip, user_agent: userAgent },
+            // If they re-submit (e.g. re-checked the box), just refresh the timestamp
+            update: { agreed: true, unsubscribed: false, unsubscribed_at: null, ip_address: ip },
+        });
+    } catch (err) {
+        console.error('[marketing-optin] DB error:', err);
+        return NextResponse.json({ error: 'Failed to save submission' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
 }
