@@ -186,8 +186,8 @@ export default function SplashPage() {
                         <span className="relative z-10 text-xl">→</span>
                     </button>
 
-                    <p className="text-center text-xs mt-4" style={{ color: theme.textMuted }}>
-                        Powered by <span style={{ color: theme.textPrimary, fontWeight: 600 }}>Vega Vision</span>
+                    <p className="text-center text-xs mt-4" style={{ color: theme.textSecondary }}>
+                        Powered by <span style={{ color: theme.textSecondary, fontWeight: 600 }}>Vega Vision</span>
                     </p>
                 </form>
             </div>
