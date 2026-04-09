@@ -37,6 +37,7 @@ export function PUPhoneInnerForm({ label = 'Connect with phone', style, classNam
                     <form ref={formRef} method="GET" action={action} className="inline-block w-full">
                         <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
                         <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
+                        <input type="hidden" name="dst" value={typeof window !== 'undefined' ? window.location.origin + '/welcome' : '/welcome'} />
                         <button
                             type="submit"
                             className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
