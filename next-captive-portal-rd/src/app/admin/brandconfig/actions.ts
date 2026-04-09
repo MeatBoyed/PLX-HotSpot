@@ -53,8 +53,6 @@ const adsSchema = z.object({
     adsZoneId: z.string().max(255).nullable().optional(),
     adsReviveId: z.string().max(255).nullable().optional(),
     adsVastUrl: z.string().max(255).nullable().optional(),
-    adBannerImageUrl: z.string().max(500).nullable().optional(),
-    adBannerLinkUrl: z.string().max(500).nullable().optional(),
 });
 
 export async function updateBrandIdentityAction(ssid: string, values: unknown): Promise<BrandingConfig> {
