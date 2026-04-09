@@ -44,8 +44,6 @@ export type BrandingConfigAppUpdate = {
 	adsZoneId?: string | null;
 	adsReviveId?: string | null;
 	adsVastUrl?: string | null;
-	adBannerImageUrl?: string | null;
-	adBannerLinkUrl?: string | null;
 	// splash
 	splashBackground?: string | null;
 	splashHeading?: string | null;
@@ -112,8 +110,6 @@ const brandingConfigSelect = {
 	ads_zone_id: true,
 	ads_revive_id: true,
 	ads_vast_url: true,
-	ad_banner_image_url: true,
-	ad_banner_link_url: true,
 	splash_background: true,
 	splash_heading: true,
 	auth_methods: true,
@@ -164,8 +160,6 @@ export class DatabaseService {
 			adsZoneId: row.ads_zone_id ?? null,
 			adsReviveId: row.ads_revive_id ?? null,
 			adsVastUrl: row.ads_vast_url ?? null,
-			adBannerImageUrl: row.ad_banner_image_url ?? null,
-			adBannerLinkUrl: row.ad_banner_link_url ?? null,
 			splashBackground: row.splash_background ?? null,
 			splashHeading: row.splash_heading ?? null,
 			authMethods: filteredAuth,
@@ -259,8 +253,6 @@ export class DatabaseService {
 			adsZoneId: 'ads_zone_id',
 			adsReviveId: 'ads_revive_id',
 			adsVastUrl: 'ads_vast_url',
-			adBannerImageUrl: 'ad_banner_image_url',
-			adBannerLinkUrl: 'ad_banner_link_url',
 			splashBackground: 'splash_background',
 			splashHeading: 'splash_heading',
 			authMethods: 'auth_methods',
