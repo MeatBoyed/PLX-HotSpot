@@ -275,6 +275,10 @@ export default function WelcomePage() {
 
         {theme.marketingOptIn && <MarketingOptInCard />}
 
+        <div className="flex items-center gap-3 my-3">
+          <div className="flex-1 h-px opacity-20" style={{ background: theme.textSecondary }} />
+        </div>
+
         <AdSection />
       </div>
     </div>

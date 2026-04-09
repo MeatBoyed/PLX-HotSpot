@@ -77,6 +77,8 @@ const buttonFields: FormFieldConfig[] = [
 ];
 
 const adFields: FormFieldConfig[] = [
+    { name: "adBannerImageUrl", label: "Banner Image URL", type: "text", placeholder: "https://example.com/show-poster.jpg" },
+    { name: "adBannerLinkUrl", label: "Banner Click-through URL", type: "text", placeholder: "https://example.com/buy-tickets" },
     { name: "adsReviveServerUrl", label: "Revive Server URL", type: "text", placeholder: "https://servedby.revive-adserver.net/asyncjs.php" },
     { name: "adsZoneId", label: "Ad Zone Id", type: "text", placeholder: "20641" },
     { name: "adsReviveId", label: "Revive Publisher Id", type: "text", placeholder: "727bec5e09208690b050ccfc6a45d384" },
