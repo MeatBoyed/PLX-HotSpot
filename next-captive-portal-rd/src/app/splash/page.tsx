@@ -164,7 +164,7 @@ export default function SplashPage() {
                     {/* Accept button */}
                     <button
                         type="submit"
-                        disabled={!checked}
+                        disabled={!checked || (subVenues.length > 0 && !selectedVenue)}
                         onClick={handleAccept}
                         className="relative w-full rounded-2xl text-base font-bold py-4 flex items-center justify-center gap-3 overflow-hidden transition-all duration-300"
                         style={{
@@ -172,12 +172,12 @@ export default function SplashPage() {
                             color: theme.buttonPrimaryText,
                             backdropFilter: 'blur(8px)',
                             border: '1px solid transparent',
-                            boxShadow: checked ? `0 8px 32px ${theme.buttonPrimary}66` : 'none',
-                            opacity: checked ? 1 : 0.45,
-                            cursor: checked ? 'pointer' : 'not-allowed',
+                            boxShadow: (checked && (subVenues.length === 0 || selectedVenue)) ? `0 8px 32px ${theme.buttonPrimary}66` : 'none',
+                            opacity: (checked && (subVenues.length === 0 || selectedVenue)) ? 1 : 0.45,
+                            cursor: (checked && (subVenues.length === 0 || selectedVenue)) ? 'pointer' : 'not-allowed',
                         }}
                     >
-                        {checked && (
+                        {(checked && (subVenues.length === 0 || selectedVenue)) && (
                             <div className="absolute inset-0 opacity-20"
                                 style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)', animation: 'shimmer 2s infinite' }}
                             />
