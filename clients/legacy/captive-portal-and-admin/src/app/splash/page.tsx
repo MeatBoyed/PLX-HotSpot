@@ -86,9 +86,9 @@ export default function SplashPage() {
 
             {/* Middle — Venue name */}
             <div className="absolute z-20 px-6" style={{ top: '35%' }}>
-                <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: theme.textSecondary }}>
+                {/* <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: theme.textSecondary }}>
                     {theme.name}
-                </p>
+                </p> */}
                 <h2 className="text-3xl font-black leading-none mb-3"
                     style={{ color: theme.textSecondary, textShadow: '0 4px 30px rgba(0,0,0,0.4)', letterSpacing: '-0.02em' }}>
                     {theme.splashHeading || 'Welcome to\nthe Hotspot'}
