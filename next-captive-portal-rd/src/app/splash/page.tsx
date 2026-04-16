@@ -57,7 +57,7 @@ export default function SplashPage() {
                         background: `linear-gradient(
                             135deg,
                             ${theme.brandAccent}22 50%,
-                            transparent 53%
+                            transparent 65%
                         )`
                     }}
                 />
@@ -101,7 +101,7 @@ export default function SplashPage() {
 
             {/* Bottom — Glass acceptance card */}
             <div className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-5 pt-3"
-                style={{ background: `linear-gradient(to top, ${theme.brandPrimary} 60%, transparent)` }}>
+                style={{ background: `linear-gradient(to top, ${theme.brandAccent} 1%, transparent)` }}>
                 <form method="POST" action="/">
 
                     {/* Theatre selector — only shown when sub-venues exist */}
