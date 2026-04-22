@@ -10,8 +10,8 @@ const isPublicRoute = createRouteMatcher([
     "/dashboard(.*)",
     '/sign-in(.*)',
     '/terms-and-conditions(.*)',
-    // Allow "/[subvenue] pages"
-    "/:subvenue(.*)",
+    // Allow "/[subvenue] pages" (but NOT /admin)
+    "/:subvenue((?!admin).*)",
     // '/sign-up(.*)',
 ])
 
