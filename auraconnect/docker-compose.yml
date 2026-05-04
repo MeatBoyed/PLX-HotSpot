@@ -1,0 +1,40 @@
+services:
+  auraconnect:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: auraconnect:latest
+    container_name: auraconnect
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# ── Future services (add when migrating to BetterAuth) ────────────
+# postgres:
+#   image: postgres:17-alpine
+#   container_name: auraconnect-db
+#   restart: unless-stopped
+#   volumes:
+#     - pgdata:/var/lib/postgresql/data
+#   environment:
+#     POSTGRES_DB: auraconnect
+#     POSTGRES_USER: auraconnect
+#     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#   healthcheck:
+#     test: ["CMD-SHELL", "pg_isready -U auraconnect"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 5
+
+# volumes:
+#   pgdata:

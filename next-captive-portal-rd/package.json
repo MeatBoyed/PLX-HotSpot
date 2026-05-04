@@ -7,14 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "prebuild:local": "npx openapi-zod-client http://localhost:3000/api/spec -o ./src/lib/hotspotAPI.ts --api-client-name=hotspotAPI --export-schemas=true --export-types=true --base-url=http://localhost:3000 --strict-objects"
+    "prebuild:local": "npx openapi-zod-client http://localhost:5299/openapi/v1.json -o ./src/types/api.ts --api-client-name=api --export-schemas=true --export-types=true --base-url=http://localhost:5299/openapi/v1.json --strict-objects"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.3",
     "@hookform/resolvers": "^5.1.1",
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^7.4.2",
-    "@prisma/extension-accelerate": "^2.0.2",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -51,7 +48,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "openapi-zod-client": "^1.18.3",
-    "prisma": "^7.4.2",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "tw-animate-css": "^1.3.4",

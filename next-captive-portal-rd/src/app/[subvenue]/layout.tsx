@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { BrandingService } from "@/lib/services/branding-service";
+import { brandingService } from "@/application/services";
 import { Toaster } from "sonner";
 
 export default async function SubVenueLayout({
@@ -12,7 +12,7 @@ export default async function SubVenueLayout({
     const { subvenue } = await params;
     let branding = undefined;
     try {
-        branding = await BrandingService.get(subvenue);
+        branding = await brandingService.get(subvenue);
     } catch {
         // falls back to default theme inside ThemeProvider
     }

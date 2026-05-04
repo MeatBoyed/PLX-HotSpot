@@ -4,22 +4,16 @@ import { ArrowRight, Palette, BarChart3, Settings } from 'lucide-react';
 export default function AdminDashboard() {
   const adminSections = [
     {
-      title: 'Styles & Branding',
-      description: 'Manage colors, typography, images, and overall brand appearance',
-      href: '/admin/styles',
-      icon: Palette,
-    },
-    {
-      title: 'Packages',
-      description: 'View and manage WiFi packages and pricing plans',
-      href: '/admin/packages',
-      icon: BarChart3,
-    },
-    {
-      title: 'Marketing Opt-In',
-      description: 'Configure and monitor marketing email subscriptions',
-      href: '/admin/marketing-optin',
+      title: 'Tenant Management',
+      description: 'Browse tenants, create new tenants, and manage tenant sites.',
+      href: '/admin/tenants',
       icon: Settings,
+    },
+    {
+      title: 'Branding & Ads',
+      description: 'Edit site branding and advertising configuration through the API.',
+      href: '/admin/tenants',
+      icon: Palette,
     },
   ];
 

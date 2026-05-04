@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { env } from "@/env";
 import Footer from "@/components/footer";
-import { BrandingService } from "@/lib/services/branding-service";
+import { brandingService } from "@/application/services";
 import { ClerkProvider } from "@clerk/nextjs";
 
 // const geistSans = Geist({
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const ssid = env.NEXT_PUBLIC_SSID;
   let favicon = '/favicon.svg';
   try {
-    const branding = await BrandingService.get(ssid);
+    const branding = await brandingService.get(ssid);
     favicon = branding?.favicon ?? '/favicon.svg';
   } catch {
     // fallback to default favicon
@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const ssid = env.NEXT_PUBLIC_SSID;
   let branding = undefined;
   try {
-    branding = await BrandingService.get(ssid);
+    branding = await brandingService.get(ssid);
   } catch (e) {
     if (env.NODE_ENV !== 'production') {
       console.debug('RootLayout branding fetch failed, falling back', e);
