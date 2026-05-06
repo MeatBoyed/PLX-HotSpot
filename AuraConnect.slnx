@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AuraConnect.Application/AuraConnect.Application.csproj" Id="63ab3e50-9520-4e1d-9f86-45fde2fb1496" />
+  <Project Path="AuraConnect.Core/AuraConnect.Core.csproj" Id="e270319a-dc6c-48e2-9573-8e9d8be4dea2" />
+  <Project Path="AuraConnect.Infrastructure/AuraConnect.Infrastructure.csproj" Id="c104edb9-c8a0-4430-91f3-b94e23daad90" />
+  <Project Path="AuraConnectAPI/AuraConnect.API.csproj" />
+</Solution>

@@ -1,0 +1,6 @@
+@AuraConnectAPI_HostAddress = http://localhost:5299
+
+GET {{AuraConnectAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
