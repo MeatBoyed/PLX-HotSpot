@@ -49,18 +49,18 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Test database connection on startup
+// Apply pending EF Core migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        await dbContext.Database.CanConnectAsync();
-        Console.WriteLine("✅ Database connection successful!");
+        await dbContext.Database.MigrateAsync();
+        Console.WriteLine("✅ Database migrations applied successfully!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Database connection failed: {ex.Message}");
+        Console.WriteLine($"❌ Database migration failed: {ex.Message}");
         throw;
     }
 }
