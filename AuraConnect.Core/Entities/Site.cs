@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AuraConnect.Core.Entities
 {
@@ -13,7 +11,7 @@ namespace AuraConnect.Core.Entities
         public string? Domain { get; private set; }
         public SiteStatus Status { get; private set; } = SiteStatus.Active;
         public int SortOrder { get; private set; }
-        public string[] AuthMethods { get; private set; } = ["free"];
+        public string[] AuthMethods { get; private set; } = [AuthMethod.Free];
         public bool MarketingOptIn { get; private set; } = false;
 
         // Navigation
@@ -79,6 +77,11 @@ namespace AuraConnect.Core.Entities
         {
             if (methods == null || methods.Length == 0)
                 throw new ArgumentException("At least one auth method is required");
+
+            var invalid = methods.Except(AuthMethod.All).ToArray();
+            if (invalid.Length > 0)
+                throw new ArgumentException($"Invalid auth methods: {string.Join(", ", invalid)}. Valid values: {string.Join(", ", AuthMethod.All)}");
+
             AuthMethods = methods;
             UpdateTimestamp();
         }
