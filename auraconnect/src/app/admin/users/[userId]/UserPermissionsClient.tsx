@@ -189,9 +189,7 @@ export function UserPermissionsClient({ user, tenants }: UserPermissionsClientPr
                         <Building2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <p className="text-sm font-medium truncate">{tenant.name}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {tenant.siteCount} site{tenant.siteCount !== 1 ? 's' : ''}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{tenant.slug}</p>
                     </div>
                   </label>
                 )

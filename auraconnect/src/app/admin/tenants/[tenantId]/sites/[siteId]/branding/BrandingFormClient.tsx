@@ -12,6 +12,7 @@ interface Props {
 export function BrandingFormClient({ siteId, config }: Props) {
   return (
     <BrandingForm
+      siteId={siteId}
       config={config}
       onSave={(values) => updateBrandingAction(siteId, values).then(() => undefined)}
     />

@@ -8,7 +8,7 @@ export function AdsFormClient({ siteId, config }: { siteId: string; config: AdsC
   return (
     <AdsConfigForm
       config={config}
-      onSave={(values) => updateAdsConfigAction(siteId, values).then(() => undefined)}
+      onSave={(values) => updateAdsConfigAction(siteId, values)}
     />
   )
 }

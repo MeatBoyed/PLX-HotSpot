@@ -11,59 +11,64 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ColorField } from './ColorField'
 import { BrandingPreview } from './BrandingPreview'
-import { DEFAULT_BRANDING } from '@/lib/types/branding.types'
+import { ImageUploadField } from './ImageUploadField'
+import { BrandingImageType } from '@/lib/infrastructure/api/types'
 import type { BrandingConfig, UpdateBrandingInput } from '@/lib/types/branding.types'
 
 const colorKeys = [
-  'primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'surfaceColor',
-  'textPrimaryColor', 'textSecondaryColor', 'buttonTextColor', 'buttonHoverColor',
-  'linkColor', 'borderColor', 'errorColor', 'successColor', 'warningColor',
-  'headerBgColor', 'footerBgColor', 'inputBgColor',
+  'brandPrimary', 'brandPrimaryHover', 'brandSecondary', 'brandAccent',
+  'textPrimary', 'textSecondary', 'textTertiary', 'textMuted',
+  'surfaceCard', 'surfaceWhite', 'surfaceBorder',
+  'buttonPrimary', 'buttonPrimaryHover', 'buttonPrimaryText',
+  'buttonSecondary', 'buttonSecondaryHover', 'buttonSecondaryText',
 ] as const
 
 const colorLabels: Record<string, string> = {
-  primaryColor: 'Primary',
-  secondaryColor: 'Secondary',
-  accentColor: 'Accent',
-  backgroundColor: 'Background',
-  surfaceColor: 'Surface',
-  textPrimaryColor: 'Text Primary',
-  textSecondaryColor: 'Text Secondary',
-  buttonTextColor: 'Button Text',
-  buttonHoverColor: 'Button Hover',
-  linkColor: 'Link',
-  borderColor: 'Border',
-  errorColor: 'Error',
-  successColor: 'Success',
-  warningColor: 'Warning',
-  headerBgColor: 'Header BG',
-  footerBgColor: 'Footer BG',
-  inputBgColor: 'Input BG',
+  brandPrimary: 'Brand Primary',
+  brandPrimaryHover: 'Brand Primary Hover',
+  brandSecondary: 'Brand Secondary',
+  brandAccent: 'Brand Accent',
+  textPrimary: 'Text Primary',
+  textSecondary: 'Text Secondary',
+  textTertiary: 'Text Tertiary',
+  textMuted: 'Text Muted',
+  surfaceCard: 'Surface Card',
+  surfaceWhite: 'Surface White',
+  surfaceBorder: 'Surface Border',
+  buttonPrimary: 'Button Primary',
+  buttonPrimaryHover: 'Button Primary Hover',
+  buttonPrimaryText: 'Button Primary Text',
+  buttonSecondary: 'Button Secondary',
+  buttonSecondaryHover: 'Button Secondary Hover',
+  buttonSecondaryText: 'Button Secondary Text',
 }
 
+const optStr = z.string().nullable().optional()
+
 const schema = z.object({
-  primaryColor: z.string(), secondaryColor: z.string(), accentColor: z.string(),
-  backgroundColor: z.string(), surfaceColor: z.string(), textPrimaryColor: z.string(),
-  textSecondaryColor: z.string(), buttonTextColor: z.string(), buttonHoverColor: z.string(),
-  linkColor: z.string(), borderColor: z.string(), errorColor: z.string(),
-  successColor: z.string(), warningColor: z.string(), headerBgColor: z.string(),
-  footerBgColor: z.string(), inputBgColor: z.string(),
-  logoUrl: z.string(), backgroundImageUrl: z.string().optional(), faviconUrl: z.string().optional(),
-  headingText: z.string().min(1), subheadingText: z.string(), connectButtonText: z.string().min(1),
-  termsText: z.string(), termsUrl: z.string().optional(), privacyUrl: z.string().optional(),
-  footerText: z.string().optional(), venueLabel: z.string(), venueRoute: z.string(),
+  brandPrimary: optStr, brandPrimaryHover: optStr, brandSecondary: optStr, brandAccent: optStr,
+  textPrimary: optStr, textSecondary: optStr, textTertiary: optStr, textMuted: optStr,
+  surfaceCard: optStr, surfaceWhite: optStr, surfaceBorder: optStr,
+  buttonPrimary: optStr, buttonPrimaryHover: optStr, buttonPrimaryText: optStr,
+  buttonSecondary: optStr, buttonSecondaryHover: optStr, buttonSecondaryText: optStr,
+  logoUrl: optStr, logoWhiteUrl: optStr, connectCardBgUrl: optStr,
+  bannerOverlayUrl: optStr, faviconUrl: optStr, splashBgUrl: optStr,
+  displayName: optStr, heading: optStr, subheading: optStr, splashHeading: optStr,
+  buttonText: optStr, termsLinks: optStr, venueLabel: optStr, venueRoute: optStr,
+  sortOrder: z.number().nullable().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
 
 interface BrandingFormProps {
+  siteId: string
   config: BrandingConfig
   onSave: (values: UpdateBrandingInput) => Promise<void>
 }
 
-export function BrandingForm({ config, onSave }: BrandingFormProps) {
+export function BrandingForm({ siteId, config, onSave }: BrandingFormProps) {
   const [loading, setLoading] = useState(false)
-  const { register, handleSubmit, control, watch, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, reset, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { ...config },
   })
@@ -104,7 +109,7 @@ export function BrandingForm({ config, onSave }: BrandingFormProps) {
                     render={({ field }) => (
                       <ColorField
                         label={colorLabels[key]}
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={field.onChange}
                       />
                     )}
@@ -115,13 +120,12 @@ export function BrandingForm({ config, onSave }: BrandingFormProps) {
 
             <TabsContent value="content" className="space-y-4">
               {[
-                { name: 'headingText' as const, label: 'Heading' },
-                { name: 'subheadingText' as const, label: 'Subheading' },
-                { name: 'connectButtonText' as const, label: 'Connect Button Text' },
-                { name: 'termsText' as const, label: 'Terms Text' },
-                { name: 'termsUrl' as const, label: 'Terms URL' },
-                { name: 'privacyUrl' as const, label: 'Privacy URL' },
-                { name: 'footerText' as const, label: 'Footer Text' },
+                { name: 'displayName' as const, label: 'Display Name' },
+                { name: 'heading' as const, label: 'Heading' },
+                { name: 'subheading' as const, label: 'Subheading' },
+                { name: 'splashHeading' as const, label: 'Splash Heading' },
+                { name: 'buttonText' as const, label: 'Connect Button Text' },
+                { name: 'termsLinks' as const, label: 'Terms & Conditions Text' },
               ].map(({ name, label }) => (
                 <div key={name} className="space-y-1.5">
                   <Label htmlFor={name} className="text-xs">{label}</Label>
@@ -131,19 +135,25 @@ export function BrandingForm({ config, onSave }: BrandingFormProps) {
               ))}
             </TabsContent>
 
-            <TabsContent value="images" className="space-y-4">
-              {[
-                { name: 'logoUrl' as const, label: 'Logo URL' },
-                { name: 'backgroundImageUrl' as const, label: 'Background Image URL' },
-                { name: 'faviconUrl' as const, label: 'Favicon URL' },
-              ].map(({ name, label }) => (
-                <div key={name} className="space-y-1.5">
-                  <Label htmlFor={name} className="text-xs">{label}</Label>
-                  <Input id={name} {...register(name)} placeholder="https://..." />
-                  {watch(name) && (
-                    <img src={watch(name)} alt={label} className="h-12 object-contain rounded border" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                  )}
-                </div>
+            <TabsContent value="images" className="space-y-6">
+              {(
+                [
+                  { name: 'logoUrl' as const, label: 'Logo', imageType: BrandingImageType.Logo },
+                  { name: 'logoWhiteUrl' as const, label: 'Logo (White)', imageType: BrandingImageType.LogoWhite },
+                  { name: 'faviconUrl' as const, label: 'Favicon', imageType: BrandingImageType.Favicon },
+                  { name: 'connectCardBgUrl' as const, label: 'Connect Card Background', imageType: BrandingImageType.ConnectCardBg },
+                  { name: 'bannerOverlayUrl' as const, label: 'Banner Overlay', imageType: BrandingImageType.BannerOverlay },
+                  { name: 'splashBgUrl' as const, label: 'Splash Background', imageType: BrandingImageType.SplashBg },
+                ] as const
+              ).map(({ name, label, imageType }) => (
+                <ImageUploadField
+                  key={name}
+                  siteId={siteId}
+                  imageType={imageType}
+                  label={label}
+                  currentUrl={watch(name)}
+                  onUploaded={(url) => setValue(name, url)}
+                />
               ))}
             </TabsContent>
 
@@ -167,9 +177,9 @@ export function BrandingForm({ config, onSave }: BrandingFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => reset({ ...DEFAULT_BRANDING })}
+              onClick={() => reset({ siteId: config.siteId } as FormValues)}
             >
-              Reset to Default
+              Reset
             </Button>
           </div>
         </div>

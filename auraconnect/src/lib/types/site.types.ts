@@ -5,8 +5,8 @@ export interface Site {
   tenantId: string
   name: string
   ssid: string
-  description?: string
-  address?: string
+  domain?: string | null
+  sortOrder?: number
   status: SiteStatus
   createdAt: string
   updatedAt: string
@@ -16,9 +16,13 @@ export interface CreateSiteInput {
   tenantId: string
   name: string
   ssid: string
-  description?: string
-  address?: string
-  status?: SiteStatus
+  domain?: string | null
+  sortOrder?: number
 }
 
-export interface UpdateSiteInput extends Partial<Omit<CreateSiteInput, 'tenantId'>> {}
+export interface UpdateSiteInput {
+  name?: string
+  ssid?: string
+  domain?: string | null
+  sortOrder?: number
+}

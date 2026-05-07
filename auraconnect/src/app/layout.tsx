@@ -14,6 +14,11 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: 'AuraConnect Admin',
   description: 'Hotspot tenant management platform',
+  icons: {
+    icon: '/AuraConnect-48px.png',
+    shortcut: '/AuraConnect-48px.png',
+    apple: '/AuraConnect.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

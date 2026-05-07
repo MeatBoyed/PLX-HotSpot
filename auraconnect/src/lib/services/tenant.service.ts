@@ -1,54 +1,54 @@
-import { mockTenants } from '@/lib/mock-data/tenants'
+import { tenantsApi } from '@/lib/infrastructure/api/tenants.api'
+import type { ApiTenant } from '@/lib/infrastructure/api/types'
 import type { Tenant, CreateTenantInput, UpdateTenantInput } from '@/lib/types/tenant.types'
 
-let tenants = [...mockTenants]
+function mapStatus(status: number | string): Tenant['status'] {
+  if (status === 1 || status === 'suspended') return 'suspended'
+  if (status === 2 || status === 'inactive') return 'inactive'
+  return 'active'
+}
 
-function delay(ms = 400): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+function toTenant(r: ApiTenant): Tenant {
+  return {
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    status: mapStatus(r.status),
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }
 }
 
 export const tenantService = {
   async getAll(): Promise<Tenant[]> {
-    await delay()
-    return [...tenants]
+    const results = await tenantsApi.getAll()
+    return results.map(toTenant)
   },
 
   async getById(id: string): Promise<Tenant | null> {
-    await delay()
-    return tenants.find((t) => t.id === id) ?? null
+    const result = await tenantsApi.getById(id)
+    return result ? toTenant(result) : null
   },
 
   async getByIds(ids: string[]): Promise<Tenant[]> {
-    await delay()
-    return tenants.filter((t) => ids.includes(t.id))
+    const all = await tenantsApi.getAll()
+    return all.filter((r) => ids.includes(r.id)).map(toTenant)
   },
 
   async create(input: CreateTenantInput): Promise<Tenant> {
-    await delay()
-    const now = new Date().toISOString()
-    const tenant: Tenant = {
-      id: `tenant_${Date.now()}`,
-      ...input,
-      siteCount: 0,
-      status: 'active',
-      createdAt: now,
-      updatedAt: now,
-    }
-    tenants = [...tenants, tenant]
-    return tenant
+    const result = await tenantsApi.create({ name: input.name, slug: input.slug })
+    return toTenant(result)
   },
 
   async update(id: string, input: UpdateTenantInput): Promise<Tenant> {
-    await delay()
-    const idx = tenants.findIndex((t) => t.id === id)
-    if (idx === -1) throw new Error(`Tenant ${id} not found`)
-    const updated = { ...tenants[idx], ...input, updatedAt: new Date().toISOString() }
-    tenants = tenants.map((t) => (t.id === id ? updated : t))
-    return updated
+    const result = await tenantsApi.update(id, {
+      name: input.name,
+      slug: input.slug,
+    })
+    return toTenant(result)
   },
 
   async delete(id: string): Promise<void> {
-    await delay()
-    tenants = tenants.filter((t) => t.id !== id)
+    await tenantsApi.delete(id)
   },
 }

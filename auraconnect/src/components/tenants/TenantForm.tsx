@@ -31,9 +31,6 @@ export function TenantForm({ defaultValues, onSubmit, onCancel, loading }: Tenan
     defaultValues: {
       name: defaultValues?.name ?? '',
       slug: defaultValues?.slug ?? '',
-      description: defaultValues?.description ?? '',
-      contactEmail: defaultValues?.contactEmail ?? '',
-      contactPhone: defaultValues?.contactPhone ?? '',
     },
   })
 
@@ -49,22 +46,6 @@ export function TenantForm({ defaultValues, onSubmit, onCancel, loading }: Tenan
         <Label htmlFor="slug">Slug *</Label>
         <Input id="slug" {...register('slug')} placeholder="joburg-theatre" />
         {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Input id="description" {...register('description')} placeholder="Short description" />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="contactEmail">Contact Email</Label>
-        <Input id="contactEmail" type="email" {...register('contactEmail')} placeholder="admin@example.com" />
-        {errors.contactEmail && <p className="text-xs text-destructive">{errors.contactEmail.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="contactPhone">Contact Phone</Label>
-        <Input id="contactPhone" {...register('contactPhone')} placeholder="+27 11 000 0000" />
       </div>
 
       <div className="flex gap-2 justify-end pt-2">

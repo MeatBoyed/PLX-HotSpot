@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   LayoutDashboard,
   Building2,
   Users,
+  UsersRound,
+  CreditCard,
   ChevronLeft,
   ChevronRight,
   Wifi,
@@ -25,7 +28,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: 'Tenants', href: '/admin/tenants', icon: <Building2 className="h-5 w-5" /> },
-  { label: 'Users', href: '/admin/users', icon: <Users className="h-5 w-5" />, superAdminOnly: true },
+  { label: 'Hotspot Users', href: '/admin/hotspot-users', icon: <UsersRound className="h-5 w-5" /> },
+  { label: 'Transactions', href: '/admin/transactions', icon: <CreditCard className="h-5 w-5" /> },
+  { label: 'Admin Users', href: '/admin/users', icon: <Users className="h-5 w-5" />, superAdminOnly: true },
 ]
 
 interface SidebarProps {
@@ -52,11 +57,10 @@ export function Sidebar({ currentTenantName, currentSiteName }: SidebarProps) {
     >
       {/* Logo */}
       <div className="flex items-center gap-2 p-4 border-b border-border h-16">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shrink-0">
-          <Wifi className="h-4 w-4" />
-        </div>
-        {!collapsed && (
-          <span className="font-semibold text-sm truncate">AuraConnect</span>
+        {collapsed ? (
+          <Image src="/AuraConnect-48px.png" alt="AuraConnect" width={32} height={32} className="shrink-0" />
+        ) : (
+          <Image src="/AuraConnect.png" alt="AuraConnect" width={140} height={32} className="h-8 w-auto object-contain" />
         )}
       </div>
 

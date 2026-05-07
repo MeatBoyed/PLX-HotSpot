@@ -124,9 +124,7 @@ export function ManagePermissionsDialog({
                     <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
                       {tenant.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {tenant.siteCount} site{tenant.siteCount !== 1 ? 's' : ''}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tenant.slug}</p>
                   </div>
                 </label>
               ))}

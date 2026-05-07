@@ -6,15 +6,13 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Site } from '@/lib/types/site.types'
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   ssid: z.string().min(1, 'SSID is required'),
-  description: z.string().optional(),
-  address: z.string().optional(),
-  status: z.enum(['active', 'maintenance', 'suspended', 'inactive']),
+  domain: z.string().optional().nullable(),
+  sortOrder: z.number().int().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -27,14 +25,13 @@ interface SiteFormProps {
 }
 
 export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFormProps) {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: defaultValues?.name ?? '',
       ssid: defaultValues?.ssid ?? '',
-      description: defaultValues?.description ?? '',
-      address: defaultValues?.address ?? '',
-      status: defaultValues?.status ?? 'active',
+      domain: defaultValues?.domain ?? '',
+      sortOrder: defaultValues?.sortOrder ?? undefined,
     },
   })
 
@@ -53,28 +50,19 @@ export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFor
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Input id="description" {...register('description')} placeholder="Brief site description" />
+        <Label htmlFor="domain">
+          Domain <span className="text-muted-foreground font-normal">(optional)</span>
+        </Label>
+        <Input id="domain" {...register('domain')} placeholder="portal.venue.co.za" className="font-mono" />
+        {errors.domain && <p className="text-xs text-destructive">{errors.domain.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input id="address" {...register('address')} placeholder="Full address" />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Status</Label>
-        <Select value={watch('status')} onValueChange={(v) => setValue('status', v as Site['status'])}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label htmlFor="sortOrder">
+          Sort Order <span className="text-muted-foreground font-normal">(optional)</span>
+        </Label>
+        <Input id="sortOrder" type="number" {...register('sortOrder', { valueAsNumber: true })} placeholder="1" className="w-32" />
+        {errors.sortOrder && <p className="text-xs text-destructive">{errors.sortOrder.message}</p>}
       </div>
 
       <div className="flex gap-2 justify-end pt-2">

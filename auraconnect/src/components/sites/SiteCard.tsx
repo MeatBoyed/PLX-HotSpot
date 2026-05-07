@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Wifi, MapPin, ChevronRight } from 'lucide-react'
+import { Wifi, Globe, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import type { Site } from '@/lib/types/site.types'
@@ -28,10 +28,10 @@ export function SiteCard({ site, tenantId }: SiteCardProps) {
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-2">
-            {site.address && (
+            {site.domain && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">{site.address}</span>
+                <Globe className="h-3 w-3 shrink-0" />
+                <span className="truncate">{site.domain}</span>
               </div>
             )}
             <StatusBadge status={site.status} className="shrink-0 ml-auto" />

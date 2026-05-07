@@ -1,53 +1,66 @@
 import { mockSites } from '@/lib/mock-data/sites'
-import type { Site, CreateSiteInput, UpdateSiteInput } from '@/lib/types/site.types'
+import { sitesApi } from '@/lib/infrastructure/api/sites.api'
+import type { ApiSite } from '@/lib/infrastructure/api/types'
+import type { Site, SiteStatus, CreateSiteInput, UpdateSiteInput } from '@/lib/types/site.types'
 
-let sites = [...mockSites]
+const STATUS_MAP: Record<number | string, SiteStatus> = {
+  0: 'active', active: 'active',
+  1: 'maintenance', maintenance: 'maintenance',
+  2: 'suspended', suspended: 'suspended',
+  3: 'inactive', inactive: 'inactive',
+}
 
-function delay(ms = 400): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+function toSite(r: ApiSite): Site {
+  return {
+    id: r.id,
+    tenantId: r.tenantId,
+    name: r.name,
+    ssid: r.ssid,
+    domain: r.domain,
+    sortOrder: r.sortOrder ?? undefined,
+    status: STATUS_MAP[r.status] ?? 'active',
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }
 }
 
 export const siteService = {
+  // No top-level GET /api/admin/sites endpoint yet — returns mock data for filter dropdowns
   async getAll(): Promise<Site[]> {
-    await delay()
-    return [...sites]
+    return [...mockSites]
   },
 
   async getByTenantId(tenantId: string): Promise<Site[]> {
-    await delay()
-    return sites.filter((s) => s.tenantId === tenantId)
+    const results = await sitesApi.getByTenantId(tenantId)
+    return results.map(toSite)
   },
 
   async getById(id: string): Promise<Site | null> {
-    await delay()
-    return sites.find((s) => s.id === id) ?? null
+    const result = await sitesApi.getById(id)
+    return result ? toSite(result) : null
   },
 
   async create(input: CreateSiteInput): Promise<Site> {
-    await delay()
-    const now = new Date().toISOString()
-    const site: Site = {
-      id: `site_${Date.now()}`,
-      ...input,
-      status: input.status ?? 'active',
-      createdAt: now,
-      updatedAt: now,
-    }
-    sites = [...sites, site]
-    return site
+    const result = await sitesApi.create(input.tenantId, {
+      name: input.name,
+      ssid: input.ssid,
+      domain: input.domain ?? null,
+      sortOrder: input.sortOrder,
+    })
+    return toSite(result)
   },
 
   async update(id: string, input: UpdateSiteInput): Promise<Site> {
-    await delay()
-    const idx = sites.findIndex((s) => s.id === id)
-    if (idx === -1) throw new Error(`Site ${id} not found`)
-    const updated = { ...sites[idx], ...input, updatedAt: new Date().toISOString() }
-    sites = sites.map((s) => (s.id === id ? updated : s))
-    return updated
+    const result = await sitesApi.update(id, {
+      name: input.name,
+      ssid: input.ssid,
+      domain: input.domain ?? null,
+      sortOrder: input.sortOrder,
+    })
+    return toSite(result)
   },
 
   async delete(id: string): Promise<void> {
-    await delay()
-    sites = sites.filter((s) => s.id !== id)
+    await sitesApi.delete(id)
   },
 }
