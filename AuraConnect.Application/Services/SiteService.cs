@@ -91,6 +91,8 @@ namespace AuraConnect.Application.Services
             site.SetName(request.Name);
             site.SetDomain(request.Domain);
             site.SetSortOrder(request.SortOrder);
+            if (request.AuthMethods != null) site.SetAuthMethods(request.AuthMethods);
+            if (request.MarketingOptIn.HasValue) site.SetMarketingOptIn(request.MarketingOptIn.Value);
 
             // 4. Save
             await _siteRepository.UpdateAsync(site, cancellationToken);
@@ -166,6 +168,8 @@ namespace AuraConnect.Application.Services
                 Domain = site.Domain,
                 Status = site.Status,
                 SortOrder = site.SortOrder,
+                AuthMethods = site.AuthMethods,
+                MarketingOptIn = site.MarketingOptIn,
                 CreatedAt = site.CreatedAt,
                 UpdatedAt = site.UpdatedAt,
                 PackageCount = site.Packages?.Count ?? 0,

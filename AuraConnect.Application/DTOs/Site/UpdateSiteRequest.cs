@@ -13,5 +13,7 @@ namespace AuraConnect.Application.DTOs.Site
         public string Name { get; set; } = string.Empty;
         public string? Domain { get; set; }
         public int SortOrder { get; set; }
+        public string[]? AuthMethods { get; set; }
+        public bool? MarketingOptIn { get; set; }
     }
 }

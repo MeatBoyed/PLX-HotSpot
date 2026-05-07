@@ -18,6 +18,8 @@ namespace AuraConnect.Application.DTOs.Site
         public string? Domain { get; set; }
         public SiteStatus Status { get; set; }
         public int SortOrder { get; set; }
+        public string[] AuthMethods { get; set; } = [];
+        public bool MarketingOptIn { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
