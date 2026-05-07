@@ -52,7 +52,18 @@ namespace AuraConnect.Infrastructure.Repositories
         {
             return await _context.Sites
                 .Include(s => s.Branding)
+                .Include(s => s.AdsConfig)
                 .FirstOrDefaultAsync(s => s.Ssid == ssid, cancellationToken);
+        }
+
+        public async Task<IEnumerable<Site>> GetByTenantIdWithBrandingAsync(string tenantId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Sites
+                .Include(s => s.Branding)
+                .Where(s => s.TenantId == tenantId)
+                .OrderBy(s => s.SortOrder)
+                .ThenBy(s => s.CreatedAt)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<bool> ExistsAsync(string ssid, CancellationToken cancellationToken = default)

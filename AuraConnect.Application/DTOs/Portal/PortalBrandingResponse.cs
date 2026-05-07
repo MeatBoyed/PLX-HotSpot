@@ -48,5 +48,12 @@ namespace AuraConnect.Application.DTOs.Portal
         // Auth & Features
         public string[] AuthMethods { get; set; } = ["free"];
         public bool MarketingOptIn { get; set; }
+
+        // Ads
+        public bool AdsEnabled { get; set; }
+        public string? AdsReviveServerUrl { get; set; }
+        public string? AdsReviveZoneId { get; set; }
+        public string? AdsReviveId { get; set; }
+        public string? AdsVastUrl { get; set; }
     }
 }

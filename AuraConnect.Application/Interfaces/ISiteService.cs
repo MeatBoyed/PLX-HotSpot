@@ -1,4 +1,5 @@
-﻿using AuraConnect.Application.DTOs.Site;
+﻿using AuraConnect.Application.DTOs.Portal;
+using AuraConnect.Application.DTOs.Site;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +8,9 @@ namespace AuraConnect.Application.Interfaces
 {
     public interface ISiteService
     {
+        // Portal
+        Task<IEnumerable<PortalSiteResponse>> GetPortalSitesAsync(string tenantId, CancellationToken cancellationToken = default);
+
         // Site CRUD
         Task<IEnumerable<SiteResponse>> GetSitesByTenantAsync(string tenantId, CancellationToken cancellationToken = default);
         Task<SiteResponse?> GetSiteByIdAsync(string siteId, CancellationToken cancellationToken = default);

@@ -1,4 +1,5 @@
-﻿using AuraConnect.Application.DTOs.Site;
+﻿using AuraConnect.Application.DTOs.Portal;
+using AuraConnect.Application.DTOs.Site;
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
 using AuraConnect.Core.Interfaces.Repositories;
@@ -17,6 +18,19 @@ namespace AuraConnect.Application.Services
         {
             _siteRepository = siteRepository;
             _tenantRepository = tenantRepository;
+        }
+
+        // GET portal site list for a tenant (site selector page)
+        public async Task<IEnumerable<PortalSiteResponse>> GetPortalSitesAsync(string tenantId, CancellationToken cancellationToken = default)
+        {
+            var sites = await _siteRepository.GetByTenantIdWithBrandingAsync(tenantId, cancellationToken);
+            return sites.Select(s => new PortalSiteResponse
+            {
+                Ssid = s.Ssid,
+                DisplayName = s.Branding?.DisplayName,
+                LogoUrl = s.Branding?.LogoUrl ?? "/logo-default.svg",
+                SortOrder = s.SortOrder
+            });
         }
 
         // GET all sites for a tenant

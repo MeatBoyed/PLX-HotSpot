@@ -9,10 +9,29 @@ namespace AuraConnect.API.Controllers.Portal
     public class PortalController : ControllerBase
     {
         private readonly IBrandingService _brandingService;
+        private readonly ISiteService _siteService;
 
-        public PortalController(IBrandingService brandingService)
+        public PortalController(IBrandingService brandingService, ISiteService siteService)
         {
             _brandingService = brandingService;
+            _siteService = siteService;
+        }
+
+        // GET /portal/{tenantId}/sites
+        [HttpGet("sites")]
+        [ProducesResponseType(typeof(IEnumerable<PortalSiteResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetSites(string tenantId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var sites = await _siteService.GetPortalSitesAsync(tenantId, cancellationToken);
+                return Ok(sites);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         // GET /portal/{tenantId}/branding?ssid={ssid}

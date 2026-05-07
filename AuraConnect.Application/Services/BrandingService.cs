@@ -290,7 +290,14 @@ namespace AuraConnect.Application.Services
 
                 // Auth & Features
                 AuthMethods = site.AuthMethods,
-                MarketingOptIn = site.MarketingOptIn
+                MarketingOptIn = site.MarketingOptIn,
+
+                // Ads
+                AdsEnabled = site.AdsConfig?.IsEnabled ?? false,
+                AdsReviveServerUrl = site.AdsConfig?.ReviveServerUrl,
+                AdsReviveZoneId = site.AdsConfig?.ReviveZoneId,
+                AdsReviveId = site.AdsConfig?.ReviveId,
+                AdsVastUrl = site.AdsConfig?.VastUrl
             };
         }
 
