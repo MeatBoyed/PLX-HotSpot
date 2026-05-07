@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Infrastructure\\\\Migrations\" -File | Sort-Object Name -Descending | Select-Object -First 1 | ForEach-Object { $_.FullName })",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)"
+    ]
+  }
+}

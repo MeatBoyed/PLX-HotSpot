@@ -2,6 +2,7 @@ using AuraConnect.Application.DTOs.Portal;
 using AuraConnect.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace AuraConnect.API.Controllers.Portal
 {
     [ApiController]
@@ -10,11 +11,34 @@ namespace AuraConnect.API.Controllers.Portal
     {
         private readonly IBrandingService _brandingService;
         private readonly ISiteService _siteService;
+        private readonly IRadiusConfigService _radiusConfigService;
 
-        public PortalController(IBrandingService brandingService, ISiteService siteService)
+        public PortalController(IBrandingService brandingService, ISiteService siteService, IRadiusConfigService radiusConfigService)
         {
             _brandingService = brandingService;
             _siteService = siteService;
+            _radiusConfigService = radiusConfigService;
+        }
+
+        // GET /portal/{tenantId}/gateway?ssid={ssid}
+        [HttpGet("gateway")]
+        [ProducesResponseType(typeof(GatewayConfigResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetGatewayConfig(string tenantId, [FromQuery] string ssid, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(ssid))
+                return BadRequest(new { error = "ssid query parameter is required" });
+
+            try
+            {
+                var config = await _radiusConfigService.GetGatewayConfigAsync(tenantId, ssid, cancellationToken);
+                return Ok(config);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         // GET /portal/{tenantId}/sites

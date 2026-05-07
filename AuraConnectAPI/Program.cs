@@ -37,6 +37,8 @@ try
     builder.Services.AddScoped<IBrandingService, BrandingService>();
     builder.Services.AddScoped<IAdsConfigRepository, AdsConfigRepository>();
     builder.Services.AddScoped<IAdsConfigService, AdsConfigService>();
+    builder.Services.AddScoped<IRadiusConfigRepository, RadiusConfigRepository>();
+    builder.Services.AddScoped<IRadiusConfigService, RadiusConfigService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);
 

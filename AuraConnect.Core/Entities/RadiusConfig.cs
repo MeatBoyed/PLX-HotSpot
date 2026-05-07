@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace AuraConnect.Core.Entities
 {
     public class RadiusConfig
     {
         public string? SiteId { get; private set; }
-        public string Host { get; private set; } = string.Empty;
-        public int Port { get; private set; } = 1812;
-        public string Secret { get; private set; } = string.Empty;
-        public string? NasIdentifier { get; private set; }
-        public string? Realm { get; private set; }
-        public int? AcctPort { get; private set; } = 1813;
-        public int? TimeoutMs { get; private set; } = 5000;
-        public int? Retries { get; private set; } = 3;
+
+        // MikroTik gateway
+        public string? GatewayUrl { get; private set; }
+        public string? FreeUsername { get; private set; }
+        public string? FreePassword { get; private set; }
+
+        // RadiusDesk integration
+        public string? RadiusDeskUrl { get; private set; }
+        public string? RadiusDeskApiToken { get; private set; }
+        public string? RadiusDeskRealmId { get; private set; }
+        public string? RadiusDeskCloudId { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
 
@@ -25,74 +27,56 @@ namespace AuraConnect.Core.Entities
         private RadiusConfig() { }
 
         // Domain constructor
-        public RadiusConfig(string siteId, string host, string secret, int port = 1812)
+        public RadiusConfig(string siteId)
         {
             SiteId = siteId;
-            SetHost(host);
-            SetSecret(secret);
-            SetPort(port);
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
 
-        // Setters
-        public void SetHost(string host)
+        public void SetGatewayUrl(string? url)
         {
-            if (string.IsNullOrWhiteSpace(host))
-                throw new ArgumentException("RADIUS host cannot be empty");
-            Host = host;
+            if (url != null && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException("Invalid gateway URL format");
+            GatewayUrl = url;
             UpdateTimestamp();
         }
 
-        public void SetPort(int port)
+        public void SetFreeUsername(string? username)
         {
-            if (port < 1 || port > 65535)
-                throw new ArgumentException("Port must be between 1 and 65535");
-            Port = port;
+            FreeUsername = username;
             UpdateTimestamp();
         }
 
-        public void SetSecret(string secret)
+        public void SetFreePassword(string? password)
         {
-            if (string.IsNullOrWhiteSpace(secret))
-                throw new ArgumentException("RADIUS secret cannot be empty");
-            Secret = secret;
+            FreePassword = password;
             UpdateTimestamp();
         }
 
-        public void SetNasIdentifier(string? identifier)
+        public void SetRadiusDeskUrl(string? url)
         {
-            NasIdentifier = identifier;
+            if (url != null && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException("Invalid RadiusDesk URL format");
+            RadiusDeskUrl = url;
             UpdateTimestamp();
         }
 
-        public void SetRealm(string? realm)
+        public void SetRadiusDeskApiToken(string? token)
         {
-            Realm = realm;
+            RadiusDeskApiToken = token;
             UpdateTimestamp();
         }
 
-        public void SetAcctPort(int? port)
+        public void SetRadiusDeskRealmId(string? realmId)
         {
-            if (port.HasValue && (port < 1 || port > 65535))
-                throw new ArgumentException("Accounting port must be between 1 and 65535");
-            AcctPort = port;
+            RadiusDeskRealmId = realmId;
             UpdateTimestamp();
         }
 
-        public void SetTimeout(int? milliseconds)
+        public void SetRadiusDeskCloudId(string? cloudId)
         {
-            if (milliseconds.HasValue && milliseconds <= 0)
-                throw new ArgumentException("Timeout must be positive");
-            TimeoutMs = milliseconds;
-            UpdateTimestamp();
-        }
-
-        public void SetRetries(int? retries)
-        {
-            if (retries.HasValue && retries < 0)
-                throw new ArgumentException("Retries cannot be negative");
-            Retries = retries;
+            RadiusDeskCloudId = cloudId;
             UpdateTimestamp();
         }
 

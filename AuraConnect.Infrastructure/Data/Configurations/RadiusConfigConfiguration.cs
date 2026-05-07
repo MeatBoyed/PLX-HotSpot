@@ -1,13 +1,9 @@
-﻿using AuraConnect.Core.Entities;
+using AuraConnect.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AuraConnect.Infrastructure.Data.Configurations
 {
-
     public class RadiusConfigConfiguration : IEntityTypeConfiguration<RadiusConfig>
     {
         public void Configure(EntityTypeBuilder<RadiusConfig> builder)
@@ -21,39 +17,33 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasMaxLength(32)
                 .IsRequired();
 
-            builder.Property(r => r.Host)
-                .HasColumnName("host")
-                .IsRequired()
+            builder.Property(r => r.GatewayUrl)
+                .HasColumnName("gateway_url")
+                .HasMaxLength(500);
+
+            builder.Property(r => r.FreeUsername)
+                .HasColumnName("free_username")
                 .HasMaxLength(255);
 
-            builder.Property(r => r.Port)
-                .HasColumnName("port")
-                .HasDefaultValue(1812);
+            builder.Property(r => r.FreePassword)
+                .HasColumnName("free_password")
+                .HasMaxLength(255);
 
-            builder.Property(r => r.Secret)
-                .HasColumnName("secret")
-                .IsRequired()
+            builder.Property(r => r.RadiusDeskUrl)
+                .HasColumnName("radiusdesk_url")
+                .HasMaxLength(500);
+
+            builder.Property(r => r.RadiusDeskApiToken)
+                .HasColumnName("radiusdesk_api_token")
                 .HasColumnType("text");
 
-            builder.Property(r => r.NasIdentifier)
-                .HasColumnName("nas_identifier")
+            builder.Property(r => r.RadiusDeskRealmId)
+                .HasColumnName("radiusdesk_realm_id")
                 .HasMaxLength(255);
 
-            builder.Property(r => r.Realm)
-                .HasColumnName("realm")
+            builder.Property(r => r.RadiusDeskCloudId)
+                .HasColumnName("radiusdesk_cloud_id")
                 .HasMaxLength(255);
-
-            builder.Property(r => r.AcctPort)
-                .HasColumnName("acct_port")
-                .HasDefaultValue(1813);
-
-            builder.Property(r => r.TimeoutMs)
-                .HasColumnName("timeout_ms")
-                .HasDefaultValue(5000);
-
-            builder.Property(r => r.Retries)
-                .HasColumnName("retries")
-                .HasDefaultValue(3);
 
             builder.Property(r => r.CreatedAt)
                 .HasColumnName("created_at")
