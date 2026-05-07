@@ -1,5 +1,6 @@
 ﻿using AuraConnect.Application.DTOs.Branding;
 using AuraConnect.Application.Interfaces;
+using AuraConnect.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuraConnect.API.Controllers.Admin
@@ -92,6 +93,36 @@ namespace AuraConnect.API.Controllers.Admin
             {
                 return NotFound(new { error = ex.Message });
             }
+        }
+
+        // POST /admin/sites/{siteId}/branding/images/{imageType}  — upload & store image in DB
+        [HttpPost("images/{imageType}")]
+        public async Task<IActionResult> UploadImage(string siteId, BrandingImageType imageType, IFormFile file, CancellationToken cancellationToken)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { error = "No file provided" });
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                var branding = await _brandingService.UploadImageAsync(siteId, imageType, stream, file.FileName, file.ContentType, cancellationToken);
+                return Ok(branding);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
+        // GET /api/sites/{siteId}/branding/images/{imageType}  — public endpoint, serves raw image bytes
+        [HttpGet("~/api/sites/{siteId}/branding/images/{imageType}")]
+        public async Task<IActionResult> GetImage(string siteId, BrandingImageType imageType, CancellationToken cancellationToken)
+        {
+            var image = await _brandingService.GetImageAsync(siteId, imageType, cancellationToken);
+            if (image == null)
+                return NotFound();
+
+            return File(image.Data, image.ContentType, image.FileName);
         }
     }
 }

@@ -9,8 +9,10 @@ namespace AuraConnect.Application.DTOs.Branding
     /// </summary>
     public class UpdateContentRequest
     {
+        public string? DisplayName { get; set; }
         public string? Heading { get; set; }
         public string? Subheading { get; set; }
+        public string? SplashHeading { get; set; }
         public string? ButtonText { get; set; }
         public string? TermsLinks { get; set; }
         public string? VenueLabel { get; set; }

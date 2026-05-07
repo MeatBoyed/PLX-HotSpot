@@ -37,8 +37,10 @@ namespace AuraConnect.Application.DTOs.Branding
         public string? SplashBgUrl { get; set; }
 
         // Content
+        public string? DisplayName { get; set; }
         public string? Heading { get; set; }
         public string? Subheading { get; set; }
+        public string? SplashHeading { get; set; }
         public string? ButtonText { get; set; }
         public string? TermsLinks { get; set; }
 

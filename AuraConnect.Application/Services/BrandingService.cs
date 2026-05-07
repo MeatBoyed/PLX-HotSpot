@@ -2,9 +2,6 @@
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
 using AuraConnect.Core.Interfaces.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AuraConnect.Application.Services
 {
@@ -120,8 +117,10 @@ namespace AuraConnect.Application.Services
         {
             var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
 
+            if (request.DisplayName != null) branding.SetDisplayName(request.DisplayName);
             if (request.Heading != null) branding.SetHeading(request.Heading);
             if (request.Subheading != null) branding.SetSubheading(request.Subheading);
+            if (request.SplashHeading != null) branding.SetSplashHeading(request.SplashHeading);
             if (request.ButtonText != null) branding.SetButtonText(request.ButtonText);
             if (request.TermsLinks != null) branding.SetTermsLinks(request.TermsLinks);
             if (request.VenueLabel != null) branding.SetVenueLabel(request.VenueLabel);
@@ -131,6 +130,34 @@ namespace AuraConnect.Application.Services
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
             return MapToResponse(branding);
+        }
+
+        // POST upload image — stores bytes in DB and updates the branding URL field
+        public async Task<BrandingResponse> UploadImageAsync(string siteId, BrandingImageType imageType, Stream data, string fileName, string contentType, CancellationToken cancellationToken = default)
+        {
+            var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
+
+            using var ms = new MemoryStream();
+            await data.CopyToAsync(ms, cancellationToken);
+            var bytes = ms.ToArray();
+
+            var image = new BrandingImage(siteId, imageType, bytes, contentType, fileName);
+            await _brandingRepository.SaveImageAsync(image, cancellationToken);
+
+            var url = $"/api/sites/{siteId}/branding/images/{imageType}";
+            SetBrandingImageUrl(branding, imageType, url);
+
+            await _brandingRepository.SaveChangesAsync(cancellationToken);
+
+            return MapToResponse(branding);
+        }
+
+        // GET raw image data for serving to clients
+        public async Task<BrandingImageData?> GetImageAsync(string siteId, BrandingImageType imageType, CancellationToken cancellationToken = default)
+        {
+            var image = await _brandingRepository.GetImageAsync(siteId, imageType, cancellationToken);
+            if (image == null) return null;
+            return new BrandingImageData(image.Data, image.ContentType, image.FileName);
         }
 
         // Helper: Get or create branding (with site validation)
@@ -188,13 +215,28 @@ namespace AuraConnect.Application.Services
         // Helper: Apply content updates from request
         private static void ApplyContentUpdates(Branding branding, UpdateBrandingRequest request)
         {
+            if (request.DisplayName != null) branding.SetDisplayName(request.DisplayName);
             if (request.Heading != null) branding.SetHeading(request.Heading);
             if (request.Subheading != null) branding.SetSubheading(request.Subheading);
+            if (request.SplashHeading != null) branding.SetSplashHeading(request.SplashHeading);
             if (request.ButtonText != null) branding.SetButtonText(request.ButtonText);
             if (request.TermsLinks != null) branding.SetTermsLinks(request.TermsLinks);
             if (request.VenueLabel != null) branding.SetVenueLabel(request.VenueLabel);
             if (request.VenueRoute != null) branding.SetVenueRoute(request.VenueRoute);
             if (request.SortOrder.HasValue) branding.SetSortOrder(request.SortOrder.Value);
+        }
+
+        private static void SetBrandingImageUrl(Branding branding, BrandingImageType imageType, string url)
+        {
+            switch (imageType)
+            {
+                case BrandingImageType.Logo: branding.SetLogoUrl(url); break;
+                case BrandingImageType.LogoWhite: branding.SetLogoWhiteUrl(url); break;
+                case BrandingImageType.ConnectCardBackground: branding.SetConnectCardBgUrl(url); break;
+                case BrandingImageType.BannerOverlay: branding.SetBannerOverlayUrl(url); break;
+                case BrandingImageType.Favicon: branding.SetFaviconUrl(url); break;
+                case BrandingImageType.SplashBackground: branding.SetSplashBgUrl(url); break;
+            }
         }
 
         // Helper: Map Entity → DTO
@@ -230,8 +272,10 @@ namespace AuraConnect.Application.Services
                 SplashBgUrl = branding.SplashBgUrl,
 
                 // Content
+                DisplayName = branding.DisplayName,
                 Heading = branding.Heading,
                 Subheading = branding.Subheading,
+                SplashHeading = branding.SplashHeading,
                 ButtonText = branding.ButtonText,
                 TermsLinks = branding.TermsLinks,
                 VenueLabel = branding.VenueLabel,

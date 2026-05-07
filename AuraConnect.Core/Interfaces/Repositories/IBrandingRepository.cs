@@ -11,6 +11,10 @@ namespace AuraConnect.Core.Interfaces.Repositories
         Task AddAsync(Branding branding, CancellationToken cancellationToken = default);
         Task UpdateAsync(Branding branding, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(string siteId, CancellationToken cancellationToken = default);
+
+        Task<BrandingImage?> GetImageAsync(string siteId, BrandingImageType imageType, CancellationToken cancellationToken = default);
+        Task SaveImageAsync(BrandingImage image, CancellationToken cancellationToken = default);
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

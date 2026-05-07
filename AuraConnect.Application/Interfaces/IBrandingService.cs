@@ -1,7 +1,5 @@
 ﻿using AuraConnect.Application.DTOs.Branding;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using AuraConnect.Core.Entities;
 
 namespace AuraConnect.Application.Interfaces
 {
@@ -12,5 +10,7 @@ namespace AuraConnect.Application.Interfaces
         Task<BrandingResponse> UpdateColorsAsync(string siteId, UpdateColorsRequest request, CancellationToken cancellationToken = default);
         Task<BrandingResponse> UpdateImagesAsync(string siteId, UpdateImagesRequest request, CancellationToken cancellationToken = default);
         Task<BrandingResponse> UpdateContentAsync(string siteId, UpdateContentRequest request, CancellationToken cancellationToken = default);
+        Task<BrandingResponse> UploadImageAsync(string siteId, BrandingImageType imageType, Stream data, string fileName, string contentType, CancellationToken cancellationToken = default);
+        Task<BrandingImageData?> GetImageAsync(string siteId, BrandingImageType imageType, CancellationToken cancellationToken = default);
     }
 }

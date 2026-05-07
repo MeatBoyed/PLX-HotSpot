@@ -13,6 +13,8 @@ namespace AuraConnect.Core.Entities
         public string? Domain { get; private set; }
         public SiteStatus Status { get; private set; } = SiteStatus.Active;
         public int SortOrder { get; private set; }
+        public string[] AuthMethods { get; private set; } = ["free"];
+        public bool MarketingOptIn { get; private set; } = false;
 
         // Navigation
         public virtual Tenant Tenant { get; private set; } = null!;
@@ -70,6 +72,20 @@ namespace AuraConnect.Core.Entities
         public void SetSortOrder(int sortOrder)
         {
             SortOrder = sortOrder;
+            UpdateTimestamp();
+        }
+
+        public void SetAuthMethods(string[] methods)
+        {
+            if (methods == null || methods.Length == 0)
+                throw new ArgumentException("At least one auth method is required");
+            AuthMethods = methods;
+            UpdateTimestamp();
+        }
+
+        public void SetMarketingOptIn(bool value)
+        {
+            MarketingOptIn = value;
             UpdateTimestamp();
         }
 

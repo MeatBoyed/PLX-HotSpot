@@ -48,8 +48,10 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.Property(b => b.SplashBgUrl).HasColumnName("splash_bg_url").HasMaxLength(255);
 
             // Content
+            builder.Property(b => b.DisplayName).HasColumnName("display_name").HasMaxLength(255);
             builder.Property(b => b.Heading).HasColumnName("heading").HasMaxLength(255);
             builder.Property(b => b.Subheading).HasColumnName("subheading").HasMaxLength(255);
+            builder.Property(b => b.SplashHeading).HasColumnName("splash_heading").HasMaxLength(255);
             builder.Property(b => b.ButtonText).HasColumnName("button_text").HasMaxLength(255);
             builder.Property(b => b.TermsLinks).HasColumnName("terms_links").HasColumnType("text");
 

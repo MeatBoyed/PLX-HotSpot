@@ -40,6 +40,23 @@ namespace AuraConnect.Infrastructure.Repositories
             return await _context.Brandings.AnyAsync(b => b.SiteId == siteId, cancellationToken);
         }
 
+        public async Task<BrandingImage?> GetImageAsync(string siteId, BrandingImageType imageType, CancellationToken cancellationToken = default)
+        {
+            return await _context.BrandingImages
+                .FirstOrDefaultAsync(i => i.SiteId == siteId && i.ImageType == imageType, cancellationToken);
+        }
+
+        public async Task SaveImageAsync(BrandingImage image, CancellationToken cancellationToken = default)
+        {
+            var existing = await _context.BrandingImages
+                .FirstOrDefaultAsync(i => i.SiteId == image.SiteId && i.ImageType == image.ImageType, cancellationToken);
+
+            if (existing == null)
+                await _context.BrandingImages.AddAsync(image, cancellationToken);
+            else
+                existing.UpdateData(image.Data, image.ContentType, image.FileName);
+        }
+
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);

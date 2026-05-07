@@ -13,6 +13,7 @@ namespace AuraConnect.Infrastructure.Data
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Site> Sites { get; set; }
         public DbSet<Branding> Brandings { get; set; }
+        public DbSet<BrandingImage> BrandingImages { get; set; }
         public DbSet<AdsConfig> AdsConfigs { get; set; }
         public DbSet<Package> Packages { get; set; }
         public DbSet<OtpVerification> OtpVerifications { get; set; }

@@ -36,8 +36,10 @@ namespace AuraConnect.Core.Entities
         public string? SplashBgUrl { get; private set; }
 
         // Content
+        public string? DisplayName { get; private set; }
         public string? Heading { get; private set; }
         public string? Subheading { get; private set; }
+        public string? SplashHeading { get; private set; }
         public string? ButtonText { get; private set; }
         public string? TermsLinks { get; private set; }
 
@@ -145,6 +147,18 @@ namespace AuraConnect.Core.Entities
         }
 
         // Content setters
+        public void SetDisplayName(string? displayName)
+        {
+            DisplayName = displayName;
+            UpdateTimestamp();
+        }
+
+        public void SetSplashHeading(string? splashHeading)
+        {
+            SplashHeading = splashHeading;
+            UpdateTimestamp();
+        }
+
         public void SetHeading(string? heading)
         {
             Heading = heading;

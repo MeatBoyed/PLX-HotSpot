@@ -49,6 +49,14 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasColumnName("sort_order")
                 .HasDefaultValue(0);
 
+            builder.Property(s => s.AuthMethods)
+                .HasColumnName("auth_methods")
+                .HasColumnType("text[]");
+
+            builder.Property(s => s.MarketingOptIn)
+                .HasColumnName("marketing_opt_in")
+                .HasDefaultValue(false);
+
             builder.Property(s => s.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
