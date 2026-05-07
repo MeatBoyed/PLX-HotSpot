@@ -48,6 +48,13 @@ namespace AuraConnect.Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
 
+        public async Task<Site?> GetBySsidWithBrandingAsync(string ssid, CancellationToken cancellationToken = default)
+        {
+            return await _context.Sites
+                .Include(s => s.Branding)
+                .FirstOrDefaultAsync(s => s.Ssid == ssid, cancellationToken);
+        }
+
         public async Task<bool> ExistsAsync(string ssid, CancellationToken cancellationToken = default)
         {
             return await _context.Sites.AnyAsync(s => s.Ssid == ssid, cancellationToken);
