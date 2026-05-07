@@ -153,12 +153,13 @@ namespace AuraConnect.Application.Services
             return MapToResponse(branding);
         }
 
-        // GET portal branding by SSID — combines Site + Branding into a single response
-        public async Task<PortalBrandingResponse> GetPortalBrandingAsync(string ssid, CancellationToken cancellationToken = default)
+        // GET portal branding by tenant + SSID — validates the site belongs to the tenant
+        public async Task<PortalBrandingResponse> GetPortalBrandingAsync(string tenantId, string ssid, CancellationToken cancellationToken = default)
         {
             var site = await _siteRepository.GetBySsidWithBrandingAsync(ssid, cancellationToken);
-            if (site == null)
-                throw new InvalidOperationException($"No site found for SSID '{ssid}'");
+
+            if (site == null || site.TenantId != tenantId)
+                throw new InvalidOperationException($"No site found for SSID '{ssid}' under this tenant");
 
             if (site.Branding == null)
                 throw new InvalidOperationException($"No branding configured for SSID '{ssid}'");

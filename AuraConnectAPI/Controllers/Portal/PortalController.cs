@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AuraConnect.API.Controllers.Portal
 {
     [ApiController]
-    [Route("portal")]
+    [Route("portal/{tenantId}")]
     public class PortalController : ControllerBase
     {
         private readonly IBrandingService _brandingService;
@@ -14,16 +14,16 @@ namespace AuraConnect.API.Controllers.Portal
             _brandingService = brandingService;
         }
 
-        // GET /portal/branding?ssid={ssid}
+        // GET /portal/{tenantId}/branding?ssid={ssid}
         [HttpGet("branding")]
-        public async Task<IActionResult> GetBranding([FromQuery] string ssid, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBranding(string tenantId, [FromQuery] string ssid, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(ssid))
                 return BadRequest(new { error = "ssid query parameter is required" });
 
             try
             {
-                var branding = await _brandingService.GetPortalBrandingAsync(ssid, cancellationToken);
+                var branding = await _brandingService.GetPortalBrandingAsync(tenantId, ssid, cancellationToken);
                 return Ok(branding);
             }
             catch (InvalidOperationException ex)
