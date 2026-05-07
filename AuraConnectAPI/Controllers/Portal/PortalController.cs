@@ -1,3 +1,4 @@
+using AuraConnect.Application.DTOs.Portal;
 using AuraConnect.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,9 @@ namespace AuraConnect.API.Controllers.Portal
 
         // GET /portal/{tenantId}/branding?ssid={ssid}
         [HttpGet("branding")]
+        [ProducesResponseType(typeof(PortalBrandingResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBranding(string tenantId, [FromQuery] string ssid, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(ssid))
