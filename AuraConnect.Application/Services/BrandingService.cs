@@ -1,4 +1,4 @@
-﻿using AuraConnect.Application.DTOs.Branding;
+using AuraConnect.Application.DTOs.Branding;
 using AuraConnect.Application.DTOs.Portal;
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
@@ -10,69 +10,61 @@ namespace AuraConnect.Application.Services
     {
         private readonly IBrandingRepository _brandingRepository;
         private readonly ISiteRepository _siteRepository;
+        private readonly IPortalCacheService _portalCache;
 
-        public BrandingService(IBrandingRepository brandingRepository, ISiteRepository siteRepository)
+        public BrandingService(IBrandingRepository brandingRepository, ISiteRepository siteRepository, IPortalCacheService portalCache)
         {
             _brandingRepository = brandingRepository;
             _siteRepository = siteRepository;
+            _portalCache = portalCache;
         }
 
-        // GET branding
         public async Task<BrandingResponse?> GetBrandingAsync(string siteId, CancellationToken cancellationToken = default)
         {
-            // 1. Verify site exists
             var site = await _siteRepository.GetByIdAsync(siteId, cancellationToken);
             if (site == null)
                 throw new InvalidOperationException($"Site with ID '{siteId}' not found");
 
-            // 2. Get branding (or return default if doesn't exist)
             var branding = await _brandingRepository.GetBySiteIdAsync(siteId, cancellationToken);
-
             if (branding == null)
-                return null;  // No branding configured yet
+                return null;
 
             return MapToResponse(branding);
         }
 
-        // PUT full branding update (creates if not exists)
         public async Task<BrandingResponse> UpdateBrandingAsync(string siteId, UpdateBrandingRequest request, CancellationToken cancellationToken = default)
         {
-            // 1. Verify site exists
             var site = await _siteRepository.GetByIdAsync(siteId, cancellationToken);
             if (site == null)
                 throw new InvalidOperationException($"Site with ID '{siteId}' not found");
 
-            // 2. Get existing or create new branding
             var branding = await _brandingRepository.GetBySiteIdAsync(siteId, cancellationToken);
             var isNew = branding == null;
 
             if (isNew)
-            {
                 branding = new Branding(siteId);
-            }
 
-            // 3. Apply all updates (only non-null values)
-            ApplyColorUpdates(branding, request);
-            ApplyImageUpdates(branding, request);
-            ApplyContentUpdates(branding, request);
+            ApplyColorUpdates(branding!, request);
+            ApplyImageUpdates(branding!, request);
+            ApplyContentUpdates(branding!, request);
 
-            // 4. Save
             if (isNew)
-                await _brandingRepository.AddAsync(branding, cancellationToken);
+                await _brandingRepository.AddAsync(branding!, cancellationToken);
             else
-                await _brandingRepository.UpdateAsync(branding, cancellationToken);
+                await _brandingRepository.UpdateAsync(branding!, cancellationToken);
 
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
-            return MapToResponse(branding);
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
+
+            return MapToResponse(branding!);
         }
 
-        // PUT update only colors
         public async Task<BrandingResponse> UpdateColorsAsync(string siteId, UpdateColorsRequest request, CancellationToken cancellationToken = default)
         {
-            var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
+            var (site, branding) = await GetOrCreateBrandingAsync(siteId, cancellationToken);
 
-            // Apply color updates
             if (request.BrandPrimary != null) branding.SetBrandPrimary(request.BrandPrimary);
             if (request.BrandPrimaryHover != null) branding.SetBrandPrimaryHover(request.BrandPrimaryHover);
             if (request.BrandSecondary != null) branding.SetBrandSecondary(request.BrandSecondary);
@@ -93,13 +85,15 @@ namespace AuraConnect.Application.Services
 
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
+
             return MapToResponse(branding);
         }
 
-        // PUT update only images
         public async Task<BrandingResponse> UpdateImagesAsync(string siteId, UpdateImagesRequest request, CancellationToken cancellationToken = default)
         {
-            var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
+            var (site, branding) = await GetOrCreateBrandingAsync(siteId, cancellationToken);
 
             if (request.LogoUrl != null) branding.SetLogoUrl(request.LogoUrl);
             if (request.LogoWhiteUrl != null) branding.SetLogoWhiteUrl(request.LogoWhiteUrl);
@@ -110,13 +104,15 @@ namespace AuraConnect.Application.Services
 
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
+
             return MapToResponse(branding);
         }
 
-        // PUT update only content
         public async Task<BrandingResponse> UpdateContentAsync(string siteId, UpdateContentRequest request, CancellationToken cancellationToken = default)
         {
-            var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
+            var (site, branding) = await GetOrCreateBrandingAsync(siteId, cancellationToken);
 
             if (request.DisplayName != null) branding.SetDisplayName(request.DisplayName);
             if (request.Heading != null) branding.SetHeading(request.Heading);
@@ -130,13 +126,15 @@ namespace AuraConnect.Application.Services
 
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
+
             return MapToResponse(branding);
         }
 
-        // POST upload image — stores bytes in DB and updates the branding URL field
         public async Task<BrandingResponse> UploadImageAsync(string siteId, BrandingImageType imageType, Stream data, string fileName, string contentType, CancellationToken cancellationToken = default)
         {
-            var branding = await GetOrCreateBrandingAsync(siteId, cancellationToken);
+            var (site, branding) = await GetOrCreateBrandingAsync(siteId, cancellationToken);
 
             using var ms = new MemoryStream();
             await data.CopyToAsync(ms, cancellationToken);
@@ -150,12 +148,18 @@ namespace AuraConnect.Application.Services
 
             await _brandingRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
+
             return MapToResponse(branding);
         }
 
-        // GET portal branding by tenant + SSID — validates the site belongs to the tenant
         public async Task<PortalBrandingResponse> GetPortalBrandingAsync(string tenantId, string ssid, CancellationToken cancellationToken = default)
         {
+            var cached = _portalCache.GetBranding(ssid);
+            if (cached != null)
+                return cached;
+
             var site = await _siteRepository.GetBySsidWithBrandingAsync(ssid, cancellationToken);
 
             if (site == null || site.TenantId != tenantId)
@@ -164,10 +168,11 @@ namespace AuraConnect.Application.Services
             if (site.Branding == null)
                 throw new InvalidOperationException($"No branding configured for SSID '{ssid}'");
 
-            return MapToPortalResponse(site, site.Branding);
+            var response = MapToPortalResponse(site, site.Branding);
+            _portalCache.SetBranding(ssid, response);
+            return response;
         }
 
-        // GET raw image data for serving to clients
         public async Task<BrandingImageData?> GetImageAsync(string siteId, BrandingImageType imageType, CancellationToken cancellationToken = default)
         {
             var image = await _brandingRepository.GetImageAsync(siteId, imageType, cancellationToken);
@@ -175,15 +180,12 @@ namespace AuraConnect.Application.Services
             return new BrandingImageData(image.Data, image.ContentType, image.FileName);
         }
 
-        // Helper: Get or create branding (with site validation)
-        private async Task<Branding> GetOrCreateBrandingAsync(string siteId, CancellationToken cancellationToken)
+        private async Task<(Site site, Branding branding)> GetOrCreateBrandingAsync(string siteId, CancellationToken cancellationToken)
         {
-            // Verify site exists
             var site = await _siteRepository.GetByIdAsync(siteId, cancellationToken);
             if (site == null)
                 throw new InvalidOperationException($"Site with ID '{siteId}' not found");
 
-            // Get existing or create new
             var branding = await _brandingRepository.GetBySiteIdAsync(siteId, cancellationToken);
             if (branding == null)
             {
@@ -191,10 +193,9 @@ namespace AuraConnect.Application.Services
                 await _brandingRepository.AddAsync(branding, cancellationToken);
             }
 
-            return branding;
+            return (site, branding);
         }
 
-        // Helper: Apply color updates from request
         private static void ApplyColorUpdates(Branding branding, UpdateBrandingRequest request)
         {
             if (request.BrandPrimary != null) branding.SetBrandPrimary(request.BrandPrimary);
@@ -216,7 +217,6 @@ namespace AuraConnect.Application.Services
             if (request.ButtonSecondaryText != null) branding.SetButtonSecondaryText(request.ButtonSecondaryText);
         }
 
-        // Helper: Apply image updates from request
         private static void ApplyImageUpdates(Branding branding, UpdateBrandingRequest request)
         {
             if (request.LogoUrl != null) branding.SetLogoUrl(request.LogoUrl);
@@ -227,7 +227,6 @@ namespace AuraConnect.Application.Services
             if (request.SplashBgUrl != null) branding.SetSplashBgUrl(request.SplashBgUrl);
         }
 
-        // Helper: Apply content updates from request
         private static void ApplyContentUpdates(Branding branding, UpdateBrandingRequest request)
         {
             if (request.DisplayName != null) branding.SetDisplayName(request.DisplayName);
@@ -245,11 +244,9 @@ namespace AuraConnect.Application.Services
         {
             return new PortalBrandingResponse
             {
-                // Identity
                 Ssid = site.Ssid,
                 DisplayName = branding.DisplayName,
 
-                // Colors
                 BrandPrimary = branding.BrandPrimary,
                 BrandPrimaryHover = branding.BrandPrimaryHover,
                 BrandSecondary = branding.BrandSecondary,
@@ -268,7 +265,6 @@ namespace AuraConnect.Application.Services
                 ButtonSecondaryHover = branding.ButtonSecondaryHover,
                 ButtonSecondaryText = branding.ButtonSecondaryText,
 
-                // Images
                 LogoUrl = branding.LogoUrl,
                 LogoWhiteUrl = branding.LogoWhiteUrl,
                 ConnectCardBgUrl = branding.ConnectCardBgUrl,
@@ -276,23 +272,19 @@ namespace AuraConnect.Application.Services
                 FaviconUrl = branding.FaviconUrl,
                 SplashBgUrl = branding.SplashBgUrl,
 
-                // Content
                 Heading = branding.Heading,
                 Subheading = branding.Subheading,
                 SplashHeading = branding.SplashHeading,
                 ButtonText = branding.ButtonText,
                 TermsLinks = branding.TermsLinks,
 
-                // Venue
                 VenueLabel = branding.VenueLabel,
                 VenueRoute = branding.VenueRoute,
                 SortOrder = branding.SortOrder,
 
-                // Auth & Features
                 AuthMethods = site.AuthMethods,
                 MarketingOptIn = site.MarketingOptIn,
 
-                // Ads
                 AdsEnabled = site.AdsConfig?.IsEnabled ?? false,
                 AdsReviveServerUrl = site.AdsConfig?.ReviveServerUrl,
                 AdsReviveZoneId = site.AdsConfig?.ReviveZoneId,
@@ -314,12 +306,10 @@ namespace AuraConnect.Application.Services
             }
         }
 
-        // Helper: Map Entity → DTO
         private static BrandingResponse MapToResponse(Branding branding)
         {
             return new BrandingResponse
             {
-                // Colors
                 BrandPrimary = branding.BrandPrimary,
                 BrandPrimaryHover = branding.BrandPrimaryHover,
                 BrandSecondary = branding.BrandSecondary,
@@ -338,7 +328,6 @@ namespace AuraConnect.Application.Services
                 ButtonSecondaryHover = branding.ButtonSecondaryHover,
                 ButtonSecondaryText = branding.ButtonSecondaryText,
 
-                // Images
                 LogoUrl = branding.LogoUrl,
                 LogoWhiteUrl = branding.LogoWhiteUrl,
                 ConnectCardBgUrl = branding.ConnectCardBgUrl,
@@ -346,7 +335,6 @@ namespace AuraConnect.Application.Services
                 FaviconUrl = branding.FaviconUrl,
                 SplashBgUrl = branding.SplashBgUrl,
 
-                // Content
                 DisplayName = branding.DisplayName,
                 Heading = branding.Heading,
                 Subheading = branding.Subheading,
@@ -357,7 +345,6 @@ namespace AuraConnect.Application.Services
                 VenueRoute = branding.VenueRoute,
                 SortOrder = branding.SortOrder,
 
-                // Metadata
                 CreatedAt = branding.CreatedAt,
                 UpdatedAt = branding.UpdatedAt
             };

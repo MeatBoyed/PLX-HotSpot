@@ -4,6 +4,7 @@ using AuraConnect.Core.Interfaces.Repositories;
 using AuraConnect.Infrastructure;
 using AuraConnect.Infrastructure.Data;
 using AuraConnect.Infrastructure.Repositories;
+using AuraConnect.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -21,6 +22,7 @@ try
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
 
+    builder.Services.AddMemoryCache();
     builder.Services.AddControllers();
 
     builder.Services.AddOpenApi();
@@ -39,6 +41,7 @@ try
     builder.Services.AddScoped<IAdsConfigService, AdsConfigService>();
     builder.Services.AddScoped<IRadiusConfigRepository, RadiusConfigRepository>();
     builder.Services.AddScoped<IRadiusConfigService, RadiusConfigService>();
+    builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);
 

@@ -16,6 +16,7 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.HasKey(s => s.Id);
             builder.HasIndex(s => s.Ssid).IsUnique();
             builder.HasIndex(s => s.Domain).IsUnique();
+            builder.HasIndex(s => s.TenantId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("id")

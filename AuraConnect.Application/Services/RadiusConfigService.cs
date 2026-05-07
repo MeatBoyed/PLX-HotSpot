@@ -10,11 +10,13 @@ namespace AuraConnect.Application.Services
     {
         private readonly IRadiusConfigRepository _radiusConfigRepository;
         private readonly ISiteRepository _siteRepository;
+        private readonly IPortalCacheService _portalCache;
 
-        public RadiusConfigService(IRadiusConfigRepository radiusConfigRepository, ISiteRepository siteRepository)
+        public RadiusConfigService(IRadiusConfigRepository radiusConfigRepository, ISiteRepository siteRepository, IPortalCacheService portalCache)
         {
             _radiusConfigRepository = radiusConfigRepository;
             _siteRepository = siteRepository;
+            _portalCache = portalCache;
         }
 
         public async Task<RadiusConfigResponse?> GetRadiusConfigAsync(string siteId, CancellationToken cancellationToken = default)
@@ -54,11 +56,17 @@ namespace AuraConnect.Application.Services
 
             await _radiusConfigRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateGatewayConfig(site.Ssid);
+
             return MapToResponse(config!);
         }
 
         public async Task<GatewayConfigResponse> GetGatewayConfigAsync(string tenantId, string ssid, CancellationToken cancellationToken = default)
         {
+            var cached = _portalCache.GetGatewayConfig(ssid);
+            if (cached != null)
+                return cached;
+
             var site = await _siteRepository.GetBySsidAsync(ssid, cancellationToken);
 
             if (site == null || site.TenantId != tenantId)
@@ -68,12 +76,15 @@ namespace AuraConnect.Application.Services
             if (config == null)
                 throw new InvalidOperationException($"No gateway configuration found for SSID '{ssid}'");
 
-            return new GatewayConfigResponse
+            var response = new GatewayConfigResponse
             {
                 LoginUrl = config.GatewayUrl != null ? $"{config.GatewayUrl.TrimEnd('/')}/login" : null,
                 FreeUsername = config.FreeUsername,
                 FreePassword = config.FreePassword
             };
+
+            _portalCache.SetGatewayConfig(ssid, response);
+            return response;
         }
 
         private static RadiusConfigResponse MapToResponse(RadiusConfig config) => new()

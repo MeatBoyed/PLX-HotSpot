@@ -13,24 +13,33 @@ namespace AuraConnect.Application.Services
     {
         private readonly ISiteRepository _siteRepository;
         private readonly ITenantRepository _tenantRepository;
+        private readonly IPortalCacheService _portalCache;
 
-        public SiteService(ISiteRepository siteRepository, ITenantRepository tenantRepository)
+        public SiteService(ISiteRepository siteRepository, ITenantRepository tenantRepository, IPortalCacheService portalCache)
         {
             _siteRepository = siteRepository;
             _tenantRepository = tenantRepository;
+            _portalCache = portalCache;
         }
 
         // GET portal site list for a tenant (site selector page)
         public async Task<IEnumerable<PortalSiteResponse>> GetPortalSitesAsync(string tenantId, CancellationToken cancellationToken = default)
         {
+            var cached = _portalCache.GetSites(tenantId);
+            if (cached != null)
+                return cached;
+
             var sites = await _siteRepository.GetByTenantIdWithBrandingAsync(tenantId, cancellationToken);
-            return sites.Select(s => new PortalSiteResponse
+            var response = sites.Select(s => new PortalSiteResponse
             {
                 Ssid = s.Ssid,
                 DisplayName = s.Branding?.DisplayName,
                 LogoUrl = s.Branding?.LogoUrl ?? "/logo-default.svg",
                 SortOrder = s.SortOrder
-            });
+            }).ToList();
+
+            _portalCache.SetSites(tenantId, response);
+            return response;
         }
 
         // GET all sites for a tenant
@@ -81,6 +90,8 @@ namespace AuraConnect.Application.Services
             await _siteRepository.AddAsync(site, cancellationToken);
             await _siteRepository.SaveChangesAsync(cancellationToken);
 
+            _portalCache.InvalidateSites(tenantId);
+
             return MapToResponse(site, tenant.Name);
         }
 
@@ -111,6 +122,9 @@ namespace AuraConnect.Application.Services
             // 4. Save
             await _siteRepository.UpdateAsync(site, cancellationToken);
             await _siteRepository.SaveChangesAsync(cancellationToken);
+
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
 
             // 5. Get tenant name for response
             var tenant = await _tenantRepository.GetByIdAsync(site.TenantId, cancellationToken);
@@ -146,6 +160,10 @@ namespace AuraConnect.Application.Services
             // 3. Delete
             await _siteRepository.DeleteAsync(site, cancellationToken);
             await _siteRepository.SaveChangesAsync(cancellationToken);
+
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateGatewayConfig(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
         }
 
         // PATCH update status only
@@ -162,6 +180,9 @@ namespace AuraConnect.Application.Services
             // 3. Save
             await _siteRepository.UpdateAsync(site, cancellationToken);
             await _siteRepository.SaveChangesAsync(cancellationToken);
+
+            _portalCache.InvalidateBranding(site.Ssid);
+            _portalCache.InvalidateSites(site.TenantId);
 
             // 4. Return updated site
             var tenant = await _tenantRepository.GetByIdAsync(site.TenantId, cancellationToken);

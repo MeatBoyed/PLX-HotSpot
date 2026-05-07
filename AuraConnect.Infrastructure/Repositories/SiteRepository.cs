@@ -51,6 +51,7 @@ namespace AuraConnect.Infrastructure.Repositories
         public async Task<Site?> GetBySsidWithBrandingAsync(string ssid, CancellationToken cancellationToken = default)
         {
             return await _context.Sites
+                .AsNoTracking()
                 .Include(s => s.Branding)
                 .Include(s => s.AdsConfig)
                 .FirstOrDefaultAsync(s => s.Ssid == ssid, cancellationToken);
@@ -59,6 +60,7 @@ namespace AuraConnect.Infrastructure.Repositories
         public async Task<IEnumerable<Site>> GetByTenantIdWithBrandingAsync(string tenantId, CancellationToken cancellationToken = default)
         {
             return await _context.Sites
+                .AsNoTracking()
                 .Include(s => s.Branding)
                 .Where(s => s.TenantId == tenantId)
                 .OrderBy(s => s.SortOrder)
