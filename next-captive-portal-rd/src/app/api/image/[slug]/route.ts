@@ -1,27 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { imageService } from '@/lib/services/image-service';
+import { env } from '@/env';
 
+const API_BASE = env.API_URL;
+
+// Proxy image requests to the API's public image endpoint.
+// The API serves images at /api/portal/images/{slug}?ssid={ssid}.
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
   const ssid = req.nextUrl.searchParams.get('ssid') || '';
+
   if (!ssid || !slug) {
-    return NextResponse.json({ error: 'Missing ssid or slug' }, { status: 400 });
+    return new NextResponse(null, { status: 400 });
   }
 
-  const image = await imageService.getBySlug(ssid, slug);
-  if (!image) {
-    return new NextResponse(null, { status: 404 });
-  }
+  try {
+    const upstream = await fetch(
+      `${API_BASE}/api/portal/images/${encodeURIComponent(slug)}?ssid=${encodeURIComponent(ssid)}`,
+      { next: { revalidate: 3600 } }
+    );
 
-  const buffer = Buffer.from(image.dataBase64, 'base64');
-  return new NextResponse(buffer, {
-    headers: {
-      'Content-Type': image.mimeType,
-      'Content-Length': buffer.length.toString(),
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-    },
-  });
+    if (!upstream.ok) {
+      return new NextResponse(null, { status: upstream.status });
+    }
+
+    const contentType = upstream.headers.get('content-type') ?? 'application/octet-stream';
+    const buffer = await upstream.arrayBuffer();
+
+    return new NextResponse(buffer, {
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': buffer.byteLength.toString(),
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    });
+  } catch (err) {
+    console.error('[GET /api/image/[slug]]', err);
+    return new NextResponse(null, { status: 502 });
+  }
 }

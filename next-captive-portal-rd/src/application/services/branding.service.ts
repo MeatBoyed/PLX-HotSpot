@@ -5,7 +5,6 @@
 
 import { BrandingConfig } from '@/lib/types';
 import { BrandingRepository } from '../repositories/branding.repo';
-import { apiClient } from '@/infrastructure/http';
 import { brandingCache } from '@/infrastructure/cache';
 
 /**
@@ -16,8 +15,7 @@ export class BrandingService {
     private repository: BrandingRepository;
 
     constructor() {
-        // Inject dependencies
-        this.repository = new BrandingRepository(apiClient, brandingCache);
+        this.repository = new BrandingRepository(brandingCache);
     }
 
     /**

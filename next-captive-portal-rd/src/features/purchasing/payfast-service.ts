@@ -16,7 +16,7 @@
  */
 import 'server-only';
 import crypto from 'crypto';
-import { Package } from '@/lib/services/package-service';
+import type { ApiPortalPackage as Package } from '@/infrastructure/api';
 
 // Exact PayFast Node.js signature function (adapted to TypeScript)
 const pfGenerateSignature = (
@@ -113,6 +113,8 @@ export class PayFastService {
       m_payment_id: String(pkg.id),
       amount,
       item_name: pkg.name,
+      // Store SSID so the IPN handler can look up the right package
+      custom_str1: pkg.ssid,
     } as const;
     const fields: Record<string, string> = { ...baseFields };
     const signature = pfGenerateSignature(fields, this.passphrase ?? null);

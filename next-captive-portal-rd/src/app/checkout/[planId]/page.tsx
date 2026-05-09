@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { packageService } from '@/lib/services/package-service';
+import { packagesService } from '@/application/services';
 import { buildPayfastFieldsAction } from './actions';
 import CheckoutClient from './CheckoutClient';
 
@@ -12,11 +12,16 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 //   params: { planId: string };
 // }
 
-export default async function CheckoutPlanPage({ params }: { params: Promise<{ planId: string }> }) {
+export default async function CheckoutPlanPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ planId: string }>;
+  searchParams: Promise<{ ssid?: string }>;
+}) {
   const { planId } = await params;
-  // planId comes from the slug: /checkout/[package_name]
-  // Fetch package by name; if not found, redirect home
-  const pkg = await packageService.getByName(decodeURI(planId));
+  const { ssid = '' } = await searchParams;
+  const pkg = await packagesService.getByName(decodeURI(planId), ssid);
   if (!pkg) {
     redirect('/');
   }

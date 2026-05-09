@@ -1,21 +1,22 @@
 
 "use client";
-import { useState, useRef, FormEvent, useEffect } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { AuthService } from '@/lib/services/auth-service';
 import { ConnectProvider, useConnect } from '@/components/home-page/ConnectContext';
+import { useTheme } from '@/components/theme-provider';
 import { Input } from './input';
-import { FormLabel } from './form';
 import { Label } from './label';
 import Link from 'next/link';
-import { Dot } from 'lucide-react';
 import { PUPhoneInnerForm } from './pu-phone-form';
+import type { GatewayConfig } from '@/lib/types';
 
 type BaseButtonProps = {
     label?: string;
     className: string;
     style: React.CSSProperties;
     adGateEnabled?: boolean;
+    gatewayConfig: GatewayConfig;
 };
 
 // Internal hook to provide programmatic submission logic
@@ -31,11 +32,11 @@ function useProgrammaticSubmit() {
  * - Username/password (and optional dst) sent as hidden inputs
  * - Action targets `${MIKROTIK_BASE_URL}/login` using POST
  */
-function FreeInnerButton({ label = 'Connect Now', style, className }: BaseButtonProps) {
+function FreeInnerButton({ label = 'Connect Now', style, className, gatewayConfig }: BaseButtonProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
     const [attempted, setAttempted] = useState(false);
-    const action = new AuthService().getLoginFormTarget();
+    const action = new AuthService(gatewayConfig).getLoginFormTarget();
 
     const onClick = (e: FormEvent) => {
         e.preventDefault();
@@ -77,13 +78,13 @@ function FreeInnerButton({ label = 'Connect Now', style, className }: BaseButton
 }
 
 // PU Login Inner Form
-function PULoginInnerForm({ label = 'Login to Connect', style, className }: BaseButtonProps) {
+function PULoginInnerForm({ label = 'Login to Connect', style, className, gatewayConfig }: BaseButtonProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const action = new AuthService().getLoginFormTarget();
+    const action = new AuthService(gatewayConfig).getLoginFormTarget();
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -161,6 +162,7 @@ function PULoginInnerForm({ label = 'Login to Connect', style, className }: Base
 
 // PU Register Inner Form
 function PURegisterInnerForm({ label = 'Register to Connect', style, className }: BaseButtonProps) {
+    const { theme } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -198,7 +200,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword }),
+                body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword, ssid: theme.ssid }),
             });
 
             const result = await response.json();
@@ -263,12 +265,12 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
             </button>
         </div>
     );
-} function VoucherInnerForm({ label = 'Connect Now', style, className }: BaseButtonProps) {
+} function VoucherInnerForm({ label = 'Connect Now', style, className, gatewayConfig }: BaseButtonProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
     const [voucherCode, setVoucherCode] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const action = new AuthService().getLoginFormTarget();
+    const action = new AuthService(gatewayConfig).getLoginFormTarget();
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -326,7 +328,7 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
 // Public exported components embedding their own provider
 export function FreeLoginFormButton(props: BaseButtonProps) {
     return (
-        <ConnectProvider enabledAuth={['free']} adGateEnabled={props.adGateEnabled}>
+        <ConnectProvider enabledAuth={['free']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <FreeInnerButton {...props} />
         </ConnectProvider>
     );
@@ -334,7 +336,7 @@ export function FreeLoginFormButton(props: BaseButtonProps) {
 
 export function VoucherLoginForm(props: BaseButtonProps) {
     return (
-        <ConnectProvider enabledAuth={['voucher']} adGateEnabled={props.adGateEnabled}>
+        <ConnectProvider enabledAuth={['voucher']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <VoucherInnerForm {...props} />
         </ConnectProvider>
     );
@@ -342,7 +344,7 @@ export function VoucherLoginForm(props: BaseButtonProps) {
 
 export function PULoginForm(props: BaseButtonProps) {
     return (
-        <ConnectProvider enabledAuth={['pu-login']} adGateEnabled={props.adGateEnabled}>
+        <ConnectProvider enabledAuth={['pu-login']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <PULoginInnerForm {...props} />
         </ConnectProvider>
     );
@@ -350,7 +352,7 @@ export function PULoginForm(props: BaseButtonProps) {
 
 export function PUPhoneForm(props: BaseButtonProps) {
     return (
-        <ConnectProvider enabledAuth={['pu-phonename']} adGateEnabled={props.adGateEnabled}>
+        <ConnectProvider enabledAuth={['pu-phonename']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <PUPhoneInnerForm {...props} />
         </ConnectProvider>
     );
@@ -358,7 +360,7 @@ export function PUPhoneForm(props: BaseButtonProps) {
 
 export function PURegisterForm(props: BaseButtonProps) {
     return (
-        <ConnectProvider enabledAuth={['pu-login']} adGateEnabled={props.adGateEnabled}>
+        <ConnectProvider enabledAuth={['pu-login']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <PURegisterInnerForm {...props} />
         </ConnectProvider>
     );

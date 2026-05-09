@@ -4,6 +4,7 @@
  */
 
 import { ApiError, API_ERROR_CODES } from './api-error';
+import { env } from '@/env';
 
 interface ApiClientOptions {
     headers?: Record<string, string>;
@@ -20,7 +21,7 @@ export class ApiClient {
     private defaultTimeout: number = 10000; // 10 seconds
 
     constructor(
-        baseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5299/api',
+        baseUrl: string = env.API_URL,
         timeout: number = 10000
     ) {
         this.baseUrl = baseUrl;
@@ -59,6 +60,7 @@ export class ApiClient {
             const data = await response.json();
             return data as T;
         } catch (error) {
+            if (error instanceof ApiError) throw error;
             return this.handleNetworkError(error);
         }
     }

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { permanentUserService } from '@/features/purchasing/permanent-user-service';
-import { packageService } from '@/lib/services/package-service';
-import { env } from '@/env';
+import { packagesService } from '@/application/services';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        const { email, password, ssid } = body;
 
         // Validate inputs
         if (!email || !password) {
@@ -15,10 +14,13 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-
-        // Get the default package for the current SSID
-        const ssid = env.NEXT_PUBLIC_SSID;
-        const packages = await packageService.list(ssid);
+        if (!ssid) {
+            return NextResponse.json(
+                { success: false, error: 'SSID is required' },
+                { status: 400 }
+            );
+        }
+        const packages = await packagesService.list(ssid);
 
         if (!packages || packages.length === 0) {
             console.error('[REGISTER] No packages found for SSID:', ssid);

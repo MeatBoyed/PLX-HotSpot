@@ -1,13 +1,12 @@
 import { PlanCard } from "../plan-card"
 import { useTheme } from "../theme-provider"
 import VoucherCTA from "../voucher-cta"
+import type { GatewayConfig } from "@/lib/types"
 
-
-export default function AuthMethodsCard() {
+export default function AuthMethodsCard({ gatewayConfig }: { gatewayConfig: GatewayConfig }) {
     const { theme } = useTheme()
 
     return (
-
         <div className="flex flex-col gap-3">
             {theme.authMethods.includes("free") && (
                 <div
@@ -18,7 +17,7 @@ export default function AuthMethodsCard() {
                         border: '1px solid rgba(255,255,255,0.6)',
                     }}
                 >
-                    <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' />
+                    <PlanCard variant="free" totalData='24 Hrs • 1.5 GB' tag='Promotion' gatewayConfig={gatewayConfig} />
                 </div>
             )}
             {theme.authMethods.includes("voucher") && (
@@ -30,7 +29,7 @@ export default function AuthMethodsCard() {
                         border: '1px solid rgba(255,255,255,0.6)',
                     }}
                 >
-                    <VoucherCTA />
+                    <VoucherCTA gatewayConfig={gatewayConfig} />
                 </div>
             )}
             {theme.authMethods.includes("pu-login") && (
@@ -38,7 +37,7 @@ export default function AuthMethodsCard() {
                     className="rounded-2xl overflow-hidden shadow-lg"
                     style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
                 >
-                    <PlanCard variant="pu-login" />
+                    <PlanCard variant="pu-login" gatewayConfig={gatewayConfig} />
                 </div>
             )}
             {theme.authMethods.includes("pu-phonename") && (
@@ -46,7 +45,7 @@ export default function AuthMethodsCard() {
                     className="rounded-2xl overflow-hidden shadow-lg"
                     style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}
                 >
-                    <PlanCard variant="pu-phonename" />
+                    <PlanCard variant="pu-phonename" gatewayConfig={gatewayConfig} />
                 </div>
             )}
         </div>

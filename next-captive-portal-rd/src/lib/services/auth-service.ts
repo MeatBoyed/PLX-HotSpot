@@ -1,4 +1,4 @@
-import { env } from '@/env';
+import type { GatewayConfig } from '@/lib/types';
 
 export type AuthMode = 'free' | 'voucher' | 'pu-login' | 'pu-phonename';
 
@@ -14,7 +14,7 @@ export interface BuildCredentialsParams {
     username?: string
     password?: string;
     enabledAuth: AuthMode[];
-    mode?: AuthMode; // specify which auth method we're trying to build credentials for
+    mode?: AuthMode;
 }
 
 export type AuthCredentialsResult =
@@ -30,10 +30,10 @@ export class AuthService {
     private defaultPass: string;
     private baseUrl: string;
 
-    constructor() {
-        this.defaultUser = env.NEXT_PUBLIC_MIKROTIK_DEFAULT_USERNAME || 'freeuser';
-        this.defaultPass = env.NEXT_PUBLIC_MIKROTIK_DEFAULT_PASSWORD || 'freepass';
-        const raw = env.NEXT_PUBLIC_MIKROTIK_BASE_URL || 'http://10.5.50.1';
+    constructor(config: GatewayConfig) {
+        this.defaultUser = config.freeUsername;
+        this.defaultPass = config.freePassword;
+        const raw = config.loginUrl;
         this.baseUrl = raw.endsWith('/login') ? raw : `${raw.replace(/\/$/, '')}/login`;
     }
 

@@ -17,7 +17,7 @@ export function normalizeBranding(input: Partial<BrandingConfig> | null | undefi
   const cleaned: Partial<BrandingConfig> = {};
   for (const key of Object.keys(draft) as (keyof BrandingConfig)[]) {
     if (KNOWN_KEYS.has(key)) {
-      cleaned[key] = draft[key];
+      (cleaned as Record<string, unknown>)[key] = draft[key];
     }
   }
   return cleaned as BrandingConfig;

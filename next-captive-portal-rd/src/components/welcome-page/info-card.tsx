@@ -17,7 +17,7 @@ export default function InfoCard() {
                     <Link href={"/"} className="logo d-flex align-items-center">
                         {/*  eslint-disable @next/next/no-img-element  */}
                         <img
-                            src={theme.logoWhite}
+                            src={theme.logoWhite ?? undefined}
                             alt="Brand logo"
                             width="auto"
                             height="auto"

@@ -4,6 +4,7 @@ import { useTheme } from "./theme-provider";
 import { FreeLoginFormButton, PULoginForm, PURegisterForm, VoucherLoginForm, PUPhoneForm } from "./ui/login-form-button";
 import React from "react";
 import Link from "next/link";
+import type { GatewayConfig } from "@/lib/types";
 
 export type PlanVariant = 'free' | 'paid' | 'voucher' | 'pu-login' | 'pu-register' | 'pu-phonename';
 
@@ -15,6 +16,7 @@ interface PlanCardProps {
     totalData?: string;
     onDismiss?: () => void;
     className?: string;
+    gatewayConfig?: GatewayConfig;
 }
 
 // Shimmer wrapper — wraps any button with the sweep animation
@@ -40,7 +42,9 @@ function ShimmerButton({ children, style, className }: { children: React.ReactNo
     );
 }
 
-export function PlanCard({ name, variant, tag, price, totalData, onDismiss, className }: PlanCardProps) {
+const EMPTY_GATEWAY: GatewayConfig = { loginUrl: '', freeUsername: '', freePassword: '' };
+
+export function PlanCard({ name, variant, tag, price, totalData, onDismiss, className, gatewayConfig = EMPTY_GATEWAY }: PlanCardProps) {
     const { theme } = useTheme();
 
     const isPaid = variant === 'paid';
@@ -84,7 +88,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             {isPaid && (
                 <ShimmerButton style={btnStyle}>
                     <Link
-                        href={`/checkout/${name}`}
+                        href={`/checkout/${name}?ssid=${encodeURIComponent(theme.ssid)}`}
                         className="text-white rounded-full w-full py-3 font-semibold mt-2 text-sm block"
                         style={btnStyle}
                     >
@@ -98,6 +102,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                     <FreeLoginFormButton
                         style={btnStyle}
                         className={btnClass}
+                        gatewayConfig={gatewayConfig}
                     />
                 </ShimmerButton>
             )}
@@ -107,6 +112,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                     className={btnClass}
                     style={btnStyle}
                     label="Connect"
+                    gatewayConfig={gatewayConfig}
                 />
             )}
 
@@ -114,6 +120,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 <PURegisterForm
                     className={btnClass}
                     style={btnStyle}
+                    gatewayConfig={gatewayConfig}
                 />
             )}
 
@@ -121,6 +128,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 <PULoginForm
                     className={btnClass}
                     style={btnStyle}
+                    gatewayConfig={gatewayConfig}
                 />
             )}
 
@@ -128,6 +136,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 <PUPhoneForm
                     className={btnClass}
                     style={btnStyle}
+                    gatewayConfig={gatewayConfig}
                 />
             )}
         </div>

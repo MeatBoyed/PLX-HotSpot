@@ -1,7 +1,7 @@
 "use server";
 
 import { env } from '@/env';
-import { packageService } from '@/lib/services/package-service';
+import { packagesService } from '@/application/services';
 import { payFastService } from '@/features/purchasing/payfast-service';
 
 export type BuildState = {
@@ -13,9 +13,11 @@ export type BuildState = {
 
 export async function buildPayfastFieldsAction(_prevState: BuildState | undefined, formData: FormData): Promise<BuildState> {
     const planName = String(formData.get('planName') || '').trim();
+    const ssid = String(formData.get('ssid') || '').trim();
     const rawCell = String(formData.get('cell') || '').trim();
 
     if (!planName) return { error: 'Missing plan.' };
+    if (!ssid) return { error: 'Missing site configuration.' };
     if (!rawCell) return { error: 'Please enter your mobile number.' };
 
     // Normalize to 27XXXXXXXXX
@@ -26,7 +28,7 @@ export async function buildPayfastFieldsAction(_prevState: BuildState | undefine
     else if (/^0\d{9}$/.test(digits)) normalizedMsisdn = `27${digits.slice(1)}`;
     if (!normalizedMsisdn) return { error: 'Enter a valid ZA number (e.g. +2782XXXXXXX or 082XXXXXXX).' };
 
-    const pkg = await packageService.getByName(decodeURI(planName));
+    const pkg = await packagesService.getByName(decodeURI(planName), ssid);
     if (!pkg) return { error: 'Selected package not found.' };
 
     const baseUrl = env.BASE_URL;

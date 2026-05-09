@@ -1,8 +1,9 @@
 import { useTheme } from "@/components/theme-provider"
 import { PlanCard } from '@/components/plan-card';
 import { useState } from "react";
+import type { GatewayConfig } from "@/lib/types";
 
-export default function VoucherCTA() {
+export default function VoucherCTA({ gatewayConfig }: { gatewayConfig: GatewayConfig }) {
     const { theme } = useTheme()
     const [showVoucherInput, setShowVoucherInput] = useState(false);
 
@@ -26,6 +27,7 @@ export default function VoucherCTA() {
                     variant="voucher"
                     onDismiss={() => setShowVoucherInput(false)}
                     className="w-full mb-4"
+                    gatewayConfig={gatewayConfig}
                 />
             )}
         </>

@@ -1,42 +1,19 @@
-/**
- * Packages Repository
- * Data access layer for packages/pricing plans
- */
+import { portalPackagesApi } from '@/infrastructure/api'
+import type { ApiPortalPackage } from '@/infrastructure/api'
 
-import { Package, PackagesList } from '@/types/api.types';
-import type { ApiClient } from '@/infrastructure/http';
-
-/**
- * IPackagesRepository - Port/Interface
- */
 export interface IPackagesRepository {
-    /**
-     * List all available packages for a site
-     */
-    list(ssid: string): Promise<PackagesList>;
+    list(ssid: string): Promise<ApiPortalPackage[]>
 }
 
-/**
- * PackagesRepository - Implementation
- */
 export class PackagesRepository implements IPackagesRepository {
-    constructor(
-        private apiClient: ApiClient,
-        private cache: any
-    ) { }
+    constructor(private cache: any) {}
 
-    async list(ssid: string): Promise<PackagesList> {
-        const cacheKey = `packages:${ssid}`;
+    async list(ssid: string): Promise<ApiPortalPackage[]> {
+        const cacheKey = `packages:${ssid}`
 
-        // Try cache first
-        const cached = this.cache.get(cacheKey);
-        if (cached) {
-            return cached;
-        }
+        const cached = this.cache.get(cacheKey)
+        if (cached) return cached
 
-        // Use deduplication
-        return this.cache.getOrSet(cacheKey, async () => {
-            return this.apiClient.get<PackagesList>('/packages', { ssid });
-        });
+        return this.cache.getOrSet(cacheKey, () => portalPackagesApi.list(ssid))
     }
 }

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { permanentUserService } from '@/features/purchasing/permanent-user-service';
-import { Package, packageService } from '@/lib/services/package-service';
-import { otpService } from '@/lib/services/otp-service';
-import { env } from '@/env';
+import { authService } from '@/application/services';
+import type { ApiPortalPackage } from '@/infrastructure/api';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,43 +21,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Phone and name are required' }, { status: 400 });
     }
 
-    // build credentials according to spec
-    //const username = trimmedPhone;
-    // password is first_surname (spaces replaced with underscores)
-    //const password = trimmedName.replace(/\s+/g, '_');
-
-    const msisdn = trimmedPhone.replace(/\D/g, ''); // 27691235789
+    const msisdn = trimmedPhone.replace(/\D/g, '');
     if (!msisdn) {
       return NextResponse.json({ success: false, error: 'Invalid phone number' }, { status: 400 });
     }
 
-    const username = `jt_${msisdn}`;                 // safe + unique
-    const password = trimmedName.replace(/\s+/g, '_').toLowerCase(); // keeps it consistent
+    const username = `jt_${msisdn}`;
+    const password = trimmedName.replace(/\s+/g, '_').toLowerCase();
 
     console.log('[PU-PHONE] Login started and Credentials Verified', username);
 
-    // Verify OTP before proceeding
-    const ssid = env.NEXT_PUBLIC_SSID;
-    const otpResult = await otpService.verify(ssid, msisdn, String(otp).trim());
-    if (!otpResult.success) {
-      return NextResponse.json({ success: false, error: otpResult.error }, { status: 400 });
+    const ssid = String(body.ssid || '').trim();
+    if (!ssid) {
+      return NextResponse.json({ success: false, error: 'SSID is required' }, { status: 400 });
     }
 
-    // locate a package for this SSID
-    // const packages = await packageService.list(ssid);
-    // if (!packages || packages.length === 0) {
-    //   console.error('[PU-PHONE] no packages for SSID', ssid);
-    //   return NextResponse.json({ success: false, error: 'Service configuration error' }, { status: 500 });
-    // }
-    // const pkg = packages[0];
-    const pkg: Package = {
-      id: 0, // not used for pu-phonename flow
+    // Verify OTP via API
+    try {
+      await authService.verifyOtp({ phoneNumber: msisdn, code: String(otp).trim(), ssid });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Invalid or expired code';
+      return NextResponse.json({ success: false, error: msg }, { status: 400 });
+    }
+
+    const pkg: ApiPortalPackage = {
+      id: 0,
       ssid,
       name: 'Default Package',
       price: 0,
-      radiusProfile: "default",
+      radiusProfile: 'default',
       radiusProfileId: 61,
-    }
+    };
 
     try {
       await permanentUserService.createPermanentUser({
@@ -71,19 +64,16 @@ export async function POST(request: NextRequest) {
         surname: trimmedName.split(/\s+/)[1] || '',
       });
       console.log('[PU-PHONE] created new user', username);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      // handle both new user creation failures and existing user detection
       if (/already exists|duplicate|already taken/i.test(msg)) {
-        // user already exists, that's fine - proceed to login
-        console.log('[PU-PHONE] user already exists or taken, will login', username);
+        console.log('[PU-PHONE] user already exists, will login', username);
       } else {
         console.error('[PU-PHONE] error creating user', err);
         return NextResponse.json({ success: false, error: msg }, { status: 500 });
       }
     }
 
-    // return credentials so client can proceed to authenticate
     return NextResponse.json({ success: true, username, password });
   } catch (error) {
     console.error('[PU-PHONE] unexpected error', error);

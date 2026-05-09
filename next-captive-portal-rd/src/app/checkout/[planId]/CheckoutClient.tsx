@@ -39,8 +39,8 @@ export default function CheckoutClient({ planName, price, ssid, description, act
 
             {/* Phone capture form (outside PayFast form) */}
             <form action={formAction} className="space-y-4">
-                {/* Hidden plan name field for the server action */}
                 <input type="hidden" name="planName" value={planName} />
+                <input type="hidden" name="ssid" value={ssid} />
 
                 <div>
                     <label htmlFor="cell_display" className="block text-sm font-medium mb-1">Mobile number (ZA)</label>

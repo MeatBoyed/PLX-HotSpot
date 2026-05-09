@@ -6,7 +6,7 @@
  */
 import 'server-only';
 import { env } from '@/env';
-import type { Package } from '@/lib/services/package-service';
+import type { ApiPortalPackage as Package } from '@/infrastructure/api';
 
 interface CreatePermanentUserInput {
     username: string; // Can be email or unique identifier

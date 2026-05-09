@@ -6,7 +6,7 @@ import { BrandingConfig } from '@/lib/types';
 import { normalizeBranding, brandingToCssVars } from '@/lib/utils/branding-normalize';
 import { fetchBrandingConfigAction } from '@/lib/actions/branding-actions';
 
-const STALE_CLIENT_TTL_MS = 6 * 60 * 1000;
+const STALE_CLIENT_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 interface ThemeContextType {
   theme: BrandingConfig;
@@ -33,20 +33,27 @@ interface ThemeProviderProps {
   showInitialSpinner?: boolean;
 }
 
-function getStoredTheme(ssid: string): BrandingConfig | null {
+interface StoredThemeEntry {
+  ssid: string;
+  fetchedAt: number;
+  theme: BrandingConfig;
+}
+
+function getStoredTheme(ssid: string): { theme: BrandingConfig; fetchedAt: number } | null {
   if (typeof window === 'undefined') return null;
   try {
     const stored = localStorage.getItem(`branding:${ssid}`);
     if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    return normalizeBranding(parsed?.theme || parsed);
+    const parsed: StoredThemeEntry = JSON.parse(stored);
+    const theme = normalizeBranding(parsed?.theme || parsed);
+    return theme ? { theme, fetchedAt: parsed.fetchedAt ?? 0 } : null;
   } catch { return null; }
 }
 
-function storeTheme(ssid: string, theme: BrandingConfig) {
+function storeTheme(ssid: string, theme: BrandingConfig, fetchedAt: number) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(`branding:${ssid}`, JSON.stringify({ ssid, updatedAt: theme.updatedAt, theme }));
+    localStorage.setItem(`branding:${ssid}`, JSON.stringify({ ssid, fetchedAt, theme }));
   } catch { }
 }
 
@@ -54,10 +61,17 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   const [loading, setLoading] = useState<boolean>(() => !initialTheme && showInitialSpinner);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
+  // Track when the current theme was fetched so the stale check uses fetch time, not DB update time
+  const fetchedAtRef = useRef<number>(initialTheme ? Date.now() : 0);
 
-  const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme(ssid) || pluxnetTheme);
+  const [theme, setThemeState] = useState<BrandingConfig>(() => {
+    if (initialTheme) return initialTheme;
+    const stored = getStoredTheme(ssid);
+    if (stored) { fetchedAtRef.current = stored.fetchedAt; return stored.theme; }
+    return pluxnetTheme;
+  });
 
-  // ✅ THIS IS THE KEY FIX — apply CSS vars to :root whenever theme changes
+  // Apply CSS vars to :root whenever theme changes
   useEffect(() => {
     const vars = brandingToCssVars(theme);
     const root = document.documentElement;
@@ -67,24 +81,25 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   }, [theme]);
 
   // Persist theme to localStorage on change
-  useEffect(() => { storeTheme(ssid, theme); }, [theme, ssid]);
+  useEffect(() => { storeTheme(ssid, theme, fetchedAtRef.current); }, [theme, ssid]);
 
-  const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
+  const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined, fetchedAt: number) => {
     if (!incoming) return;
     if (theme.updatedAt !== incoming.updatedAt || theme.id !== incoming.id) {
+      fetchedAtRef.current = fetchedAt;
       setThemeState(incoming);
     }
   };
 
-  const isFreshEnough = (incoming?: BrandingConfig | null) => {
-    if (!incoming?.updatedAt) return false;
-    const age = Date.now() - new Date(incoming.updatedAt).getTime();
-    return age < STALE_CLIENT_TTL_MS;
+  const isStoredFresh = (fetchedAt: number) => {
+    return Date.now() - fetchedAt < STALE_CLIENT_TTL_MS;
   };
 
   const fetchTheme = async (force = false) => {
+    if (!ssid) return; // root layout has no SSID — nothing to fetch
     if (fetchingRef.current) return;
-    if (!force && initialTheme && isFreshEnough(initialTheme)) {
+    // Skip if the server just gave us fresh data (initialTheme present and fetched < TTL ago)
+    if (!force && isStoredFresh(fetchedAtRef.current)) {
       setLoading(false);
       return;
     }
@@ -93,13 +108,12 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
     try {
       const incoming = await fetchBrandingConfigAction(ssid);
       const normalized = normalizeBranding(incoming);
-      applyThemeIfChanged(normalized);
-      if (normalized) storeTheme(ssid, normalized);
+      applyThemeIfChanged(normalized, Date.now());
+      if (normalized) storeTheme(ssid, normalized, fetchedAtRef.current);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to load branding config';
       setError(msg);
       setThemeState(pluxnetTheme);
-      console.log("ThemeProvider Error (Failed to fetch theme): ", msg);
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -107,12 +121,7 @@ export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner
   };
 
   useEffect(() => {
-    const stored = getStoredTheme(ssid);
-    if (!initialTheme && stored) {
-      applyThemeIfChanged(stored);
-    }
-    const force = stored?.ssid && stored.ssid !== ssid;
-    fetchTheme(!!force);
+    fetchTheme();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ssid, initialTheme]);
 

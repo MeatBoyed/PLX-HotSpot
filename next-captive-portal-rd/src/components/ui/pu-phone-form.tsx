@@ -1,25 +1,29 @@
 "use client";
 import { cn } from '@/lib/utils';
 import { usePUPhoneFlow } from '@/lib/hooks/usePUPhoneFlow';
+import { useTheme } from '@/components/theme-provider';
 import { Input } from './input';
 import { Label } from './label';
 import { PhoneInput } from './phone-input';
+import type { GatewayConfig } from '@/lib/types';
 
 type BaseButtonProps = {
     label?: string;
     className: string;
     style: React.CSSProperties;
     adGateEnabled?: boolean;
+    gatewayConfig: GatewayConfig;
 };
 
 /** View component — pure presentation, delegates all logic to usePUPhoneFlow. */
-export function PUPhoneInnerForm({ label = 'Connect with phone', style, className }: BaseButtonProps) {
+export function PUPhoneInnerForm({ label = 'Connect with phone', style, className, gatewayConfig }: BaseButtonProps) {
+    const { theme } = useTheme();
     const {
         step, phone, name, otp, error, loading, displayName, resendCooldown, credentials,
         setPhone, setName, setOtp,
         onRequestOtp, onVerifyOtp, onResend, goBack,
         formRef, action,
-    } = usePUPhoneFlow();
+    } = usePUPhoneFlow(theme.ssid, gatewayConfig);
 
     return (
         <div className="inline-block w-full">

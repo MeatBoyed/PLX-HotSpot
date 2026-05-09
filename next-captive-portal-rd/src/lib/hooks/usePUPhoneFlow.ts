@@ -2,6 +2,7 @@
 import { useState, useRef, FormEvent, useEffect } from 'react';
 import { AuthService } from '@/lib/services/auth-service';
 import { useConnect } from '@/components/home-page/ConnectContext';
+import type { GatewayConfig } from '@/lib/types';
 
 type Step = 'form' | 'otp';
 
@@ -12,10 +13,10 @@ function useProgrammaticSubmit() {
 }
 
 /** Controller hook — owns all state and side-effects for the PU-PhoneName OTP flow. */
-export function usePUPhoneFlow() {
+export function usePUPhoneFlow(ssid: string, gatewayConfig: GatewayConfig) {
     const { connect, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
-    const action = new AuthService().getLoginFormTarget();
+    const action = new AuthService(gatewayConfig).getLoginFormTarget();
 
     // Step state
     const [step, setStep] = useState<Step>('form');
@@ -70,7 +71,7 @@ export function usePUPhoneFlow() {
             const resp = await fetch('/api/pu-phonename/send-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: trimmedPhone, name: trimmedName }),
+                body: JSON.stringify({ phone: trimmedPhone, name: trimmedName, ssid }),
             });
             const data = await resp.json();
             if (!data.success) {
@@ -102,7 +103,7 @@ export function usePUPhoneFlow() {
             const resp = await fetch('/api/pu-phonename', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone?.trim(), name: name?.trim(), otp: trimmedOtp }),
+                body: JSON.stringify({ phone: phone?.trim(), name: name?.trim(), otp: trimmedOtp, ssid }),
             });
             const data = await resp.json();
             if (!data.success) {
@@ -137,7 +138,7 @@ export function usePUPhoneFlow() {
             const resp = await fetch('/api/pu-phonename/send-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone?.trim(), name: name?.trim() }),
+                body: JSON.stringify({ phone: phone?.trim(), name: name?.trim(), ssid }),
             });
             const data = await resp.json();
             if (!data.success) {

@@ -1,5 +1,8 @@
-import z from "zod";
-import { schemas } from "./hotspotAPI"
+export interface GatewayConfig {
+  loginUrl: string;
+  freeUsername: string;
+  freePassword: string;
+}
 
 export interface VastAdData {
     mediaFileUrl: string;
@@ -11,8 +14,53 @@ export interface VastAdData {
     trackingEvents?: Record<string, string[]>;
 }
 
-export type BrandingConfig = z.infer<typeof schemas.BrandingConfig>
-export type BrandingConfigUpdateBody = z.infer<typeof schemas.BrandingConfigUpdateBody>
+export interface BrandingConfig {
+    id?: number;
+    ssid: string;
+    name: string;
+    brandPrimary: string;
+    brandPrimaryHover: string;
+    brandSecondary: string;
+    brandAccent: string;
+    textPrimary: string;
+    textSecondary: string;
+    textTertiary: string;
+    textMuted: string;
+    surfaceCard: string;
+    surfaceWhite: string;
+    surfaceBorder: string;
+    buttonPrimary: string;
+    buttonPrimaryHover: string;
+    buttonPrimaryText: string;
+    buttonSecondary: string;
+    buttonSecondaryHover: string;
+    buttonSecondaryText: string;
+    logo?: string | null;
+    logoWhite?: string | null;
+    connectCardBackground?: string | null;
+    bannerOverlay?: string | null;
+    favicon?: string | null;
+    adsReviveServerUrl?: string | null;
+    adsZoneId?: string | null;
+    adsReviveId?: string | null;
+    adsVastUrl?: string | null;
+    termsLinks?: string | null;
+    heading?: string | null;
+    subheading?: string | null;
+    buttonText?: string | null;
+    splashBackground?: string | null;
+    splashHeading?: string | null;
+    authMethods: ('free' | 'voucher' | 'pu-login' | 'pu-phonename')[];
+    marketingOptIn?: boolean;
+    parentSsid?: string | null;
+    venueLabel?: string | null;
+    venueRoute?: string | null;
+    sortOrder?: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type BrandingConfigUpdateBody = Partial<Omit<BrandingConfig, 'id' | 'ssid' | 'createdAt' | 'updatedAt'>>;
 
 // Form field configuration type
 export type FormFieldConfig = {

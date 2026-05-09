@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import posthog from 'posthog-js';
 import { AuthMode, AuthService, AuthCredentials } from '@/lib/services/auth-service';
+import type { GatewayConfig } from '@/lib/types';
 
 // State machine types
 type ConnectState = 'idle' | 'ad' | 'ready';
@@ -17,11 +18,13 @@ interface ConnectContextValue {
     reset: () => void;
 }
 
+const EMPTY_GATEWAY: GatewayConfig = { loginUrl: '', freeUsername: '', freePassword: '' };
+
 interface ConnectProviderProps {
     children: ReactNode;
     enabledAuth: AuthMode[];
+    gatewayConfig?: GatewayConfig;
     adGateEnabled?: boolean;
-    authService?: AuthService;
 }
 
 interface ConnectAttemptPending { pending: true }
@@ -37,8 +40,8 @@ export function useConnect() {
     return ctx;
 }
 
-export function ConnectProvider({ children, enabledAuth, adGateEnabled = false, authService }: ConnectProviderProps) {
-    const svc = authService || new AuthService();
+export function ConnectProvider({ children, enabledAuth, gatewayConfig = EMPTY_GATEWAY, adGateEnabled = false }: ConnectProviderProps) {
+    const svc = new AuthService(gatewayConfig);
     const [state, setState] = useState<ConnectState>('idle');
     const [showAd, setShowAd] = useState(false);
     const [credentials, setCredentials] = useState<AuthCredentials | undefined>(undefined);

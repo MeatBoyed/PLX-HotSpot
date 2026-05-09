@@ -11,3 +11,6 @@ export { PackagesRepository } from './packages.repo';
 
 export type { IAuthRepository } from './auth.repo';
 export { AuthRepository } from './auth.repo';
+
+export type { ISitesRepository } from './sites.repo';
+export { SitesRepository } from './sites.repo';

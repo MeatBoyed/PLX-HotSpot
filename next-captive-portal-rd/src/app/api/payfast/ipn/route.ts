@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { payFastService } from '@/features/purchasing/payfast-service';
 import { voucherService } from '@/features/purchasing/voucher-service';
 import { smsService } from '@/features/purchasing/sms-service';
-import { packageService } from '@/lib/services/package-service';
+import { packagesService } from '@/application/services';
 import dns from 'dns';
 import { env } from '@/env';
 
@@ -103,8 +103,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Merchant mismatch' }, { status: 500 });
     }
 
-    // Look up package by item_name (DB-backed)
-    const pkg = await packageService.getByName(payload.item_name);
+    // Look up package by item_name scoped to the SSID stored in custom_str1
+    const ssid = payload.custom_str1 || '';
+    const pkg = await packagesService.getByName(payload.item_name, ssid);
     if (!pkg) {
       return NextResponse.json({ error: 'Unknown package (item_name)' }, { status: 500 });
     }

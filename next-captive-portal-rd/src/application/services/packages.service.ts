@@ -1,50 +1,24 @@
-/**
- * Packages Service
- * Business logic for packages/pricing plans
- */
+import { PackagesRepository } from '../repositories/packages.repo'
+import { packageCache } from '@/infrastructure/cache'
+import type { ApiPortalPackage } from '@/infrastructure/api'
 
-import { PackagesList } from '@/types/api.types';
-import { PackagesRepository } from '../repositories/packages.repo';
-import { apiClient } from '@/infrastructure/http';
-import { packageCache } from '@/infrastructure/cache';
-
-/**
- * Service - Stateless, orchestrates repository
- */
 export class PackagesService {
-    private repository: PackagesRepository;
+    private repository: PackagesRepository
 
     constructor() {
-        this.repository = new PackagesRepository(apiClient, packageCache);
+        this.repository = new PackagesRepository(packageCache)
     }
 
-    /**
-     * List packages for a site
-     * Server-side only
-     *
-     * @param ssid - Site identifier
-     * @returns PackagesList with all available packages
-     *
-     * @example
-     * // In server component
-     * const { packages } = await packagesService.list('joburg-theatre');
-     * return <PackageGrid packages={packages} />
-     */
-    async list(ssid: string): Promise<PackagesList> {
-        if (!ssid) {
-            throw new Error('SSID is required');
-        }
+    async list(ssid: string): Promise<ApiPortalPackage[]> {
+        if (!ssid) throw new Error('SSID is required')
+        return this.repository.list(ssid)
+    }
 
-        const result = await this.repository.list(ssid);
-
-        // Business logic can go here
-        // e.g., filtering, sorting, pricing adjustments, etc.
-
-        return result;
+    async getByName(name: string, ssid: string): Promise<ApiPortalPackage | null> {
+        if (!ssid) throw new Error('SSID is required')
+        const packages = await this.repository.list(ssid)
+        return packages.find(p => p.name === name) ?? null
     }
 }
 
-/**
- * Singleton instance
- */
-export const packagesService = new PackagesService();
+export const packagesService = new PackagesService()
