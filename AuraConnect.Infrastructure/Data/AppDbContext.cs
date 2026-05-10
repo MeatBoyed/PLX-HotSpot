@@ -1,12 +1,12 @@
-﻿using AuraConnect.Core.Entities;
+using AuraConnect.Core.Entities;
+using AuraConnect.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AuraConnect.Infrastructure.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -19,11 +19,13 @@ namespace AuraConnect.Infrastructure.Data
         public DbSet<OtpVerification> OtpVerifications { get; set; }
         public DbSet<MarketingSubmission> MarketingSubmissions { get; set; }
         public DbSet<RadiusConfig> RadiusConfigs { get; set; }
+        public DbSet<Profile> Profiles { get; set; }
+        public DbSet<SiteMembership> SiteMemberships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); // Identity tables first
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-            base.OnModelCreating(modelBuilder);
         }
     }
 }

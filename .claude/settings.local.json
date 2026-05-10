@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Infrastructure\\\\Migrations\" -File | Sort-Object Name -Descending | Select-Object -First 1 | ForEach-Object { $_.FullName })",
       "Bash(dotnet build *)",
-      "Bash(dotnet ef *)"
+      "Bash(dotnet ef *)",
+      "Bash(dotnet add *)",
+      "Bash(grep -E \"^        \\(migrationBuilder\\\\.\\(Create|Drop\\)|//\\)\" AuraConnect.Infrastructure/Migrations/20260510100512_AddIdentityAndProfiles.cs)"
     ]
   }
 }
