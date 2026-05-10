@@ -1,15 +1,12 @@
 export interface RadiusConfig {
-  id: string
   siteId: string
-  serverHost: string
-  authPort: number
-  acctPort: number
-  secret: string
-  timeout: number
-  retries: number
-  nasIdentifier: string
-  nasIpAddress?: string
-  updatedAt: string
+  gatewayUrl?: string | null
+  freeUsername?: string | null
+  freePassword?: string | null
+  radiusDeskUrl?: string | null
+  radiusDeskApiToken?: string | null
+  radiusDeskRealmId?: string | null
+  radiusDeskCloudId?: string | null
 }
 
-export interface UpdateRadiusConfigInput extends Omit<RadiusConfig, 'id' | 'siteId' | 'updatedAt'> {}
+export type UpdateRadiusConfigInput = Omit<RadiusConfig, 'siteId'>

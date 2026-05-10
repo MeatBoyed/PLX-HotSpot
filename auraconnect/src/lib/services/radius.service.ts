@@ -1,44 +1,29 @@
-import { mockRadiusConfigs } from '@/lib/mock-data/radius'
+import { radiusApi } from '@/lib/infrastructure/api/radius.api'
+import type { ApiRadiusConfig } from '@/lib/infrastructure/api/types'
 import type { RadiusConfig, UpdateRadiusConfigInput } from '@/lib/types/radius.types'
 
-let configs = [...mockRadiusConfigs]
-
-function delay(ms = 400): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-const DEFAULT_RADIUS: Omit<RadiusConfig, 'id' | 'siteId' | 'updatedAt'> = {
-  serverHost: '',
-  authPort: 1812,
-  acctPort: 1813,
-  secret: '',
-  timeout: 5,
-  retries: 3,
-  nasIdentifier: '',
+function toRadiusConfig(api: ApiRadiusConfig): RadiusConfig {
+  return {
+    siteId: api.siteId ?? '',
+    gatewayUrl: api.gatewayUrl,
+    freeUsername: api.freeUsername,
+    freePassword: api.freePassword,
+    radiusDeskUrl: api.radiusDeskUrl,
+    radiusDeskApiToken: api.radiusDeskApiToken,
+    radiusDeskRealmId: api.radiusDeskRealmId,
+    radiusDeskCloudId: api.radiusDeskCloudId,
+  }
 }
 
 export const radiusService = {
   async getBySiteId(siteId: string): Promise<RadiusConfig> {
-    await delay()
-    return (
-      configs.find((c) => c.siteId === siteId) ?? {
-        id: `radius_${siteId}`,
-        siteId,
-        ...DEFAULT_RADIUS,
-        updatedAt: new Date().toISOString(),
-      }
-    )
+    const api = await radiusApi.getConfig(siteId)
+    if (!api) return { siteId }
+    return toRadiusConfig(api)
   },
 
   async update(siteId: string, input: UpdateRadiusConfigInput): Promise<RadiusConfig> {
-    await delay()
-    const existing = configs.find((c) => c.siteId === siteId)
-    const updated: RadiusConfig = existing
-      ? { ...existing, ...input, updatedAt: new Date().toISOString() }
-      : { id: `radius_${siteId}`, siteId, ...input, updatedAt: new Date().toISOString() }
-    configs = existing
-      ? configs.map((c) => (c.siteId === siteId ? updated : c))
-      : [...configs, updated]
-    return updated
+    const api = await radiusApi.updateConfig(siteId, input)
+    return toRadiusConfig(api)
   },
 }

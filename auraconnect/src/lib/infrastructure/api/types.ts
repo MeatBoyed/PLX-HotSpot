@@ -69,6 +69,19 @@ export interface ApiBranding {
   sortOrder?: number | null
 }
 
+export interface ApiRadiusConfig {
+  siteId?: string
+  gatewayUrl?: string | null
+  freeUsername?: string | null
+  freePassword?: string | null
+  radiusDeskUrl?: string | null
+  radiusDeskApiToken?: string | null
+  radiusDeskRealmId?: string | null
+  radiusDeskCloudId?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface ApiAdsConfig {
   siteId: string
   reviveServerUrl?: string | null

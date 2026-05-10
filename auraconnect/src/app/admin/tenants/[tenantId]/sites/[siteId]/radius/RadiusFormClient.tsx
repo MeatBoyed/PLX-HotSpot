@@ -8,19 +8,28 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { updateRadiusConfigAction } from '@/lib/actions/radius.actions'
 import type { RadiusConfig } from '@/lib/types/radius.types'
 
+const optUrl = z
+  .string()
+  .nullable()
+  .optional()
+  .refine((v) => !v || v.startsWith('http://') || v.startsWith('https://'), {
+    message: 'Must be a full URL including https://',
+  })
+
+const optStr = z.string().nullable().optional()
+
 const schema = z.object({
-  serverHost: z.string().min(1, 'Server host is required'),
-  authPort: z.number({ error: 'Required' }).min(1).max(65535),
-  acctPort: z.number({ error: 'Required' }).min(1).max(65535),
-  secret: z.string().min(1, 'Shared secret is required'),
-  timeout: z.number({ error: 'Required' }).min(1).max(30),
-  retries: z.number({ error: 'Required' }).min(1).max(10),
-  nasIdentifier: z.string().min(1, 'NAS identifier is required'),
-  nasIpAddress: z.string().optional(),
+  gatewayUrl: optUrl,
+  freeUsername: optStr,
+  freePassword: optStr,
+  radiusDeskUrl: optUrl,
+  radiusDeskApiToken: optStr,
+  radiusDeskRealmId: optStr,
+  radiusDeskCloudId: optStr,
 })
 
 type FormValues = z.infer<typeof schema>
@@ -35,10 +44,15 @@ export function RadiusFormClient({ siteId, config }: { siteId: string; config: R
   const onSubmit = async (values: FormValues) => {
     setLoading(true)
     try {
-      await updateRadiusConfigAction(siteId, values)
+      const cleaned: typeof values = {
+        ...values,
+        gatewayUrl: values.gatewayUrl || null,
+        radiusDeskUrl: values.radiusDeskUrl || null,
+      }
+      await updateRadiusConfigAction(siteId, cleaned)
       toast.success('RADIUS configuration saved')
     } catch {
-      toast.error('Failed to save configuration')
+      toast.error('Failed to save RADIUS configuration')
     } finally {
       setLoading(false)
     }
@@ -47,51 +61,66 @@ export function RadiusFormClient({ siteId, config }: { siteId: string; config: R
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-6">
       <Card>
-        <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-sm">Server Settings</h3>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Gateway</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0 space-y-4">
           <div className="space-y-2">
-            <Label>Server Host *</Label>
-            <Input {...register('serverHost')} placeholder="192.168.1.100" className="font-mono" />
-            {errors.serverHost && <p className="text-xs text-destructive">{errors.serverHost.message}</p>}
+            <Label>Gateway URL</Label>
+            <Input
+              {...register('gatewayUrl')}
+              placeholder="https://gateway.example.com"
+              className="font-mono text-sm"
+            />
+            {errors.gatewayUrl ? (
+              <p className="text-xs text-destructive">{errors.gatewayUrl.message}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">Full URL required, e.g. https://gateway.example.com</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Auth Port</Label>
-              <Input type="number" {...register('authPort', { valueAsNumber: true })} />
+              <Label>Free Username</Label>
+              <Input {...register('freeUsername')} placeholder="free" className="font-mono text-sm" />
             </div>
             <div className="space-y-2">
-              <Label>Accounting Port</Label>
-              <Input type="number" {...register('acctPort', { valueAsNumber: true })} />
+              <Label>Free Password</Label>
+              <Input type="password" {...register('freePassword')} placeholder="••••••••" className="font-mono text-sm" />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Shared Secret *</Label>
-            <Input type="password" {...register('secret')} placeholder="••••••••" className="font-mono" />
-            {errors.secret && <p className="text-xs text-destructive">{errors.secret.message}</p>}
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-sm">NAS Settings</h3>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">RadiusDesk Integration</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0 space-y-4">
           <div className="space-y-2">
-            <Label>NAS Identifier *</Label>
-            <Input {...register('nasIdentifier')} placeholder="venue-ap-01" className="font-mono" />
-            {errors.nasIdentifier && <p className="text-xs text-destructive">{errors.nasIdentifier.message}</p>}
+            <Label>RadiusDesk URL</Label>
+            <Input
+              {...register('radiusDeskUrl')}
+              placeholder="https://radiusdesk.example.com"
+              className="font-mono text-sm"
+            />
+            {errors.radiusDeskUrl ? (
+              <p className="text-xs text-destructive">{errors.radiusDeskUrl.message}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">Full URL required, e.g. https://radiusdesk.example.com</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label>NAS IP Address</Label>
-            <Input {...register('nasIpAddress')} placeholder="10.0.0.1" className="font-mono" />
+            <Label>API Token</Label>
+            <Input type="password" {...register('radiusDeskApiToken')} placeholder="••••••••" className="font-mono text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Timeout (seconds)</Label>
-              <Input type="number" {...register('timeout', { valueAsNumber: true })} />
+              <Label>Realm ID</Label>
+              <Input {...register('radiusDeskRealmId')} placeholder="realm-id" className="font-mono text-sm" />
             </div>
             <div className="space-y-2">
-              <Label>Retries</Label>
-              <Input type="number" {...register('retries', { valueAsNumber: true })} />
+              <Label>Cloud ID</Label>
+              <Input {...register('radiusDeskCloudId')} placeholder="cloud-id" className="font-mono text-sm" />
             </div>
           </div>
         </CardContent>
