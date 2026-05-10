@@ -56,11 +56,10 @@ namespace AuraConnect.API.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+        public IActionResult Logout()
         {
-            await _authService.LogoutAsync(cancellationToken);
+            // JWT is stateless — logout is handled client-side by discarding the token
             return Ok(new { message = "Logged out successfully" });
         }
 

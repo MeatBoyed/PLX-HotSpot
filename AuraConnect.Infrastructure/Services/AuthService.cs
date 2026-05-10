@@ -4,30 +4,40 @@ using AuraConnect.Core.Entities;
 using AuraConnect.Core.Interfaces.Repositories;
 using AuraConnect.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace AuraConnect.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IProfileRepository _profileRepository;
         private readonly ISiteMembershipRepository _membershipRepository;
         private readonly ISiteRepository _siteRepository;
+        private readonly string _jwtSecret;
+        private readonly string _jwtIssuer;
+        private readonly string _jwtAudience;
+        private readonly int _jwtExpiryDays;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
             IProfileRepository profileRepository,
             ISiteMembershipRepository membershipRepository,
-            ISiteRepository siteRepository)
+            ISiteRepository siteRepository,
+            IConfiguration configuration)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _profileRepository = profileRepository;
             _membershipRepository = membershipRepository;
             _siteRepository = siteRepository;
+            _jwtSecret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is not configured");
+            _jwtIssuer = configuration["Jwt:Issuer"] ?? "AuraConnect";
+            _jwtAudience = configuration["Jwt:Audience"] ?? "AuraConnect";
+            _jwtExpiryDays = int.TryParse(configuration["Jwt:ExpiryDays"], out var days) ? days : 7;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -56,8 +66,6 @@ namespace AuraConnect.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(request.TenantId) && !string.IsNullOrWhiteSpace(request.Ssid))
                 await CreateOrUpdateMembershipAsync(profile.Id, request.TenantId, request.Ssid, cancellationToken);
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
-
             return await BuildResponseAsync(user, profile, cancellationToken);
         }
 
@@ -67,14 +75,17 @@ namespace AuraConnect.Infrastructure.Services
             if (user == null)
                 throw new UnauthorizedAccessException("Invalid email or password");
 
-            var result = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, lockoutOnFailure: true);
+            if (await _userManager.IsLockedOutAsync(user))
+                throw new InvalidOperationException("Account is temporarily locked. Please try again later");
 
-            if (!result.Succeeded)
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!passwordValid)
             {
-                if (result.IsLockedOut)
-                    throw new InvalidOperationException("Account is temporarily locked. Please try again later");
+                await _userManager.AccessFailedAsync(user);
                 throw new UnauthorizedAccessException("Invalid email or password");
             }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
 
             var profile = await _profileRepository.GetByIdentityUserIdAsync(user.Id, cancellationToken)
                 ?? throw new InvalidOperationException("Profile not found");
@@ -85,12 +96,12 @@ namespace AuraConnect.Infrastructure.Services
             return await BuildResponseAsync(user, profile, cancellationToken);
         }
 
-        public async Task LogoutAsync(CancellationToken cancellationToken = default) =>
-            await _signInManager.SignOutAsync();
-
         public async Task<AuthResponse> GetCurrentUserAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.GetUserAsync(principal)
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User not found");
+
+            var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException("User not found");
 
             var profile = await _profileRepository.GetByIdentityUserIdAsync(user.Id, cancellationToken)
@@ -112,9 +123,13 @@ namespace AuraConnect.Infrastructure.Services
         {
             var roles = await _userManager.GetRolesAsync(user);
             var siteIds = await _membershipRepository.GetSiteIdsByProfileAsync(profile.Id, cancellationToken);
+            var expiry = DateTime.UtcNow.AddDays(_jwtExpiryDays);
+            var token = GenerateJwtToken(user, roles, profile, expiry);
 
             return new AuthResponse
             {
+                Token = token,
+                ExpiresAt = expiry,
                 ProfileId = profile.Id,
                 Email = user.Email!,
                 FirstName = profile.FirstName,
@@ -126,6 +141,34 @@ namespace AuraConnect.Infrastructure.Services
                 Roles = [.. roles],
                 SiteIds = [.. siteIds]
             };
+        }
+
+        private string GenerateJwtToken(ApplicationUser user, IList<string> roles, Profile profile, DateTime expiry)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Email, user.Email!),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new("profileId", profile.Id),
+            };
+
+            foreach (var role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtIssuer,
+                audience: _jwtAudience,
+                claims: claims,
+                expires: expiry,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
