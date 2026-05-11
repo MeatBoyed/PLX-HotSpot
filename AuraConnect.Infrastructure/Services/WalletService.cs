@@ -1,3 +1,4 @@
+using AuraConnect.Application.DTOs.Admin;
 using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
@@ -74,18 +75,36 @@ namespace AuraConnect.Infrastructure.Services
         public async Task<IEnumerable<WalletTransactionResponse>> GetTransactionsAsync(string profileId, CancellationToken cancellationToken = default)
         {
             var transactions = await _walletTransactionRepository.GetByProfileIdAsync(profileId, cancellationToken);
-            return transactions.Select(t => new WalletTransactionResponse
-            {
-                Id = t.Id,
-                BlnkTransactionId = t.BlnkTransactionId,
-                Type = t.Type.ToString(),
-                Amount = t.Amount,
-                Currency = t.Currency,
-                Reference = t.Reference,
-                Status = t.Status,
-                CreatedAt = t.CreatedAt
-            });
+            return transactions.Select(MapTransaction);
         }
+
+        public async Task<PagedResult<WalletTransactionResponse>> GetTransactionsPagedAsync(int page, int pageSize, string? profileId, string? tenantId, string? siteId, CancellationToken cancellationToken = default)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 100) pageSize = 20;
+
+            var (items, total) = await _walletTransactionRepository.GetPagedAsync(page, pageSize, profileId, tenantId, siteId, cancellationToken);
+
+            return new PagedResult<WalletTransactionResponse>
+            {
+                Items = items.Select(MapTransaction).ToList(),
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+        }
+
+        private static WalletTransactionResponse MapTransaction(WalletTransaction t) => new()
+        {
+            Id = t.Id,
+            BlnkTransactionId = t.BlnkTransactionId,
+            Type = t.Type.ToString(),
+            Amount = t.Amount,
+            Currency = t.Currency,
+            Reference = t.Reference,
+            Status = t.Status,
+            CreatedAt = t.CreatedAt
+        };
 
         public async Task<TopUpResponse> InitiateTopUpAsync(string profileId, decimal amount, string notifyUrl, string returnUrl, string cancelUrl, CancellationToken cancellationToken = default)
         {

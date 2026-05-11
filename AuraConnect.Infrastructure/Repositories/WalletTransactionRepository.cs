@@ -23,6 +23,33 @@ namespace AuraConnect.Infrastructure.Repositories
                 .OrderByDescending(w => w.CreatedAt)
                 .ToListAsync(cancellationToken);
 
+        public async Task<(List<WalletTransaction> Items, int Total)> GetPagedAsync(
+            int page, int pageSize, string? profileId, string? tenantId, string? siteId,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _context.WalletTransactions.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(profileId))
+                query = query.Where(w => w.ProfileId == profileId);
+
+            if (!string.IsNullOrWhiteSpace(tenantId))
+                query = query.Where(w => _context.SiteMemberships
+                    .Any(m => m.ProfileId == w.ProfileId && m.TenantId == tenantId));
+
+            if (!string.IsNullOrWhiteSpace(siteId))
+                query = query.Where(w => _context.SiteMemberships
+                    .Any(m => m.ProfileId == w.ProfileId && m.SiteId == siteId));
+
+            var total = await query.CountAsync(cancellationToken);
+            var items = await query
+                .OrderByDescending(w => w.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, total);
+        }
+
         public async Task AddAsync(WalletTransaction transaction, CancellationToken cancellationToken = default)
             => await _context.WalletTransactions.AddAsync(transaction, cancellationToken);
 

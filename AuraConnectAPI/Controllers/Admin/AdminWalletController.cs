@@ -1,3 +1,4 @@
+using AuraConnect.Application.DTOs.Admin;
 using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,21 @@ namespace AuraConnect.API.Controllers.Admin
 
         public AdminWalletController(IWalletService walletService) => _walletService = walletService;
 
+        // GET /api/admin/wallet/transactions?page=1&pageSize=20&profileId=&tenantId=&siteId=
+        [HttpGet("transactions")]
+        [ProducesResponseType(typeof(PagedResult<WalletTransactionResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTransactions(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? profileId = null,
+            [FromQuery] string? tenantId = null,
+            [FromQuery] string? siteId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _walletService.GetTransactionsPagedAsync(page, pageSize, profileId, tenantId, siteId, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpGet("profiles/{profileId}")]
         [ProducesResponseType(typeof(WalletBalanceResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -28,15 +44,6 @@ namespace AuraConnect.API.Controllers.Admin
             {
                 return NotFound(new { error = ex.Message });
             }
-        }
-
-        [HttpGet("profiles/{profileId}/transactions")]
-        [ProducesResponseType(typeof(IEnumerable<WalletTransactionResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProfileTransactions(string profileId, CancellationToken cancellationToken)
-        {
-            var result = await _walletService.GetTransactionsAsync(profileId, cancellationToken);
-            return Ok(result);
         }
 
         [HttpGet("profiles/{profileId}/packages")]

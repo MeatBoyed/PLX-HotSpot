@@ -125,6 +125,7 @@ try
     builder.Services.AddScoped<IAdsConfigService, AdsConfigService>();
     builder.Services.AddScoped<IRadiusConfigService, RadiusConfigService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IAdminProfileService, AdminProfileService>();
     builder.Services.AddScoped<IRadiusProvisioningService, RadiusProvisioningService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 

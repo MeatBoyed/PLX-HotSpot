@@ -21,6 +21,36 @@ namespace AuraConnect.Infrastructure.Repositories
                 .Include(p => p.SiteMemberships)
                 .FirstOrDefaultAsync(p => p.Id == profileId, cancellationToken);
 
+        public async Task<Profile?> GetByIdWithSitesAsync(string profileId, CancellationToken cancellationToken = default) =>
+            await _context.Profiles
+                .AsNoTracking()
+                .Include(p => p.SiteMemberships)
+                    .ThenInclude(m => m.Site)
+                .FirstOrDefaultAsync(p => p.Id == profileId, cancellationToken);
+
+        public async Task<(List<Profile> Items, int Total)> GetPagedAsync(int page, int pageSize, string? tenantId, string? siteId, CancellationToken cancellationToken = default)
+        {
+            var query = _context.Profiles
+                .AsNoTracking()
+                .Include(p => p.SiteMemberships)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(tenantId))
+                query = query.Where(p => p.SiteMemberships.Any(m => m.TenantId == tenantId));
+
+            if (!string.IsNullOrWhiteSpace(siteId))
+                query = query.Where(p => p.SiteMemberships.Any(m => m.SiteId == siteId));
+
+            var total = await query.CountAsync(cancellationToken);
+            var items = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, total);
+        }
+
         public async Task AddAsync(Profile profile, CancellationToken cancellationToken = default) =>
             await _context.Profiles.AddAsync(profile, cancellationToken);
 
