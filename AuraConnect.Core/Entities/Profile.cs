@@ -78,6 +78,12 @@ namespace AuraConnect.Core.Entities
             UpdateTimestamp();
         }
 
+        public void SoftDelete()
+        {
+            Status = ProfileStatus.Deleted;
+            UpdateTimestamp();
+        }
+
         private void UpdateTimestamp() => UpdatedAt = DateTime.UtcNow;
     }
 }

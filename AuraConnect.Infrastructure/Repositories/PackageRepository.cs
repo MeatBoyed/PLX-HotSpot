@@ -20,6 +20,15 @@ namespace AuraConnect.Infrastructure.Repositories
                 .OrderBy(p => p.SortOrder)
                 .ToListAsync(cancellationToken);
 
+        public async Task<IEnumerable<Package>> GetBySiteIdAllAsync(string siteId, CancellationToken cancellationToken = default)
+            => await _context.Packages.AsNoTracking()
+                .Where(p => p.SiteId == siteId)
+                .OrderBy(p => p.SortOrder)
+                .ToListAsync(cancellationToken);
+
+        public async Task AddAsync(Package package, CancellationToken cancellationToken = default)
+            => await _context.Packages.AddAsync(package, cancellationToken);
+
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => await _context.SaveChangesAsync(cancellationToken);
     }

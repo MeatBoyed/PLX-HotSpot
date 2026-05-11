@@ -104,6 +104,45 @@ namespace AuraConnect.API.Controllers.Admin
             }
         }
 
+        // DELETE /api/admin/profiles/{profileId} — soft delete (sets status=Deleted, locks login)
+        [HttpDelete("{profileId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SoftDeleteProfile(string profileId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _profileService.SoftDeleteProfileAsync(profileId, cancellationToken);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
+        // DELETE /api/admin/profiles/{profileId}/permanent — hard delete (removes all data)
+        [HttpDelete("{profileId}/permanent")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> HardDeleteProfile(string profileId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _profileService.HardDeleteProfileAsync(profileId, cancellationToken);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         // PATCH /api/admin/profiles/{profileId}/status
         [HttpPatch("{profileId}/status")]
         [ProducesResponseType(typeof(AdminProfileDetail), StatusCodes.Status200OK)]

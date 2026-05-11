@@ -9,5 +9,7 @@ namespace AuraConnect.Application.Interfaces
         Task<AdminProfileDetail> UpdateProfileAsync(string profileId, UpdateProfileRequest request, CancellationToken cancellationToken = default);
         Task<AdminProfileDetail> UpdateWalletIdsAsync(string profileId, UpdateWalletIdsRequest request, CancellationToken cancellationToken = default);
         Task<AdminProfileDetail> SetStatusAsync(string profileId, string status, CancellationToken cancellationToken = default);
+        Task SoftDeleteProfileAsync(string profileId, CancellationToken cancellationToken = default);
+        Task HardDeleteProfileAsync(string profileId, CancellationToken cancellationToken = default);
     }
 }

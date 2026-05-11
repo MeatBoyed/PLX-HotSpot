@@ -115,6 +115,38 @@ namespace AuraConnect.Infrastructure.Services
             return await GetProfileByIdAsync(profileId, cancellationToken);
         }
 
+        public async Task SoftDeleteProfileAsync(string profileId, CancellationToken cancellationToken = default)
+        {
+            var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
+                ?? throw new InvalidOperationException("Profile not found");
+
+            profile.SoftDelete();
+            await _profileRepository.UpdateAsync(profile, cancellationToken);
+            await _profileRepository.SaveChangesAsync(cancellationToken);
+
+            // Lock the identity account so they cannot log in
+            var user = await _userManager.FindByIdAsync(profile.IdentityUserId);
+            if (user != null)
+            {
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            }
+        }
+
+        public async Task HardDeleteProfileAsync(string profileId, CancellationToken cancellationToken = default)
+        {
+            var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
+                ?? throw new InvalidOperationException("Profile not found");
+
+            var user = await _userManager.FindByIdAsync(profile.IdentityUserId)
+                ?? throw new InvalidOperationException("Identity user not found");
+
+            // Deleting the identity user cascades: Profile → SiteMemberships, WalletTransactions, UserPackages
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
+        }
+
         private static AdminProfileDetail MapToDetail(Profile profile, string email) => new()
         {
             Id = profile.Id,
