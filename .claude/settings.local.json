@@ -5,7 +5,15 @@
       "Bash(dotnet build *)",
       "Bash(dotnet ef *)",
       "Bash(dotnet add *)",
-      "Bash(grep -E \"^        \\(migrationBuilder\\\\.\\(Create|Drop\\)|//\\)\" AuraConnect.Infrastructure/Migrations/20260510100512_AddIdentityAndProfiles.cs)"
+      "Bash(grep -E \"^        \\(migrationBuilder\\\\.\\(Create|Drop\\)|//\\)\" AuraConnect.Infrastructure/Migrations/20260510100512_AddIdentityAndProfiles.cs)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:docs.blnkfinance.com)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\" -Directory)",
+      "Bash(Select-Object Name)",
+      "WebSearch",
+      "Bash(ls -la \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\\" | grep -i application)",
+      "Read(//c/Users/charles.MBVIT/source/repos/**)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty Name)"
     ]
   }
 }

@@ -36,6 +36,10 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasColumnName("phone_number")
                 .HasMaxLength(20);
 
+            builder.Property(p => p.BlnkIdentityId)
+                .HasColumnName("blnk_identity_id")
+                .HasMaxLength(255);
+
             builder.Property(p => p.BlnkWalletId)
                 .HasColumnName("blnk_wallet_id")
                 .HasMaxLength(255);

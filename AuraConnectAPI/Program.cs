@@ -105,6 +105,18 @@ try
     builder.Services.AddScoped<IRadiusConfigRepository, RadiusConfigRepository>();
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<ISiteMembershipRepository, SiteMembershipRepository>();
+    builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+    builder.Services.AddScoped<IUserPackageRepository, UserPackageRepository>();
+    builder.Services.AddScoped<IWalletTransactionRepository, WalletTransactionRepository>();
+
+    // Wallet / payment services
+    builder.Services.AddHttpClient<IBlnkService, BlnkService>(client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["Blnk:BaseUrl"]
+            ?? throw new InvalidOperationException("Blnk:BaseUrl is not configured"));
+    });
+    builder.Services.AddScoped<IPayFastService, PayFastService>();
+    builder.Services.AddScoped<IWalletService, WalletService>();
 
     // Services
     builder.Services.AddScoped<ITenantService, TenantService>();

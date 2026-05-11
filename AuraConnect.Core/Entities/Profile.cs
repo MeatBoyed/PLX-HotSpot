@@ -7,6 +7,7 @@ namespace AuraConnect.Core.Entities
         public string FirstName { get; private set; } = string.Empty;
         public string LastName { get; private set; } = string.Empty;
         public string? PhoneNumber { get; private set; }
+        public string? BlnkIdentityId { get; private set; }
         public string? BlnkWalletId { get; private set; }
         public ProfileStatus Status { get; private set; } = ProfileStatus.Active;
         public DateTime CreatedAt { get; private set; }
@@ -50,6 +51,12 @@ namespace AuraConnect.Core.Entities
         public void SetPhoneNumber(string? phoneNumber)
         {
             PhoneNumber = phoneNumber;
+            UpdateTimestamp();
+        }
+
+        public void SetBlnkIdentityId(string? identityId)
+        {
+            BlnkIdentityId = identityId;
             UpdateTimestamp();
         }
 

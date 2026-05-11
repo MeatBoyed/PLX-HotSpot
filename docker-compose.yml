@@ -10,9 +10,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=auraconnect_test;Username=local_dev;Password=KQP2Hqg16gqp5u
+      - Blnk__BaseUrl=http://blnk-server:5001
     depends_on:
       postgres:
         condition: service_healthy
+      blnk-server:
+        condition: service_started
 
   postgres:
     image: postgres:17

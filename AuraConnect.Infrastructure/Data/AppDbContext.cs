@@ -21,6 +21,8 @@ namespace AuraConnect.Infrastructure.Data
         public DbSet<RadiusConfig> RadiusConfigs { get; set; }
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<SiteMembership> SiteMemberships { get; set; }
+        public DbSet<UserPackage> UserPackages { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
