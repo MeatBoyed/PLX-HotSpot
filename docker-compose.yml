@@ -1,4 +1,6 @@
 services:
+  # ── AuraConnect ────────────────────────────────────────────────────────────
+
   api:
     build:
       context: .
@@ -22,11 +24,64 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U local_dev -d auraconnect_test"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # ── Blnk Finance ───────────────────────────────────────────────────────────
+
+  blnk-server:
+    image: jerryenebeli/blnk:0.10.2
+    restart: on-failure
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "blnk migrate up && blnk start"
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+    volumes:
+      - ./blnk.json:/blnk.json
+
+  blnk-worker:
+    image: jerryenebeli/blnk:0.10.2
+    restart: on-failure
+    entrypoint: ["blnk", "workers"]
+    depends_on:
+      - blnk-server
+    volumes:
+      - ./blnk.json:/blnk.json
+
+  redis:
+    image: redis:7.2.4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  typesense:
+    image: typesense/typesense:0.23.1
+    restart: unless-stopped
+    command: ["--data-dir", "/data", "--api-key=blnk-api-key", "--listen-port", "8108"]
+    volumes:
+      - typesense_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8108/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
 volumes:
   postgres_data:
+  typesense_data:
