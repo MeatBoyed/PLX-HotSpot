@@ -1,13 +1,11 @@
 using AuraConnect.Application.DTOs.Admin;
 using AuraConnect.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuraConnect.API.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/profiles")]
-    [Authorize(Roles = "Admin")]
     public class AdminProfileController : ControllerBase
     {
         private readonly IAdminProfileService _profileService;

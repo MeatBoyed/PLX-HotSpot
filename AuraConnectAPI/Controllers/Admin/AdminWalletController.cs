@@ -1,14 +1,12 @@
 using AuraConnect.Application.DTOs.Admin;
 using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuraConnect.API.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/wallet")]
-    [Authorize(Roles = "Admin")]
     public class AdminWalletController : ControllerBase
     {
         private readonly IWalletService _walletService;
