@@ -1,17 +1,19 @@
-
 "use client";
 import { useState, useRef, FormEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { AuthService } from '@/lib/services/auth-service';
 import { ConnectProvider, useConnect } from '@/components/home-page/ConnectContext';
-import { useTheme } from '@/components/theme-provider';
 import { Input } from './input';
 import { Label } from './label';
 import Link from 'next/link';
 import { PUPhoneInnerForm } from './pu-phone-form';
 import type { GatewayConfig } from '@/lib/types';
 
-type BaseButtonProps = {
+// ─── Network Auth ────────────────────────────────────────────────────────────
+// All forms below submit credentials to the Mikrotik/RadiusDesk gateway.
+// They are NOT platform auth — they grant network access only.
+
+type NetworkFormProps = {
     label?: string;
     className: string;
     style: React.CSSProperties;
@@ -19,20 +21,13 @@ type BaseButtonProps = {
     gatewayConfig: GatewayConfig;
 };
 
-// Internal hook to provide programmatic submission logic
 function useProgrammaticSubmit() {
     const formRef = useRef<HTMLFormElement | null>(null);
     const submit = () => formRef.current?.submit();
     return { formRef, submit };
 }
 
-/**
- * Static login form button that posts hidden credentials to the Mikrotik login endpoint.
- * - No JS handlers (pure <form> submit)
- * - Username/password (and optional dst) sent as hidden inputs
- * - Action targets `${MIKROTIK_BASE_URL}/login` using POST
- */
-function FreeInnerButton({ label = 'Connect Now', style, className, gatewayConfig }: BaseButtonProps) {
+function NetworkFreeInner({ label = 'Connect Now', style, className, gatewayConfig }: NetworkFormProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
     const [attempted, setAttempted] = useState(false);
@@ -43,12 +38,10 @@ function FreeInnerButton({ label = 'Connect Now', style, className, gatewayConfi
         const result = connect();
         setAttempted(true);
         if (!result.pending && 'credentials' in result) {
-            // React hasn't flushed the new hidden inputs yet; defer submit
             setTimeout(() => submit(), 0);
         }
     };
 
-    // If credentials become available after ad gate, require second click (simple MVP)
     const disabled = showAd || state === 'ad';
 
     return (
@@ -69,7 +62,6 @@ function FreeInnerButton({ label = 'Connect Now', style, className, gatewayConfi
             >
                 {disabled ? (showAd ? 'Watch Ad…' : label) : label}
             </button>
-            {/* Optionally show hint after ad finished but before second click */}
             {attempted && state === 'ready' && !credentials && (
                 <p className="mt-1 text-xs text-gray-500">Click again to submit.</p>
             )}
@@ -77,195 +69,7 @@ function FreeInnerButton({ label = 'Connect Now', style, className, gatewayConfi
     );
 }
 
-// PU Login Inner Form
-function PULoginInnerForm({ label = 'Login to Connect', style, className, gatewayConfig }: BaseButtonProps) {
-    const { connect, state, showAd, credentials } = useConnect();
-    const { formRef, submit } = useProgrammaticSubmit();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const action = new AuthService(gatewayConfig).getLoginFormTarget();
-
-    const onSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        const trimmedEmail = email.trim();
-        const trimmedPassword = password.trim()
-        if (!trimmedEmail || !trimmedPassword) {
-            setError('Email & Password are required');
-            return;
-        }
-        const result = connect(undefined, { username: trimmedEmail, password: trimmedPassword, mode: 'pu-login' });
-        if (!result.pending) {
-            if ('error' in result) {
-                setError(result.error);
-            } else if ('credentials' in result) {
-                // Defer so hidden inputs update with credentials before submit
-                setTimeout(() => submit(), 0);
-            }
-        }
-    };
-
-    const disabled = showAd || state === 'ad';
-
-    return (
-        <div className="inline-block w-full">
-            <div className="flex gap-3 flex-col w-full mb-2">
-                <Label>Email</Label>
-                <Input
-                    type="email"
-                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
-                    placeholder="Enter your email"
-                    disabled={disabled}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-            <div className="flex gap-3 flex-col w-full mb-2">
-                <Label>Password</Label>
-                <Input
-                    type="password"
-                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
-                    placeholder="Enter your Password code"
-                    disabled={disabled}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div className='flex gap-2 justify-center items-center'>
-                <Link href="/register" className="text-sm text-blue-600 hover:underline">
-                    Register an account
-                </Link>
-
-            </div>
-            {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
-            <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onSubmit}>
-                {credentials && (
-                    <>
-                        <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
-                        <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
-                    </>
-                )}
-                <button
-                    type="submit"
-                    aria-disabled={disabled}
-                    disabled={disabled}
-                    className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
-                    style={style}
-                >
-                    {disabled ? (showAd ? 'Watch Ad…' : label) : label}
-                </button>
-            </form>
-        </div>
-    );
-}
-
-// PU Register Inner Form
-function PURegisterInnerForm({ label = 'Register to Connect', style, className }: BaseButtonProps) {
-    const { theme } = useTheme();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isRegistering, setIsRegistering] = useState(false);
-
-    const onSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        const trimmedEmail = email.trim();
-        const trimmedPassword = password.trim();
-
-        if (!trimmedEmail || !trimmedPassword) {
-            setError('Email & Password are required');
-            return;
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(trimmedEmail)) {
-            setError('Please enter a valid email address');
-            return;
-        }
-
-        // Validate password length
-        if (trimmedPassword.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
-        }
-
-        setIsRegistering(true);
-
-        try {
-            const { toast } = await import('sonner');
-
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword, ssid: theme.ssid }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                toast.success('Account created successfully! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1500);
-            } else {
-                toast.error(result.error || 'Registration failed. Please try again.');
-                setError(result.error || 'Registration failed. Please try again.');
-            }
-        } catch (err) {
-            console.error('[REGISTER] Client error:', err);
-            const { toast } = await import('sonner');
-            toast.error('An unexpected error occurred. Please try again.');
-            setError('An unexpected error occurred. Please try again.');
-        } finally {
-            setIsRegistering(false);
-        }
-    };
-
-    return (
-        <div className="inline-block w-full">
-            <div className="flex gap-3 flex-col w-full mb-2">
-                <Label>Email</Label>
-                <Input
-                    type="email"
-                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
-                    placeholder="Enter your email"
-                    disabled={isRegistering}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-            <div className="flex gap-3 flex-col w-full mb-2">
-                <Label>Password</Label>
-                <Input
-                    type="password"
-                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
-                    placeholder="Enter your Password (min 6 characters)"
-                    disabled={isRegistering}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div className='flex gap-2 justify-center items-center'>
-                <Link href="/" className="text-sm text-blue-600 hover:underline">
-                    Already have an account? Login
-                </Link>
-            </div>
-            {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
-            <button
-                onClick={onSubmit}
-                aria-disabled={isRegistering}
-                disabled={isRegistering}
-                className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
-                style={style}
-            >
-                {isRegistering ? 'Creating account...' : label}
-            </button>
-        </div>
-    );
-} function VoucherInnerForm({ label = 'Connect Now', style, className, gatewayConfig }: BaseButtonProps) {
+function NetworkVoucherInner({ label = 'Connect Now', style, className, gatewayConfig }: NetworkFormProps) {
     const { connect, state, showAd, credentials } = useConnect();
     const { formRef, submit } = useProgrammaticSubmit();
     const [voucherCode, setVoucherCode] = useState('');
@@ -276,18 +80,11 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
         e.preventDefault();
         setError(null);
         const trimmed = voucherCode.trim();
-        if (!trimmed) {
-            setError('Voucher code required');
-            return;
-        }
+        if (!trimmed) { setError('Voucher code required'); return; }
         const result = connect(trimmed);
         if (!result.pending) {
-            if ('error' in result) {
-                setError(result.error);
-            } else if ('credentials' in result) {
-                // Defer so hidden inputs update with credentials before submit
-                setTimeout(() => submit(), 0);
-            }
+            if ('error' in result) setError(result.error);
+            else if ('credentials' in result) setTimeout(() => submit(), 0);
         }
     };
 
@@ -325,50 +122,110 @@ function PURegisterInnerForm({ label = 'Register to Connect', style, className }
     );
 }
 
-// Public exported components embedding their own provider
-export function FreeLoginFormButton(props: BaseButtonProps) {
+function NetworkLoginInner({ label = 'Login to Connect', style, className, gatewayConfig }: NetworkFormProps) {
+    const { connect, state, showAd, credentials } = useConnect();
+    const { formRef, submit } = useProgrammaticSubmit();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const action = new AuthService(gatewayConfig).getLoginFormTarget();
+
+    const onSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        const trimmedEmail = email.trim();
+        const trimmedPassword = password.trim();
+        if (!trimmedEmail || !trimmedPassword) { setError('Email & Password are required'); return; }
+        const result = connect(undefined, { username: trimmedEmail, password: trimmedPassword, mode: 'pu-login' });
+        if (!result.pending) {
+            if ('error' in result) setError(result.error);
+            else if ('credentials' in result) setTimeout(() => submit(), 0);
+        }
+    };
+
+    const disabled = showAd || state === 'ad';
+
+    return (
+        <div className="inline-block w-full">
+            <div className="flex gap-3 flex-col w-full mb-2">
+                <Label>Email</Label>
+                <Input
+                    type="email"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
+                    placeholder="Enter your email"
+                    disabled={disabled}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
+            <div className="flex gap-3 flex-col w-full mb-2">
+                <Label>Password</Label>
+                <Input
+                    type="password"
+                    className="w-full border border-gray-300 rounded p-2 mb-3 disabled:opacity-60 bg-white text-gray-800 placeholder:text-gray-400"
+                    placeholder="Enter your password"
+                    disabled={disabled}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
+            <div className="flex gap-2 justify-center items-center">
+                <Link href="/register" className="text-sm text-blue-600 hover:underline">
+                    Register an account
+                </Link>
+            </div>
+            {error && <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-2">{error}</p>}
+            <form ref={formRef} method="GET" action={action} className="inline-block w-full" onSubmit={onSubmit}>
+                {credentials && (
+                    <>
+                        <input type="hidden" name="username" value={credentials.username.toLowerCase()} />
+                        <input type="hidden" name="password" value={credentials.password.toLowerCase()} />
+                    </>
+                )}
+                <button
+                    type="submit"
+                    aria-disabled={disabled}
+                    disabled={disabled}
+                    className={cn(className, 'hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed')}
+                    style={style}
+                >
+                    {disabled ? (showAd ? 'Watch Ad…' : label) : label}
+                </button>
+            </form>
+        </div>
+    );
+}
+
+// ─── Exported Network Auth Components ────────────────────────────────────────
+
+export function NetworkFreeConnectButton(props: NetworkFormProps) {
     return (
         <ConnectProvider enabledAuth={['free']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
-            <FreeInnerButton {...props} />
+            <NetworkFreeInner {...props} />
         </ConnectProvider>
     );
 }
 
-export function VoucherLoginForm(props: BaseButtonProps) {
+export function NetworkVoucherConnectForm(props: NetworkFormProps) {
     return (
         <ConnectProvider enabledAuth={['voucher']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
-            <VoucherInnerForm {...props} />
+            <NetworkVoucherInner {...props} />
         </ConnectProvider>
     );
 }
 
-export function PULoginForm(props: BaseButtonProps) {
+export function NetworkLoginForm(props: NetworkFormProps) {
     return (
         <ConnectProvider enabledAuth={['pu-login']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
-            <PULoginInnerForm {...props} />
+            <NetworkLoginInner {...props} />
         </ConnectProvider>
     );
 }
 
-export function PUPhoneForm(props: BaseButtonProps) {
+export function NetworkPhoneNameForm(props: NetworkFormProps) {
     return (
         <ConnectProvider enabledAuth={['pu-phonename']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
             <PUPhoneInnerForm {...props} />
         </ConnectProvider>
     );
 }
-
-export function PURegisterForm(props: BaseButtonProps) {
-    return (
-        <ConnectProvider enabledAuth={['pu-login']} gatewayConfig={props.gatewayConfig} adGateEnabled={props.adGateEnabled}>
-            <PURegisterInnerForm {...props} />
-        </ConnectProvider>
-    );
-}
-
-// Optional aliases for clarity (commented usage example)
-// export { FreeLoginFormButton as FreeConnectButton, VoucherLoginForm as VoucherConnectForm };
-
-// Usage example:
-// <FreeLoginFormButton className="btn" style={{}} adGateEnabled />
-// <VoucherLoginForm className="btn" style={{}} />

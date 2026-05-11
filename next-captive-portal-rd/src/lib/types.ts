@@ -4,6 +4,19 @@ export interface GatewayConfig {
   freePassword: string;
 }
 
+export interface AuthProfile {
+  profileId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  phoneNumber: string | null;
+  blnkWalletId: string | null;
+  status: 'Active' | 'Suspended';
+  roles: string[];
+  siteIds: string[];
+}
+
 export interface VastAdData {
     mediaFileUrl: string;
     clickThroughUrl?: string;

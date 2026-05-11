@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '@/components/auth/AuthContext';
 import { brandingService, gatewayService } from '@/application/services';
 import { Toaster } from 'sonner';
 import { env } from '@/env';
@@ -49,10 +50,14 @@ export default async function SiteLayout({
         // non-404 errors fall back to default theme
     }
 
+    const tenantId = env.TENANT_ID;
+
     return (
         <ThemeProvider ssid={ssid} initialTheme={branding} showInitialSpinner={!branding}>
-            {children}
-            <Toaster position="top-center" richColors />
+            <AuthProvider ssid={ssid} tenantId={tenantId}>
+                {children}
+                <Toaster position="top-center" richColors />
+            </AuthProvider>
         </ThemeProvider>
     );
 }

@@ -1,10 +1,67 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTheme } from "@/components/theme-provider";
+import { useAuth } from "@/components/auth/AuthContext";
 import { imageUrl } from "@/lib/image-url";
 import AdSection from "@/components/ad-section";
 import AuthMethodsCard from '@/components/home-page/AuthMethodsCard';
 import type { GatewayConfig } from '@/lib/types';
+
+function ProfileBadge() {
+  const { user, logout } = useAuth();
+  const { theme } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  if (!user) {
+    return (
+      <div className="text-xs px-3 py-1 rounded-full font-medium" style={{ background: theme.brandAccent, color: '#fff' }}>
+        Free WiFi
+      </div>
+    );
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md focus:outline-none"
+        style={{ background: theme.brandAccent, color: '#fff' }}
+        aria-label="Profile"
+      >
+        {user.firstName[0]}{user.lastName[0]}
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-10 rounded-xl shadow-xl z-50 min-w-[160px] py-3 px-4 flex flex-col gap-2"
+          style={{ background: theme.brandSecondary, border: `1px solid rgba(255,255,255,0.15)` }}
+        >
+          <p className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+            {user.displayName}
+          </p>
+          <div className="h-px opacity-20" style={{ background: theme.textSecondary }} />
+          <button
+            onClick={() => { logout(); setOpen(false); }}
+            className="text-sm font-medium text-left py-1 opacity-80 hover:opacity-100 transition-opacity"
+            style={{ color: theme.textSecondary }}
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SitePageContent({ gatewayConfig }: { gatewayConfig: GatewayConfig }) {
   const { theme } = useTheme();
@@ -51,9 +108,7 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
           <span className="text-sm font-semibold tracking-wide" style={{ color: theme.textPrimary }}>
             {theme.name}
           </span>
-          <div className="text-xs px-3 py-1 rounded-full font-medium" style={{ background: theme.brandAccent, color: '#fff' }}>
-            Free WiFi
-          </div>
+          <ProfileBadge />
         </div>
 
         <div className="text-center">

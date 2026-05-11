@@ -1,12 +1,12 @@
 "use client";
 import { XCircleIcon } from "lucide-react";
 import { useTheme } from "./theme-provider";
-import { FreeLoginFormButton, PULoginForm, PURegisterForm, VoucherLoginForm, PUPhoneForm } from "./ui/login-form-button";
+import { NetworkFreeConnectButton, NetworkLoginForm, NetworkVoucherConnectForm, NetworkPhoneNameForm } from "./ui/login-form-button";
 import React from "react";
 import Link from "next/link";
 import type { GatewayConfig } from "@/lib/types";
 
-export type PlanVariant = 'free' | 'paid' | 'voucher' | 'pu-login' | 'pu-register' | 'pu-phonename';
+export type PlanVariant = 'free' | 'paid' | 'voucher' | 'pu-login' | 'pu-phonename';
 
 interface PlanCardProps {
     name?: string
@@ -51,7 +51,6 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
     const isFree = variant === 'free';
     const isVoucher = variant === 'voucher';
     const isPULogin = variant === 'pu-login';
-    const isPURegister = variant === 'pu-register';
     const isPUPhone = variant === 'pu-phonename';
 
     const btnStyle = { backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText };
@@ -99,7 +98,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
 
             {isFree && (
                 <ShimmerButton style={btnStyle} className="mt-2 w-full">
-                    <FreeLoginFormButton
+                    <NetworkFreeConnectButton
                         style={btnStyle}
                         className={btnClass}
                         gatewayConfig={gatewayConfig}
@@ -108,7 +107,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
 
             {isVoucher && (
-                <VoucherLoginForm
+                <NetworkVoucherConnectForm
                     className={btnClass}
                     style={btnStyle}
                     label="Connect"
@@ -116,16 +115,8 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
                 />
             )}
 
-            {isPURegister && (
-                <PURegisterForm
-                    className={btnClass}
-                    style={btnStyle}
-                    gatewayConfig={gatewayConfig}
-                />
-            )}
-
             {isPULogin && (
-                <PULoginForm
+                <NetworkLoginForm
                     className={btnClass}
                     style={btnStyle}
                     gatewayConfig={gatewayConfig}
@@ -133,7 +124,7 @@ export function PlanCard({ name, variant, tag, price, totalData, onDismiss, clas
             )}
 
             {isPUPhone && (
-                <PUPhoneForm
+                <NetworkPhoneNameForm
                     className={btnClass}
                     style={btnStyle}
                     gatewayConfig={gatewayConfig}
