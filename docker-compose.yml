@@ -47,7 +47,7 @@ services:
       redis:
         condition: service_healthy
       typesense:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - ./blnk.json:/blnk.json
 
@@ -75,12 +75,6 @@ services:
     command: ["--data-dir", "/data", "--api-key=blnk-api-key", "--listen-port", "8108"]
     volumes:
       - typesense_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8108/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
 
 volumes:
   postgres_data:
