@@ -135,3 +135,33 @@ services:
     env_file:
       - ./env/.env.shared
       - ./env/coj.env
+
+  diepsloot:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/diepsloot.env
+    image: auraconnect-diepsloot:latest
+    ports:
+      - "4009:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/diepsloot.env
+
+  trinitychurch:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/trinitychurch.env
+    image: auraconnect-trinitychurch:latest
+    ports:
+      - "4010:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/trinitychurch.env
