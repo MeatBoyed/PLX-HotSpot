@@ -56,9 +56,9 @@ export default function WelcomePage() {
             <img src={imageUrl(theme.logo, theme.ssid)} alt="Brand logo" className="w-6 h-6 object-contain" />
           </div>
           <span className="text-sm font-semibold tracking-wide" style={{ color: theme.textPrimary }}>{theme.name}</span>
-          {/* <div className="text-xs px-3 py-1 rounded-full font-medium" style={{ background: theme.brandAccent, color: '#fff' }}>
-            Connected ✓
-          </div> */}
+          <div className="text-xs px-3 py-1 rounded-full font-medium" style={{ background: theme.brandAccent, color: '#fff' }}>
+            Free WiFi
+          </div>
         </div>
 
         <div className="text-center">
