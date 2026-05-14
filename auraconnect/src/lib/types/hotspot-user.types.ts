@@ -1,32 +1,64 @@
-export interface ActiveBundle {
-  id: string
-  name: string
-  purchasedAt: string
-  expiresAt: string
-  dataUsedMb: number
-  dataLimitMb?: number
-  durationSeconds?: number
-}
-
 export interface HotspotUser {
   id: string
   email: string
   firstName: string
   lastName: string
-  phone?: string
-  tenantId: string
-  siteId: string
-  walletBalanceCents: number
-  activeBundle?: ActiveBundle
-  registeredAt: string
-  lastLoginAt?: string
-  status: 'active' | 'suspended'
-  radiusId?: string
-  marketingOptIn: boolean
+  displayName: string
+  phoneNumber?: string | null
+  blnkWalletId?: string | null
+  status: string
+  createdAt: string
+  siteIds: string[]
 }
 
-export interface WalletAdjustInput {
-  userId: string
-  amountCents: number  // positive = credit, negative = debit
-  reason: string
+export interface MembershipSummary {
+  siteId: string
+  siteName: string
+  tenantId: string
+  firstVisitAt: string
+  lastVisitAt: string
+}
+
+export interface HotspotUserDetail {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  displayName: string
+  phoneNumber?: string | null
+  blnkIdentityId?: string | null
+  blnkWalletId?: string | null
+  status: string
+  createdAt: string
+  updatedAt: string
+  memberships: MembershipSummary[]
+}
+
+export interface WalletBalance {
+  profileId: string
+  balance: number
+  availableBalance: number
+  currency: string
+}
+
+export interface UserPackage {
+  id: string
+  packageId: string
+  packageName: string
+  siteId: string
+  amountPaid: number
+  currency: string
+  status: string
+  purchasedAt: string
+  expiresAt?: string | null
+}
+
+export interface PagedProfiles {
+  items: HotspotUser[]
+  page: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }

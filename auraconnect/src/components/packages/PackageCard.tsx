@@ -4,7 +4,7 @@ import { Trash2, ToggleLeft, ToggleRight, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatCurrency, formatDuration, formatSpeed } from '@/lib/utils/formatters'
+import { formatCurrency } from '@/lib/utils/formatters'
 import type { Package } from '@/lib/types/package.types'
 
 interface PackageCardProps {
@@ -18,7 +18,7 @@ interface PackageCardProps {
 
 export function PackageCard({ pkg, onEdit, onDelete, onToggle, selected, onSelect }: PackageCardProps) {
   return (
-    <Card className={pkg.active ? '' : 'opacity-60'}>
+    <Card className={pkg.isActive ? '' : 'opacity-60'}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 min-w-0">
@@ -37,21 +37,36 @@ export function PackageCard({ pkg, onEdit, onDelete, onToggle, selected, onSelec
               )}
             </div>
           </div>
-          <Badge variant={pkg.active ? 'default' : 'secondary'} className="shrink-0">
-            {pkg.active ? 'Active' : 'Inactive'}
+          <Badge variant={pkg.isActive ? 'default' : 'secondary'} className="shrink-0">
+            {pkg.isActive ? 'Active' : 'Inactive'}
           </Badge>
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-          <div><span className="text-muted-foreground">Price: </span><span className="font-medium">{pkg.price === 0 ? 'Free' : formatCurrency(pkg.price, pkg.currency)}</span></div>
-          <div><span className="text-muted-foreground">Duration: </span><span className="font-medium">{formatDuration(pkg.durationValue, pkg.durationType)}</span></div>
-          <div><span className="text-muted-foreground">Download: </span><span className="font-medium">{formatSpeed(pkg.downloadSpeedKbps)}</span></div>
-          <div><span className="text-muted-foreground">RADIUS: </span><span className="font-medium font-mono truncate">{pkg.radiusProfile}</span></div>
+          <div>
+            <span className="text-muted-foreground">Price: </span>
+            <span className="font-medium">{pkg.price === 0 ? 'Free' : formatCurrency(pkg.price)}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Sort: </span>
+            <span className="font-medium">#{pkg.sortOrder}</span>
+          </div>
+          <div className="col-span-2">
+            <span className="text-muted-foreground">RADIUS: </span>
+            <span className="font-medium font-mono truncate">{pkg.radiusProfile}</span>
+          </div>
         </div>
 
         <div className="flex gap-1 mt-3 justify-end">
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onToggle} title={pkg.active ? 'Deactivate' : 'Activate'}>
-            {pkg.active ? <ToggleRight className="h-4 w-4 text-green-500" /> : <ToggleLeft className="h-4 w-4" />}
+          <Button
+            size="icon" variant="ghost" className="h-7 w-7"
+            onClick={onToggle}
+            title={pkg.isActive ? 'Deactivate' : 'Activate'}
+          >
+            {pkg.isActive
+              ? <ToggleRight className="h-4 w-4 text-green-500" />
+              : <ToggleLeft className="h-4 w-4" />
+            }
           </Button>
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onEdit}>
             <Pencil className="h-3.5 w-3.5" />

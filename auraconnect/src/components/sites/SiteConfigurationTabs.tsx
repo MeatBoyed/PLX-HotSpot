@@ -27,6 +27,8 @@ export function SiteConfigurationTabs({ tenantId, siteId }: SiteConfigurationTab
     { label: 'Packages', href: `${base}/packages`, segment: 'packages' },
     { label: 'RADIUS', href: `${base}/radius`, segment: 'radius' },
     { label: 'Marketing', href: `${base}/marketing`, segment: 'marketing' },
+    { label: 'Users', href: `${base}/users`, segment: 'users' },
+    { label: 'Transactions', href: `${base}/transactions`, segment: 'transactions' },
   ]
 
   return (

@@ -1,75 +1,128 @@
-import { mockHotspotUsers } from '@/lib/mock-data/hotspot-users'
-import { mockTransactions } from '@/lib/mock-data/transactions'
-import type { HotspotUser, WalletAdjustInput } from '@/lib/types/hotspot-user.types'
-import type { Transaction } from '@/lib/types/transaction.types'
+import { profilesApi } from '@/lib/infrastructure/api/profiles.api'
+import { walletApi } from '@/lib/infrastructure/api/wallet.api'
+import type { components } from '@/lib/infrastructure/api/schema'
+import type {
+  HotspotUser,
+  HotspotUserDetail,
+  WalletBalance,
+  UserPackage,
+  PagedProfiles,
+} from '@/lib/types/hotspot-user.types'
+import type { ProfileListParams } from '@/lib/infrastructure/api/profiles.api'
 
-let users = [...mockHotspotUsers]
-let transactions = [...mockTransactions]
+type ApiListItem = components['schemas']['AdminProfileListItem']
+type ApiDetail = components['schemas']['AdminProfileDetail']
+type ApiBalance = components['schemas']['WalletBalanceResponse']
+type ApiPackage = components['schemas']['UserPackageResponse']
+type ApiMembership = components['schemas']['AdminMembershipSummary']
 
-function delay(ms = 400): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms))
+function toHotspotUser(item: ApiListItem): HotspotUser {
+  return {
+    id: item.id ?? '',
+    email: item.email ?? '',
+    firstName: item.firstName ?? '',
+    lastName: item.lastName ?? '',
+    displayName: item.displayName ?? '',
+    phoneNumber: item.phoneNumber,
+    blnkWalletId: item.blnkWalletId,
+    status: item.status ?? 'active',
+    createdAt: item.createdAt ?? '',
+    siteIds: item.siteIds ?? [],
+  }
+}
+
+function toHotspotUserDetail(detail: ApiDetail): HotspotUserDetail {
+  return {
+    id: detail.id ?? '',
+    email: detail.email ?? '',
+    firstName: detail.firstName ?? '',
+    lastName: detail.lastName ?? '',
+    displayName: detail.displayName ?? '',
+    phoneNumber: detail.phoneNumber,
+    blnkIdentityId: detail.blnkIdentityId,
+    blnkWalletId: detail.blnkWalletId,
+    status: detail.status ?? 'active',
+    createdAt: detail.createdAt ?? '',
+    updatedAt: detail.updatedAt ?? '',
+    memberships: (detail.memberships ?? []).map((m: ApiMembership) => ({
+      siteId: m.siteId ?? '',
+      siteName: m.siteName ?? '',
+      tenantId: m.tenantId ?? '',
+      firstVisitAt: m.firstVisitAt ?? '',
+      lastVisitAt: m.lastVisitAt ?? '',
+    })),
+  }
+}
+
+function toWalletBalance(api: ApiBalance): WalletBalance {
+  return {
+    profileId: api.profileId ?? '',
+    balance: Number(api.balance ?? 0),
+    availableBalance: Number(api.availableBalance ?? 0),
+    currency: api.currency ?? 'ZAR',
+  }
+}
+
+function toUserPackage(api: ApiPackage): UserPackage {
+  return {
+    id: api.id ?? '',
+    packageId: api.packageId ?? '',
+    packageName: api.packageName ?? '',
+    siteId: api.siteId ?? '',
+    amountPaid: Number(api.amountPaid ?? 0),
+    currency: api.currency ?? 'ZAR',
+    status: api.status ?? '',
+    purchasedAt: api.purchasedAt ?? '',
+    expiresAt: api.expiresAt,
+  }
 }
 
 export const hotspotUserService = {
-  async getAll(): Promise<HotspotUser[]> {
-    await delay()
-    return [...users]
-  },
-
-  async getByTenantId(tenantId: string): Promise<HotspotUser[]> {
-    await delay()
-    return users.filter((u) => u.tenantId === tenantId)
-  },
-
-  async getBySiteId(siteId: string): Promise<HotspotUser[]> {
-    await delay()
-    return users.filter((u) => u.siteId === siteId)
-  },
-
-  async getById(id: string): Promise<HotspotUser | null> {
-    await delay()
-    return users.find((u) => u.id === id) ?? null
-  },
-
-  async getTransactions(userId: string): Promise<Transaction[]> {
-    await delay()
-    return transactions
-      .filter((t) => t.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  },
-
-  async suspend(id: string): Promise<HotspotUser> {
-    await delay()
-    const idx = users.findIndex((u) => u.id === id)
-    if (idx === -1) throw new Error(`User ${id} not found`)
-    users = users.map((u) => (u.id === id ? { ...u, status: 'suspended' as const } : u))
-    return users[idx]
-  },
-
-  async adjustWallet({ userId, amountCents, reason }: WalletAdjustInput): Promise<HotspotUser> {
-    await delay()
-    const idx = users.findIndex((u) => u.id === userId)
-    if (idx === -1) throw new Error(`User ${userId} not found`)
-    const user = users[idx]
-    const newBalance = Math.max(0, user.walletBalanceCents + amountCents)
-    users = users.map((u) => (u.id === userId ? { ...u, walletBalanceCents: newBalance } : u))
-    // Create audit transaction
-    const txn: Transaction = {
-      id: `txn_adj_${Date.now()}`,
-      userId,
-      userEmail: user.email,
-      userFullName: `${user.firstName} ${user.lastName}`,
-      tenantId: user.tenantId,
-      siteId: user.siteId,
-      type: 'adjustment',
-      amountCents,
-      status: 'completed',
-      paymentGateway: 'manual',
-      description: `Manual adjustment: ${reason}`,
-      createdAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
+  async getAll(params: ProfileListParams = {}): Promise<PagedProfiles> {
+    const paged = await profilesApi.getAll(params)
+    return {
+      items: (paged.items ?? []).map(toHotspotUser),
+      page: Number(paged.page ?? 1),
+      pageSize: Number(paged.pageSize ?? 20),
+      totalCount: Number(paged.totalCount ?? 0),
+      totalPages: Number(paged.totalPages ?? 1),
+      hasNextPage: paged.hasNextPage ?? false,
+      hasPreviousPage: paged.hasPreviousPage ?? false,
     }
-    transactions = [...transactions, txn]
-    return { ...users[idx], walletBalanceCents: newBalance }
+  },
+
+  async getById(profileId: string): Promise<HotspotUserDetail | null> {
+    const detail = await profilesApi.getById(profileId)
+    if (!detail) return null
+    return toHotspotUserDetail(detail)
+  },
+
+  async getWalletBalance(profileId: string): Promise<WalletBalance | null> {
+    const api = await walletApi.getProfileBalance(profileId)
+    if (!api) return null
+    return toWalletBalance(api)
+  },
+
+  async getPackages(profileId: string): Promise<UserPackage[]> {
+    const packages = await walletApi.getProfilePackages(profileId)
+    return packages.map(toUserPackage)
+  },
+
+  async updateStatus(profileId: string, status: string): Promise<HotspotUserDetail> {
+    const detail = await profilesApi.updateStatus(profileId, { status })
+    return toHotspotUserDetail(detail)
+  },
+
+  async update(profileId: string, firstName: string, lastName: string, phoneNumber?: string | null): Promise<HotspotUserDetail> {
+    const detail = await profilesApi.update(profileId, { firstName, lastName, phoneNumber })
+    return toHotspotUserDetail(detail)
+  },
+
+  async softDelete(profileId: string): Promise<void> {
+    await profilesApi.softDelete(profileId)
+  },
+
+  async hardDelete(profileId: string): Promise<void> {
+    await profilesApi.hardDelete(profileId)
   },
 }

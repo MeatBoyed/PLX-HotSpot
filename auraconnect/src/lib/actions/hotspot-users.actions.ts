@@ -1,12 +1,24 @@
 'use server'
 
 import { hotspotUserService } from '@/lib/services/hotspot-user.service'
-import type { WalletAdjustInput } from '@/lib/types/hotspot-user.types'
 
-export async function suspendHotspotUserAction(id: string) {
-  return hotspotUserService.suspend(id)
+export async function updateProfileStatusAction(profileId: string, status: string) {
+  return hotspotUserService.updateStatus(profileId, status)
 }
 
-export async function adjustWalletAction(input: WalletAdjustInput) {
-  return hotspotUserService.adjustWallet(input)
+export async function updateProfileAction(
+  profileId: string,
+  firstName: string,
+  lastName: string,
+  phoneNumber?: string | null,
+) {
+  return hotspotUserService.update(profileId, firstName, lastName, phoneNumber)
+}
+
+export async function softDeleteProfileAction(profileId: string) {
+  return hotspotUserService.softDelete(profileId)
+}
+
+export async function hardDeleteProfileAction(profileId: string) {
+  return hotspotUserService.hardDelete(profileId)
 }

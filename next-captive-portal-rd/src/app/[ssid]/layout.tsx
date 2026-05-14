@@ -4,7 +4,7 @@ import { AuthProvider } from '@/components/auth/AuthContext';
 import { brandingService, gatewayService } from '@/application/services';
 import { Toaster } from 'sonner';
 import { env } from '@/env';
-import { redirect } from 'next/navigation';
+import BottomNav from '@/components/layout/BottomNav';
 
 export async function generateMetadata({
     params,
@@ -44,10 +44,8 @@ export default async function SiteLayout({
             gatewayService.get(ssid).catch(() => undefined),
         ]);
         branding = b;
-    } catch (e) {
-        const status = (e as Record<string, unknown>)?.status;
-        if (status === 404) redirect('/');
-        // non-404 errors fall back to default theme
+    } catch {
+        // Fall back to default theme — branding/gateway errors are non-fatal
     }
 
     const tenantId = env.TENANT_ID;
@@ -56,6 +54,7 @@ export default async function SiteLayout({
         <ThemeProvider ssid={ssid} initialTheme={branding} showInitialSpinner={!branding}>
             <AuthProvider ssid={ssid} tenantId={tenantId}>
                 {children}
+                <BottomNav />
                 <Toaster position="top-center" richColors />
             </AuthProvider>
         </ThemeProvider>

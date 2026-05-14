@@ -3,185 +3,289 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Wallet, Package, Activity, Radio, UserX, Building2, MapPin } from 'lucide-react'
+import { ArrowLeft, Wallet, Package, Activity, UserX, UserCheck, MapPin, Building2, Clock, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { TransactionTable } from '@/components/transactions/TransactionTable'
-import { formatCurrency, formatDate, formatDateTime, formatRelativeTime } from '@/lib/utils/formatters'
-import { suspendHotspotUserAction } from '@/lib/actions/hotspot-users.actions'
-import type { HotspotUser } from '@/lib/types/hotspot-user.types'
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
+import { updateProfileStatusAction, softDeleteProfileAction, hardDeleteProfileAction } from '@/lib/actions/hotspot-users.actions'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import type { HotspotUserDetail, WalletBalance, UserPackage } from '@/lib/types/hotspot-user.types'
 import type { Transaction } from '@/lib/types/transaction.types'
-import type { Site } from '@/lib/types/site.types'
-import type { Tenant } from '@/lib/types/tenant.types'
 
-interface HotspotUserDetailClientProps {
-  user: HotspotUser
+interface Props {
+  user: HotspotUserDetail
+  walletBalance: WalletBalance | null
+  packages: UserPackage[]
   transactions: Transaction[]
-  sites: Site[]
-  tenants: Tenant[]
 }
 
-export function HotspotUserDetailClient({ user: initialUser, transactions, sites, tenants }: HotspotUserDetailClientProps) {
+function statusVariant(status: string): 'outline' | 'destructive' | 'secondary' {
+  if (status.toLowerCase() === 'active') return 'outline'
+  if (status.toLowerCase() === 'suspended') return 'destructive'
+  return 'secondary'
+}
+
+export function HotspotUserDetailClient({ user: initialUser, walletBalance, packages, transactions }: Props) {
   const router = useRouter()
   const [user, setUser] = useState(initialUser)
-  const [suspending, setSuspending] = useState(false)
+  const [updating, setUpdating] = useState(false)
+  const [softDeleteOpen, setSoftDeleteOpen] = useState(false)
+  const [hardDeleteOpen, setHardDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
-  const siteNames = Object.fromEntries(sites.map((s) => [s.id, s.name]))
-  const tenantNames = Object.fromEntries(tenants.map((t) => [t.id, t.name]))
-  const site = sites.find((s) => s.id === user.siteId)
-  const tenant = tenants.find((t) => t.id === user.tenantId)
+  const isSuspended = user.status.toLowerCase() === 'suspended'
 
-  const handleSuspend = async () => {
-    setSuspending(true)
+  const handleSoftDelete = async () => {
+    setDeleting(true)
     try {
-      await suspendHotspotUserAction(user.id)
-      setUser((u) => ({ ...u, status: 'suspended' as const }))
-      toast.success('User suspended')
-    } finally {
-      setSuspending(false)
+      await softDeleteProfileAction(user.id)
+      toast.success('User deleted')
+      router.push('/admin/hotspot-users')
+    } catch {
+      toast.error('Failed to delete user')
+      setDeleting(false)
     }
   }
 
-  const bundleProgress = user.activeBundle?.dataLimitMb
-    ? Math.min(100, (user.activeBundle.dataUsedMb / user.activeBundle.dataLimitMb) * 100)
-    : null
+  const handleHardDelete = async () => {
+    setDeleting(true)
+    try {
+      await hardDeleteProfileAction(user.id)
+      toast.success('User permanently deleted')
+      router.push('/admin/hotspot-users')
+    } catch {
+      toast.error('Failed to permanently delete user')
+      setDeleting(false)
+    }
+  }
+
+  const handleStatusToggle = async () => {
+    setUpdating(true)
+    try {
+      const newStatus = isSuspended ? 'Active' : 'Suspended'
+      const updated = await updateProfileStatusAction(user.id, newStatus)
+      setUser(updated)
+      toast.success(`User ${newStatus.toLowerCase()}`)
+    } catch {
+      toast.error('Failed to update user status')
+    } finally {
+      setUpdating(false)
+    }
+  }
 
   return (
     <div className="max-w-4xl space-y-6">
-      {/* Back */}
-      <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground"
-        onClick={() => router.push('/admin/hotspot-users')}>
+      <Button
+        variant="ghost" size="sm" className="-ml-2 text-muted-foreground"
+        onClick={() => router.push('/admin/hotspot-users')}
+      >
         <ArrowLeft className="h-4 w-4 mr-1.5" /> Hotspot Users
       </Button>
 
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <Avatar className="h-14 w-14">
-          <AvatarFallback className="text-lg font-bold">{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
+          <AvatarFallback className="text-lg font-bold">
+            {user.firstName[0]}{user.lastName[0]}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold">{user.firstName} {user.lastName}</h1>
-            <Badge variant={user.status === 'active' ? 'outline' : 'destructive'}>{user.status}</Badge>
+            <Badge variant={statusVariant(user.status)}>{user.status}</Badge>
           </div>
           <p className="text-muted-foreground text-sm">{user.email}</p>
-          {user.phone && <p className="text-muted-foreground text-sm">{user.phone}</p>}
-          {/* Tenant / Site origin */}
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            {tenant && (
-              <div className="flex items-center gap-1.5 text-sm">
-                <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="font-medium">{tenant.name}</span>
-              </div>
-            )}
-            {tenant && site && <span className="text-muted-foreground text-xs">›</span>}
-            {site && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                <span>{site.name}</span>
-                <span className="font-mono text-xs">({site.ssid})</span>
-              </div>
-            )}
-          </div>
+          {user.phoneNumber && <p className="text-muted-foreground text-sm">{user.phoneNumber}</p>}
           <p className="text-xs text-muted-foreground mt-1">
-            Registered {formatDate(user.registeredAt)}
-            {user.lastLoginAt && ` · Last login ${formatRelativeTime(user.lastLoginAt)}`}
+            Registered {formatDate(user.createdAt)}
           </p>
         </div>
-        {user.status === 'active' && (
-          <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/5"
-            onClick={handleSuspend} disabled={suspending}>
-            <UserX className="h-4 w-4 mr-2" />
-            {suspending ? 'Suspending…' : 'Suspend User'}
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="sm"
+          className={isSuspended
+            ? 'text-green-700 border-green-300 hover:bg-green-50'
+            : 'text-destructive border-destructive/30 hover:bg-destructive/5'
+          }
+          onClick={handleStatusToggle}
+          disabled={updating}
+        >
+          {isSuspended ? (
+            <><UserCheck className="h-4 w-4 mr-2" />{updating ? 'Activating…' : 'Activate User'}</>
+          ) : (
+            <><UserX className="h-4 w-4 mr-2" />{updating ? 'Suspending…' : 'Suspend User'}</>
+          )}
+        </Button>
       </div>
 
       <Separator />
 
-      {/* Cards row */}
+      {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Wallet */}
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center gap-2">
             <Wallet className="h-4 w-4 text-primary" />
             <CardTitle className="text-sm">Wallet Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{formatCurrency(user.walletBalanceCents / 100)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {transactions.filter(t => t.type === 'topup' && t.status === 'completed').length} top-up{transactions.filter(t => t.type === 'topup' && t.status === 'completed').length !== 1 ? 's' : ''} total
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Active bundle */}
-        <Card>
-          <CardHeader className="pb-2 flex flex-row items-center gap-2">
-            <Package className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm">Active Bundle</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {user.activeBundle ? (
-              <div className="space-y-1">
-                <p className="font-semibold">{user.activeBundle.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  Expires {formatDateTime(user.activeBundle.expiresAt)}
+            {walletBalance ? (
+              <>
+                <p className="text-2xl font-bold tabular-nums">
+                  {formatCurrency(walletBalance.balance, walletBalance.currency)}
                 </p>
-                {bundleProgress !== null ? (
-                  <>
-                    <div className="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
-                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${bundleProgress}%` }} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {user.activeBundle.dataUsedMb} MB / {user.activeBundle.dataLimitMb} MB used
-                    </p>
-                  </>
-                ) : (
+                {walletBalance.availableBalance !== walletBalance.balance && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {user.activeBundle.dataUsedMb} MB used · unlimited data
+                    Available: {formatCurrency(walletBalance.availableBalance, walletBalance.currency)}
                   </p>
                 )}
-              </div>
+              </>
             ) : (
-              <p className="text-sm text-muted-foreground">No active bundle</p>
+              <p className="text-sm text-muted-foreground">No wallet linked</p>
             )}
           </CardContent>
         </Card>
 
-        {/* RADIUS / Info */}
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center gap-2">
-            <Radio className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm">Account Info</CardTitle>
+            <Package className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm">Packages</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2.5">
-            <div>
-              <p className="text-xs text-muted-foreground">RADIUS ID</p>
-              <p className="text-xs font-mono">{user.radiusId ?? '—'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Marketing</p>
-              <Badge variant={user.marketingOptIn ? 'default' : 'secondary'} className="text-xs">
-                {user.marketingOptIn ? 'Opted in' : 'Opted out'}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Total spent</p>
-              <p className="text-sm font-medium tabular-nums">
-                {formatCurrency(
-                  Math.abs(transactions.filter(t => t.type === 'purchase' && t.status === 'completed').reduce((s, t) => s + t.amountCents, 0)) / 100
-                )}
-              </p>
-            </div>
+          <CardContent>
+            <p className="text-2xl font-bold">{packages.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {packages.filter((p) => p.status.toLowerCase() === 'active').length} active
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 flex flex-row items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm">Sites Visited</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{user.memberships.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {user.memberships.length === 1 ? '1 location' : `${user.memberships.length} locations`}
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Transaction history */}
+      {/* Memberships */}
+      {user.memberships.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-semibold">Site Memberships</h2>
+          </div>
+          <div className="rounded-lg border overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Site</TableHead>
+                  <TableHead>First Visit</TableHead>
+                  <TableHead>Last Visit</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {user.memberships.map((m) => (
+                  <TableRow key={m.siteId}>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-medium">{m.siteName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {m.firstVisitAt ? formatDateTime(m.firstVisitAt) : '—'}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {m.lastVisitAt ? formatDateTime(m.lastVisitAt) : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* Packages */}
+      {packages.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-semibold">Purchased Packages</h2>
+          </div>
+          <div className="rounded-lg border overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Package</TableHead>
+                  <TableHead>Amount Paid</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Purchased</TableHead>
+                  <TableHead>Expires</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {packages.map((pkg) => (
+                  <TableRow key={pkg.id}>
+                    <TableCell className="text-sm font-medium">{pkg.packageName}</TableCell>
+                    <TableCell className="text-sm tabular-nums">
+                      {formatCurrency(pkg.amountPaid, pkg.currency)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={pkg.status.toLowerCase() === 'active' ? 'outline' : 'secondary'}>
+                        {pkg.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {formatDateTime(pkg.purchasedAt)}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {pkg.expiresAt ? formatDateTime(pkg.expiresAt) : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* Wallet IDs */}
+      {(user.blnkIdentityId || user.blnkWalletId) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4" /> Blnk Integration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {user.blnkIdentityId && (
+              <div>
+                <p className="text-xs text-muted-foreground">Identity ID</p>
+                <p className="text-xs font-mono">{user.blnkIdentityId}</p>
+              </div>
+            )}
+            {user.blnkWalletId && (
+              <div>
+                <p className="text-xs text-muted-foreground">Wallet ID</p>
+                <p className="text-xs font-mono">{user.blnkWalletId}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transactions */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-muted-foreground" />
@@ -189,10 +293,69 @@ export function HotspotUserDetailClient({ user: initialUser, transactions, sites
         </div>
         <TransactionTable
           transactions={transactions}
-          siteNames={siteNames}
           filename={`user-${user.id}-transactions`}
+          compact
         />
       </div>
+
+      {/* Danger Zone */}
+      <div className="rounded-lg border border-destructive/40 p-4 space-y-3">
+        <div className="flex items-center gap-2 text-destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <h2 className="font-semibold text-sm">Danger Zone</h2>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-medium">Delete User</p>
+            <p className="text-xs text-muted-foreground">Marks this user as deleted. They will not be able to log in but their data is preserved.</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive border-destructive/30 hover:bg-destructive/5 shrink-0"
+            onClick={() => setSoftDeleteOpen(true)}
+            disabled={deleting || user.status.toLowerCase() === 'deleted'}
+          >
+            <UserX className="h-4 w-4 mr-2" />
+            {user.status.toLowerCase() === 'deleted' ? 'Already Deleted' : 'Delete User'}
+          </Button>
+        </div>
+        <Separator />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-medium">Permanently Delete</p>
+            <p className="text-xs text-muted-foreground">Irreversibly removes this user and all associated data. This cannot be undone.</p>
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="shrink-0"
+            onClick={() => setHardDeleteOpen(true)}
+            disabled={deleting}
+          >
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Permanently Delete
+          </Button>
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={softDeleteOpen}
+        onOpenChange={setSoftDeleteOpen}
+        title="Delete User"
+        description={`This will mark ${user.firstName} ${user.lastName} as deleted. They will not be able to log in, but their data is preserved and can be recovered.`}
+        loading={deleting}
+        onConfirm={handleSoftDelete}
+      />
+
+      <ConfirmDialog
+        open={hardDeleteOpen}
+        onOpenChange={setHardDeleteOpen}
+        title="Permanently Delete User"
+        description={`This will permanently delete ${user.firstName} ${user.lastName} and all associated data. This action cannot be undone.`}
+        loading={deleting}
+        onConfirm={handleHardDelete}
+      />
     </div>
   )
 }

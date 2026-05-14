@@ -8,7 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency, formatRelativeTime } from '@/lib/utils/formatters'
 import { cn } from '@/lib/utils'
 import type { Bundle } from '@/lib/types/bundle.types'
-import type { Transaction } from '@/lib/types/transaction.types'
+
+interface PortalTransaction {
+  id: string
+  type: string
+  amountCents: number
+  description: string
+  createdAt: string
+}
 
 const ACCENT = '#b8cc00'
 const NAVY = '#0d2238'
@@ -40,7 +47,7 @@ const MOCK_BUNDLES: Bundle[] = [
     radiusProfile: '30day_premium', isActive: true, sortOrder: 3 },
 ]
 
-const MOCK_TRANSACTIONS: Pick<Transaction, 'id' | 'type' | 'amountCents' | 'description' | 'createdAt'>[] = [
+const MOCK_TRANSACTIONS: PortalTransaction[] = [
   { id: 't1', type: 'topup', amountCents: 5000, description: 'Wallet top-up via PayFast', createdAt: '2025-05-01T09:00:00Z' },
   { id: 't2', type: 'purchase', amountCents: -1000, description: 'Bundle — 24hr Access', createdAt: '2025-05-04T18:30:00Z' },
 ]

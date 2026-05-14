@@ -5,16 +5,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Wallet, PackageCheck, Eye } from 'lucide-react'
-import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils/formatters'
+import { Eye } from 'lucide-react'
+import { formatDate } from '@/lib/utils/formatters'
 import type { HotspotUser } from '@/lib/types/hotspot-user.types'
 
 interface HotspotUserTableProps {
   users: HotspotUser[]
-  siteNames: Record<string, string>
 }
 
-export function HotspotUserTable({ users, siteNames }: HotspotUserTableProps) {
+function statusVariant(status: string): 'outline' | 'destructive' | 'secondary' {
+  if (status.toLowerCase() === 'active') return 'outline'
+  if (status.toLowerCase() === 'suspended') return 'destructive'
+  return 'secondary'
+}
+
+export function HotspotUserTable({ users }: HotspotUserTableProps) {
   const router = useRouter()
 
   return (
@@ -23,10 +28,9 @@ export function HotspotUserTable({ users, siteNames }: HotspotUserTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
-            <TableHead>Site</TableHead>
-            <TableHead>Wallet</TableHead>
-            <TableHead>Active Bundle</TableHead>
+            <TableHead>Phone</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Sites</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="w-12" />
           </TableRow>
@@ -34,13 +38,17 @@ export function HotspotUserTable({ users, siteNames }: HotspotUserTableProps) {
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                No hotspot users found
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                No users found
               </TableCell>
             </TableRow>
           ) : (
             users.map((user) => (
-              <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => router.push(`/admin/hotspot-users/${user.id}`)}>
+              <TableRow
+                key={user.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => router.push(`/admin/hotspot-users/${user.id}`)}
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
@@ -55,35 +63,24 @@ export function HotspotUserTable({ users, siteNames }: HotspotUserTableProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {siteNames[user.siteId] ?? user.siteId}
+                  {user.phoneNumber ?? '—'}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1.5 text-sm font-medium">
-                    <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-                    {formatCurrency(user.walletBalanceCents / 100)}
-                  </div>
+                  <Badge variant={statusVariant(user.status)}>{user.status}</Badge>
                 </TableCell>
-                <TableCell>
-                  {user.activeBundle ? (
-                    <div className="flex items-center gap-1.5">
-                      <PackageCheck className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                      <span className="text-xs font-medium text-green-700 dark:text-green-400">{user.activeBundle.name}</span>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.status === 'active' ? 'outline' : 'destructive'}>
-                    {user.status}
-                  </Badge>
+                <TableCell className="text-sm text-muted-foreground">
+                  {user.siteIds.length > 0 ? `${user.siteIds.length} site${user.siteIds.length !== 1 ? 's' : ''}` : '—'}
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {formatDate(user.registeredAt)}
+                  {user.createdAt ? formatDate(user.createdAt) : '—'}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"
-                    onClick={() => router.push(`/admin/hotspot-users/${user.id}`)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => router.push(`/admin/hotspot-users/${user.id}`)}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </TableCell>

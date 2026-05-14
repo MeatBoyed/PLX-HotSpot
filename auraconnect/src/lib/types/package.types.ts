@@ -1,38 +1,32 @@
-export type PackageDurationType = 'minutes' | 'hours' | 'days' | 'unlimited'
-
 export interface Package {
   id: string
   siteId: string
   name: string
-  description?: string
+  description?: string | null
   price: number
-  currency: string
-  durationValue: number
-  durationType: PackageDurationType
-  dataLimitMb?: number
-  downloadSpeedKbps?: number
-  uploadSpeedKbps?: number
   radiusProfile: string
-  active: boolean
+  radiusProfileId?: number | null
+  isActive: boolean
   sortOrder: number
   createdAt: string
   updatedAt: string
 }
 
 export interface CreatePackageInput {
-  siteId: string
   name: string
-  description?: string
+  description?: string | null
   price: number
-  currency?: string
-  durationValue: number
-  durationType: PackageDurationType
-  dataLimitMb?: number
-  downloadSpeedKbps?: number
-  uploadSpeedKbps?: number
   radiusProfile: string
-  active?: boolean
+  radiusProfileId?: number | null
   sortOrder?: number
 }
 
-export interface UpdatePackageInput extends Partial<Omit<CreatePackageInput, 'siteId'>> {}
+export interface UpdatePackageInput {
+  name?: string | null
+  description?: string | null
+  price?: number | null
+  radiusProfile?: string | null
+  radiusProfileId?: number | null
+  isActive?: boolean | null
+  sortOrder?: number | null
+}

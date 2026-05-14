@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { Plus, Pencil, Wifi, Users, Database, UsersRound, CreditCard, ArrowRight } from 'lucide-react'
+import { Pencil, Wifi, Database, UsersRound, CreditCard, ArrowRight } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { SiteCard } from '@/components/sites/SiteCard'
 import { MetricCard } from '@/components/dashboard/MetricCard'
@@ -15,7 +15,7 @@ import { siteService } from '@/lib/services/site.service'
 import { dashboardService } from '@/lib/services/dashboard.service'
 import { hotspotUserService } from '@/lib/services/hotspot-user.service'
 import { transactionService } from '@/lib/services/transaction.service'
-import { formatCurrency, formatDate, formatDateTime, formatDataSize } from '@/lib/utils/formatters'
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
 import { AddSiteButton } from './AddSiteButton'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -24,29 +24,29 @@ interface Props {
   params: Promise<{ tenantId: string }>
 }
 
-const txTypeBadge: Record<string, 'default' | 'secondary' | 'outline'> = {
-  topup: 'default', purchase: 'secondary', refund: 'outline', adjustment: 'secondary',
+function txBadgeVariant(type: string): 'default' | 'secondary' | 'outline' {
+  const t = type.toLowerCase()
+  if (t === 'topup') return 'default'
+  if (t === 'purchase') return 'secondary'
+  return 'outline'
 }
 
 async function TenantContent({ tenantId }: { tenantId: string }) {
-  const [tenant, sites, metrics, hotspotUsers, transactions] = await Promise.all([
+  const [tenant, sites, metrics, pagedUsers, pagedTxns] = await Promise.all([
     tenantService.getById(tenantId),
     siteService.getByTenantId(tenantId),
     dashboardService.getTenantMetrics(tenantId),
-    hotspotUserService.getByTenantId(tenantId),
-    transactionService.getByTenantId(tenantId),
+    hotspotUserService.getAll({ tenantId, pageSize: 5 }),
+    transactionService.getAll({ tenantId, pageSize: 5 }),
   ])
 
   if (!tenant) notFound()
 
-  const siteNames = Object.fromEntries(sites.map((s) => [s.id, s.name]))
-  const recentUsers = [...hotspotUsers]
-    .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime())
-    .slice(0, 5)
-  const recentTxns = transactions.slice(0, 5)
-  const totalRevenueCents = transactions
-    .filter((t) => t.type === 'topup' && t.status === 'completed')
-    .reduce((s, t) => s + t.amountCents, 0)
+  const recentUsers = pagedUsers.items
+  const recentTxns = pagedTxns.items
+  const totalRevenue = pagedTxns.items
+    .filter((t) => t.type.toLowerCase() === 'topup' && t.status.toLowerCase() === 'completed')
+    .reduce((s, t) => s + t.amount, 0)
 
   return (
     <>
@@ -69,11 +69,11 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <MetricCard title="Active Connections" value={metrics.totalActiveConnections.toLocaleString()}
           icon={<Wifi className="h-5 w-5" />} />
-        <MetricCard title="Hotspot Users" value={hotspotUsers.length.toLocaleString()}
+        <MetricCard title="Hotspot Users" value={pagedUsers.totalCount.toLocaleString()}
           icon={<UsersRound className="h-5 w-5" />} />
-        <MetricCard title="Total Revenue" value={formatCurrency(totalRevenueCents / 100)}
+        <MetricCard title="Total Revenue" value={formatCurrency(totalRevenue)}
           icon={<CreditCard className="h-5 w-5" />} />
-        <MetricCard title="Data Used Today" value={formatDataSize(metrics.totalDataUsageGb)}
+        <MetricCard title="Data Used Today" value={`${metrics.totalDataUsageGb.toFixed(1)} GB`}
           icon={<Database className="h-5 w-5" />} />
       </div>
 
@@ -93,7 +93,7 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Hotspot Users</h2>
-            <Link href={`/admin/hotspot-users?tenant=${tenantId}`}>
+            <Link href={`/admin/hotspot-users?tenantId=${tenantId}`}>
               <Button variant="ghost" size="sm" className="text-xs">
                 View all <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
@@ -104,14 +104,13 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Wallet</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Joined</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentUsers.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6 text-sm">No users yet</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6 text-sm">No users yet</TableCell></TableRow>
                 ) : recentUsers.map((u) => (
                   <TableRow key={u.id}>
                     <TableCell>
@@ -125,9 +124,12 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
                         </div>
                       </Link>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{siteNames[u.siteId] ?? u.siteId}</TableCell>
-                    <TableCell className="text-sm font-medium tabular-nums">{formatCurrency(u.walletBalanceCents / 100)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{formatDate(u.registeredAt)}</TableCell>
+                    <TableCell>
+                      <Badge variant={u.status.toLowerCase() === 'active' ? 'outline' : 'destructive'} className="text-xs">
+                        {u.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{formatDate(u.createdAt)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -139,7 +141,7 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Transactions</h2>
-            <Link href={`/admin/transactions?tenant=${tenantId}`}>
+            <Link href={`/admin/transactions?tenantId=${tenantId}`}>
               <Button variant="ghost" size="sm" className="text-xs">
                 View all <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
@@ -149,7 +151,7 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
+                  <TableHead>Reference</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -160,18 +162,13 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
                   <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6 text-sm">No transactions yet</TableCell></TableRow>
                 ) : recentTxns.map((t) => (
                   <TableRow key={t.id}>
+                    <TableCell className="text-xs font-mono text-muted-foreground truncate max-w-32">{t.reference}</TableCell>
                     <TableCell>
-                      <p className="text-sm font-medium">{t.userFullName}</p>
-                      <p className="text-xs text-muted-foreground">{siteNames[t.siteId] ?? t.siteId}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={txTypeBadge[t.type] ?? 'secondary'} className="capitalize text-xs">
-                        {t.type}
-                      </Badge>
+                      <Badge variant={txBadgeVariant(t.type)} className="capitalize text-xs">{t.type}</Badge>
                     </TableCell>
                     <TableCell className={cn('text-sm font-semibold tabular-nums',
-                      t.amountCents > 0 ? 'text-green-700 dark:text-green-400' : '')}>
-                      {t.amountCents > 0 ? '+' : ''}{formatCurrency(t.amountCents / 100)}
+                      t.amount > 0 ? 'text-green-700 dark:text-green-400' : '')}>
+                      {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount, t.currency)}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(t.createdAt)}</TableCell>
                   </TableRow>

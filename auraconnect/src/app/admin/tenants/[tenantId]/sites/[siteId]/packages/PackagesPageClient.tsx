@@ -34,26 +34,26 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const handleCreate = async (values: Omit<CreatePackageInput, 'siteId'>) => {
+  const handleCreate = async (values: CreatePackageInput | UpdatePackageInput) => {
     setSaving(true)
     try {
-      const pkg = await createPackageAction({ ...values, siteId })
+      const pkg = await createPackageAction(siteId, values as CreatePackageInput)
       setPackages((prev) => [...prev, pkg])
       setDialogOpen(false)
       toast.success('Package created')
-    } catch { toast.error('Failed to create package') }
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to create package') }
     finally { setSaving(false) }
   }
 
-  const handleUpdate = async (values: UpdatePackageInput) => {
+  const handleUpdate = async (values: CreatePackageInput | UpdatePackageInput) => {
     if (!editTarget) return
     setSaving(true)
     try {
-      const pkg = await updatePackageAction(editTarget.id, values)
+      const pkg = await updatePackageAction(siteId, editTarget.id, values as UpdatePackageInput)
       setPackages((prev) => prev.map((p) => (p.id === pkg.id ? pkg : p)))
       setEditTarget(null)
       toast.success('Package updated')
-    } catch { toast.error('Failed to update package') }
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to update package') }
     finally { setSaving(false) }
   }
 
@@ -61,18 +61,18 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
     if (!deleteTarget) return
     setSaving(true)
     try {
-      await deletePackageAction(deleteTarget)
+      await deletePackageAction(siteId, deleteTarget)
       setPackages((prev) => prev.filter((p) => p.id !== deleteTarget))
       setDeleteTarget(null)
       toast.success('Package deleted')
-    } catch { toast.error('Failed to delete') }
+    } catch { toast.error('Failed to delete package') }
     finally { setSaving(false) }
   }
 
   const handleBulkDelete = async () => {
     setSaving(true)
     try {
-      await deleteManyPackagesAction([...selected])
+      await deleteManyPackagesAction(siteId, [...selected])
       setPackages((prev) => prev.filter((p) => !selected.has(p.id)))
       setSelected(new Set())
       setBulkDeleteOpen(false)
@@ -81,10 +81,10 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
     finally { setSaving(false) }
   }
 
-  const handleToggle = async (id: string) => {
+  const handleToggle = async (pkg: Package) => {
     try {
-      const pkg = await togglePackageActiveAction(id)
-      setPackages((prev) => prev.map((p) => (p.id === id ? pkg : p)))
+      const updated = await togglePackageActiveAction(siteId, pkg.id, pkg.isActive)
+      setPackages((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
     } catch { toast.error('Failed to toggle package') }
   }
 
@@ -100,7 +100,7 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
     <>
       <PageHeader
         title="Packages"
-        description={`${packages.length} packages`}
+        description={`${packages.length} package${packages.length !== 1 ? 's' : ''}`}
         actions={
           <div className="flex gap-2">
             {selected.size > 0 && (
@@ -117,19 +117,23 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
 
       <SiteConfigurationTabs tenantId={tenantId} siteId={siteId} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {packages.map((pkg) => (
-          <PackageCard
-            key={pkg.id}
-            pkg={pkg}
-            onEdit={() => setEditTarget(pkg)}
-            onDelete={() => setDeleteTarget(pkg.id)}
-            onToggle={() => handleToggle(pkg.id)}
-            selected={selected.has(pkg.id)}
-            onSelect={(checked) => toggleSelect(pkg.id, checked)}
-          />
-        ))}
-      </div>
+      {packages.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No packages yet. Create one to get started.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {packages.map((pkg) => (
+            <PackageCard
+              key={pkg.id}
+              pkg={pkg}
+              onEdit={() => setEditTarget(pkg)}
+              onDelete={() => setDeleteTarget(pkg.id)}
+              onToggle={() => handleToggle(pkg)}
+              selected={selected.has(pkg.id)}
+              onSelect={(checked) => toggleSelect(pkg.id, checked)}
+            />
+          ))}
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
@@ -141,7 +145,12 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Edit Package</DialogTitle></DialogHeader>
-          <PackageForm defaultValues={editTarget ?? undefined} onSubmit={handleUpdate} onCancel={() => setEditTarget(null)} loading={saving} />
+          <PackageForm
+            defaultValues={editTarget ?? undefined}
+            onSubmit={handleUpdate}
+            onCancel={() => setEditTarget(null)}
+            loading={saving}
+          />
         </DialogContent>
       </Dialog>
 
@@ -149,7 +158,7 @@ export function PackagesPageClient({ tenantId, siteId, initialPackages }: Props)
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Delete Package"
-        description="This will permanently delete the package. This cannot be undone."
+        description="This will permanently delete this package. Users who have already purchased it will not be affected."
         loading={saving}
         onConfirm={handleDelete}
       />

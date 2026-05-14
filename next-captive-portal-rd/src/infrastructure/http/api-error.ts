@@ -64,9 +64,13 @@ export class ApiError extends Error {
             ...(isDev && this.originalError && { originalStack: this.originalError.stack }),
         };
 
-        // Log to console in development
+        // Log to console in development — warn for 4xx (expected), error for 5xx+
         if (isDev) {
-            console.error('[ApiError]', errorContext);
+            if (this.status >= 400 && this.status < 500) {
+                console.warn('[ApiError]', errorContext);
+            } else {
+                console.error('[ApiError]', errorContext);
+            }
         }
 
         // TODO: Send to external logging service (Sentry, Datadog, etc.)

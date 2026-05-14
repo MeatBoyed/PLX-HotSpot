@@ -1,36 +1,34 @@
-import { mockTransactions } from '@/lib/mock-data/transactions'
-import type { Transaction } from '@/lib/types/transaction.types'
+import { walletApi } from '@/lib/infrastructure/api/wallet.api'
+import type { components } from '@/lib/infrastructure/api/schema'
+import type { Transaction, PagedTransactions } from '@/lib/types/transaction.types'
+import type { TransactionListParams } from '@/lib/infrastructure/api/wallet.api'
 
-let transactions = [...mockTransactions]
+type ApiTransaction = components['schemas']['WalletTransactionResponse']
 
-function delay(ms = 400): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms))
+function toTransaction(api: ApiTransaction): Transaction {
+  return {
+    id: api.id ?? '',
+    blnkTransactionId: api.blnkTransactionId,
+    type: api.type ?? '',
+    amount: Number(api.amount ?? 0),
+    currency: api.currency ?? 'ZAR',
+    reference: api.reference ?? '',
+    status: api.status ?? '',
+    createdAt: api.createdAt ?? '',
+  }
 }
 
 export const transactionService = {
-  async getAll(): Promise<Transaction[]> {
-    await delay()
-    return [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  },
-
-  async getByTenantId(tenantId: string): Promise<Transaction[]> {
-    await delay()
-    return transactions
-      .filter((t) => t.tenantId === tenantId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  },
-
-  async getBySiteId(siteId: string): Promise<Transaction[]> {
-    await delay()
-    return transactions
-      .filter((t) => t.siteId === siteId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  },
-
-  async getByUserId(userId: string): Promise<Transaction[]> {
-    await delay()
-    return transactions
-      .filter((t) => t.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  async getAll(params: TransactionListParams = {}): Promise<PagedTransactions> {
+    const paged = await walletApi.getTransactions(params)
+    return {
+      items: (paged.items ?? []).map(toTransaction),
+      page: Number(paged.page ?? 1),
+      pageSize: Number(paged.pageSize ?? 25),
+      totalCount: Number(paged.totalCount ?? 0),
+      totalPages: Number(paged.totalPages ?? 1),
+      hasNextPage: paged.hasNextPage ?? false,
+      hasPreviousPage: paged.hasPreviousPage ?? false,
+    }
   },
 }

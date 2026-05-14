@@ -75,6 +75,30 @@ export interface BrandingConfig {
 
 export type BrandingConfigUpdateBody = Partial<Omit<BrandingConfig, 'id' | 'ssid' | 'createdAt' | 'updatedAt'>>;
 
+export interface WalletBalance {
+  balance: number;
+  currency: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  type: 'TopUp' | 'PackagePurchase' | 'Refund';
+  amount: number;
+  currency: string;
+  status: 'Pending' | 'Completed' | 'Failed';
+  reference: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface ActivePackage {
+  id: string;
+  packageName: string;
+  purchasedAt: string;
+  expiresAt: string | null;
+  status: 'Active' | 'Expired' | 'Pending';
+}
+
 // Form field configuration type
 export type FormFieldConfig = {
     name: string;

@@ -3,24 +3,30 @@ import { notFound } from 'next/navigation'
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton'
 import { HotspotUserDetailClient } from './HotspotUserDetailClient'
 import { hotspotUserService } from '@/lib/services/hotspot-user.service'
-import { siteService } from '@/lib/services/site.service'
-import { tenantService } from '@/lib/services/tenant.service'
+import { transactionService } from '@/lib/services/transaction.service'
 
 interface Props {
   params: Promise<{ userId: string }>
 }
 
 async function UserDetailContent({ userId }: { userId: string }) {
-  const [user, sites, tenants] = await Promise.all([
+  const [user, walletBalance, packages, txPaged] = await Promise.all([
     hotspotUserService.getById(userId),
-    siteService.getAll(),
-    tenantService.getAll(),
+    hotspotUserService.getWalletBalance(userId),
+    hotspotUserService.getPackages(userId),
+    transactionService.getAll({ profileId: userId, pageSize: 100 }),
   ])
+
   if (!user) notFound()
 
-  const transactions = await hotspotUserService.getTransactions(userId)
-
-  return <HotspotUserDetailClient user={user} transactions={transactions} sites={sites} tenants={tenants} />
+  return (
+    <HotspotUserDetailClient
+      user={user}
+      walletBalance={walletBalance}
+      packages={packages}
+      transactions={txPaged.items}
+    />
+  )
 }
 
 export default async function HotspotUserDetailPage({ params }: Props) {

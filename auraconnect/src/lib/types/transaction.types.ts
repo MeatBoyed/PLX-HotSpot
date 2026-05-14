@@ -1,20 +1,20 @@
-export type TransactionType = 'topup' | 'purchase' | 'refund' | 'adjustment'
-export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded'
-export type PaymentGateway = 'payfast' | 'manual'
-
 export interface Transaction {
   id: string
-  userId: string
-  userEmail: string
-  userFullName: string
-  tenantId: string
-  siteId: string
-  type: TransactionType
-  amountCents: number  // positive = credit, negative = debit
-  status: TransactionStatus
-  paymentGateway?: PaymentGateway
-  description: string
-  gatewayTransactionId?: string
+  blnkTransactionId?: string | null
+  type: string
+  amount: number
+  currency: string
+  reference: string
+  status: string
   createdAt: string
-  completedAt?: string
+}
+
+export interface PagedTransactions {
+  items: Transaction[]
+  page: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
