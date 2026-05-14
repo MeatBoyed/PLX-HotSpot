@@ -43,14 +43,6 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(255);
 
-            builder.Property(p => p.RadiusRealmId)
-                .HasColumnName("radius_realm_id")
-                .HasMaxLength(255);
-
-            builder.Property(p => p.RadiusCloudId)
-                .HasColumnName("radius_cloud_id")
-                .HasMaxLength(255);
-
             builder.Property(p => p.RadiusProfileId)
                 .HasColumnName("radius_profile_id");
 

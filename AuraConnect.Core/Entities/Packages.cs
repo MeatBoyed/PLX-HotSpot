@@ -14,8 +14,6 @@ namespace AuraConnect.Core.Entities
 
         // RADIUS mapping
         public string RadiusProfile { get; private set; } = string.Empty;
-        public string? RadiusRealmId { get; private set; }
-        public string? RadiusCloudId { get; private set; }
         public int? RadiusProfileId { get; private set; }
 
         // Status
@@ -72,18 +70,6 @@ namespace AuraConnect.Core.Entities
             if (string.IsNullOrWhiteSpace(profile))
                 throw new ArgumentException("RADIUS profile cannot be empty");
             RadiusProfile = profile;
-            UpdateTimestamp();
-        }
-
-        public void SetRadiusRealmId(string? realmId)
-        {
-            RadiusRealmId = realmId;
-            UpdateTimestamp();
-        }
-
-        public void SetRadiusCloudId(string? cloudId)
-        {
-            RadiusCloudId = cloudId;
             UpdateTimestamp();
         }
 

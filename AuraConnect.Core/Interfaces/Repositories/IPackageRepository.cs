@@ -8,6 +8,7 @@ namespace AuraConnect.Core.Interfaces.Repositories
         Task<IEnumerable<Package>> GetBySiteIdAsync(string siteId, CancellationToken cancellationToken = default);
         Task<IEnumerable<Package>> GetBySiteIdAllAsync(string siteId, CancellationToken cancellationToken = default);
         Task AddAsync(Package package, CancellationToken cancellationToken = default);
+        Task UpdateAsync(Package package, CancellationToken cancellationToken = default);
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

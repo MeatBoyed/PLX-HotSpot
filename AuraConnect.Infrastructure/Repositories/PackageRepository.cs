@@ -29,6 +29,12 @@ namespace AuraConnect.Infrastructure.Repositories
         public async Task AddAsync(Package package, CancellationToken cancellationToken = default)
             => await _context.Packages.AddAsync(package, cancellationToken);
 
+        public Task UpdateAsync(Package package, CancellationToken cancellationToken = default)
+        {
+            _context.Entry(package).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => await _context.SaveChangesAsync(cancellationToken);
     }
