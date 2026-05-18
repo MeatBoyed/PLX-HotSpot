@@ -91,6 +91,36 @@ services:
       - ./env/.env.shared
       - ./env/joburg-theatre.env
 
+  soweto-theatre:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/soweto-theatre.env
+    image: auraconnect-soweto-theatre:latest
+    ports:
+      - "4011:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/soweto-theatre.env
+
+  roodepoort-theatre:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/roodepoort-theatre.env
+    image: auraconnect-roodepoort-theatre:latest
+    ports:
+      - "4012:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/roodepoort.env
+
   ditsong-museum:
     <<: *portal-base
     build:
@@ -165,3 +195,6 @@ services:
     env_file:
       - ./env/.env.shared
       - ./env/trinitychurch.env
+
+
+
