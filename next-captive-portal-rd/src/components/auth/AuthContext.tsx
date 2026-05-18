@@ -90,6 +90,8 @@ export function AuthProvider({ children, ssid, tenantId }: AuthProviderProps) {
 
   const logout = async () => {
     setError(null);
+    // Fire-and-forget — invalidate server session, don't block client teardown
+    platformAuthApi.logout();
     try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
     setToken(null);
     setUser(null);

@@ -87,7 +87,6 @@ export interface WalletTransaction {
   currency: string;
   status: 'Pending' | 'Completed' | 'Failed';
   reference: string;
-  description: string;
   createdAt: string;
 }
 

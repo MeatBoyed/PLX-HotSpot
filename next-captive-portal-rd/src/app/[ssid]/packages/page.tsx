@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthContext';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
-import type { ApiPortalPackage } from '@/infrastructure/api/portal/packages.api';
+import type { PortalPackage } from '@/infrastructure/api/types';
 import type { WalletBalance } from '@/lib/types';
 
 export default function PackagesPage() {
@@ -13,7 +13,7 @@ export default function PackagesPage() {
   const params = useParams();
   const ssid = params.ssid as string;
 
-  const [packages, setPackages] = useState<ApiPortalPackage[]>([]);
+  const [packages, setPackages] = useState<PortalPackage[]>([]);
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +24,7 @@ export default function PackagesPage() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      fetch(`/api/packages?ssid=${encodeURIComponent(ssid)}`).then(r => r.json()).then(d => d.packages ?? []),
+      fetch('/api/wallet/packages').then(r => r.json()).then(d => d.packages ?? []),
       platformWalletApi.getBalance(),
     ]).then(([pkgs, bal]) => {
       setPackages(pkgs);

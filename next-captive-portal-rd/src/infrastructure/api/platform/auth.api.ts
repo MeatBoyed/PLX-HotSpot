@@ -1,4 +1,7 @@
 import type { AuthProfile } from '@/lib/types';
+import { setToken, platformRequest } from './client';
+
+export { setToken };
 
 export interface LoginBody {
   email: string;
@@ -24,38 +27,17 @@ export type AuthTokenResponse = AuthProfile & {
   expiresAt: string;
 };
 
-let _token: string | null = null;
-
-export function setToken(t: string | null): void {
-  _token = t;
-}
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const base = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(init?.headers as Record<string, string> ?? {}),
-  };
-  if (_token) headers['Authorization'] = `Bearer ${_token}`;
-
-  const res = await fetch(`${base}${path}`, { ...init, headers });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw Object.assign(new Error(body.error ?? `HTTP ${res.status}`), { status: res.status });
-  }
-  return res.json() as Promise<T>;
-}
-
 export const platformAuthApi = {
   me: () =>
-    request<AuthTokenResponse>('/auth/me'),
+    platformRequest<AuthTokenResponse>('/auth/me'),
 
   login: (body: LoginBody) =>
-    request<AuthTokenResponse>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+    platformRequest<AuthTokenResponse>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
 
   register: (body: RegisterBody) =>
-    request<AuthTokenResponse>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+    platformRequest<AuthTokenResponse>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
 
-  logout: (): Promise<{ message: string }> =>
-    Promise.resolve({ message: 'ok' }),
+  // Best-effort — fire and forget, never block the client-side logout flow
+  logout: () =>
+    platformRequest<void>('/auth/logout', { method: 'POST' }).catch(() => undefined),
 };

@@ -1,19 +1,19 @@
 'use client';
 import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 
 const PRESETS = [10, 20, 50, 100, 200];
 
 export default function TopUpPage() {
-  const router = useRouter();
   const params = useParams();
   const ssid = params.ssid as string;
 
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const amount = selected ?? (custom ? parseFloat(custom) : null);
   const isValid = amount !== null && !isNaN(amount) && amount >= 10;
@@ -21,10 +21,16 @@ export default function TopUpPage() {
   async function handleProceed() {
     if (!isValid || !amount) return;
     setLoading(true);
+    setError(null);
     try {
-      await platformWalletApi.initiateTopUp(amount);
-      router.push(`/${ssid}/wallet/topup/success?amount=${amount}`);
-    } finally {
+      const origin = window.location.origin;
+      const returnUrl = `${origin}/${ssid}/wallet/topup/success`;
+      const cancelUrl = `${origin}/${ssid}/wallet/topup/cancel`;
+      const { payFastUrl } = await platformWalletApi.initiateTopUp(amount, returnUrl, cancelUrl);
+      // Hard redirect — PayFast is an external payment page
+      window.location.href = payFastUrl;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to initiate payment');
       setLoading(false);
     }
   }
@@ -49,10 +55,11 @@ export default function TopUpPage() {
             <button
               key={preset}
               onClick={() => { setSelected(preset); setCustom(''); }}
-              className={`py-3 rounded-xl font-bold text-sm border transition-all ${selected === preset
+              className={`py-3 rounded-xl font-bold text-sm border transition-all ${
+                selected === preset
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
-                }`}
+              }`}
             >
               R{preset}
             </button>
@@ -72,12 +79,14 @@ export default function TopUpPage() {
           />
         </div>
 
+        {error && <p className="text-xs text-red-500 mb-4 text-center">{error}</p>}
+
         <button
           onClick={handleProceed}
           disabled={!isValid || loading}
           className="w-full py-4 rounded-2xl font-bold text-base bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-colors"
         >
-          {loading ? 'Processing…' : `Proceed to Pay${amount && isValid ? ` — R${amount}` : ''}`}
+          {loading ? 'Redirecting to payment…' : `Proceed to Pay${amount && isValid ? ` — R${amount}` : ''}`}
         </button>
       </div>
     </div>

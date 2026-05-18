@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthContext';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
-import type { ApiPortalPackage } from '@/infrastructure/api/portal/packages.api';
+import type { PortalPackage } from '@/infrastructure/api/types';
 import type { WalletBalance } from '@/lib/types';
 
 export default function ConfirmPackagePage() {
@@ -14,7 +14,7 @@ export default function ConfirmPackagePage() {
   const ssid = params.ssid as string;
   const packageId = params.packageId as string;
 
-  const [pkg, setPkg] = useState<ApiPortalPackage | null>(null);
+  const [pkg, setPkg] = useState<PortalPackage | null>(null);
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -23,10 +23,10 @@ export default function ConfirmPackagePage() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      fetch(`/api/packages?ssid=${encodeURIComponent(ssid)}`).then(r => r.json()).then(d => d.packages ?? []),
+      fetch('/api/wallet/packages').then(r => r.json()).then(d => d.packages ?? []),
       platformWalletApi.getBalance(),
-    ]).then(([pkgs, bal]: [ApiPortalPackage[], WalletBalance]) => {
-      setPkg(pkgs.find((p: ApiPortalPackage) => String(p.id) === packageId) ?? null);
+    ]).then(([pkgs, bal]: [PortalPackage[], WalletBalance]) => {
+      setPkg(pkgs.find((p: PortalPackage) => p.id === packageId) ?? null);
       setBalance(bal);
     }).finally(() => setLoading(false));
   }, [user, ssid, packageId]);

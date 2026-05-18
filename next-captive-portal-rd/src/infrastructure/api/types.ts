@@ -6,6 +6,7 @@ import type { BrandingConfig } from '@/lib/types'
 
 export type { BrandingConfig }
 
+// Legacy RadiusDesk-based package — used by checkout/payfast/voucher flows
 export interface ApiPortalPackage {
   id: number
   ssid: string
@@ -20,6 +21,17 @@ export interface ApiPortalPackage {
 
 export interface ApiPortalPackagesList {
   packages: ApiPortalPackage[]
+}
+
+// New portal package — returned by GET /portal/{tenantId}/packages
+export interface PortalPackage {
+  id: string
+  name: string
+  description?: string | null
+  price: number
+  currency: string
+  isFree: boolean
+  sortOrder: number
 }
 
 export interface ApiPortalSubVenue {

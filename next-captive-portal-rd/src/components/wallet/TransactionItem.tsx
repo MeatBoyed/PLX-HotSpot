@@ -5,10 +5,10 @@ interface Props {
   transaction: WalletTransaction;
 }
 
-const TYPE_ICON: Record<WalletTransaction['type'], string> = {
-  TopUp: '⬆️',
-  PackagePurchase: '📦',
-  Refund: '↩️',
+const TYPE_META: Record<WalletTransaction['type'], { icon: string; label: string }> = {
+  TopUp:           { icon: '⬆️', label: 'Wallet top-up' },
+  PackagePurchase: { icon: '📦', label: 'Package purchase' },
+  Refund:          { icon: '↩️', label: 'Refund' },
 };
 
 function formatDate(iso: string): string {
@@ -17,15 +17,16 @@ function formatDate(iso: string): string {
 
 export default function TransactionItem({ transaction }: Props) {
   const isCredit = transaction.amount > 0;
+  const meta = TYPE_META[transaction.type];
 
   return (
     <div className="flex items-center gap-3 py-3">
       <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${isCredit ? 'bg-green-50' : 'bg-red-50'}`}>
-        {TYPE_ICON[transaction.type]}
+        {meta.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{transaction.description}</p>
-        <p className="text-xs text-gray-400">{formatDate(transaction.createdAt)}</p>
+        <p className="text-sm font-medium text-gray-800 truncate">{meta.label}</p>
+        <p className="text-xs text-gray-400">{formatDate(transaction.createdAt)} · {transaction.reference}</p>
       </div>
       <span className={`text-sm font-bold flex-shrink-0 ${isCredit ? 'text-green-600' : 'text-red-500'}`}>
         {isCredit ? '+' : ''}R{Math.abs(transaction.amount).toFixed(2)}
