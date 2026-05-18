@@ -32,7 +32,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid phone number' }, { status: 400 });
     }
 
-    const username = `jt_${msisdn}`;                 // safe + unique
+    const rawPrefix = env.RADIUSDESK_USER_PREFIX?.trim().toLowerCase() || 'jt';
+    const prefix = rawPrefix.replace(/[^a-z0-9]/g, '') || 'jt';
+    const username = `${prefix}_${msisdn}`;           // safe + unique per site
     const password = trimmedName.replace(/\s+/g, '_').toLowerCase(); // keeps it consistent
 
     console.log('[PU-PHONE] Login started and Credentials Verified', username);
