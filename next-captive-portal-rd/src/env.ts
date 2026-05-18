@@ -27,6 +27,7 @@ export const env = createEnv({
         // Voucher / RadiusDesk integration
         VOUCHER_DEFAULT_TTL_HOURS: z.coerce.number().default(24),
         RADIUSDESK_TOKEN: z.string().optional(),
+        RADIUSDESK_USER_PREFIX: z.string().optional(),
         RADIUSDESK_REALM_ID: z.string().optional(),
         RADIUSDESK_PROFILE_ID: z.string().optional(),
         RADIUSDESK_CLOUD_ID: z.string().optional(),
@@ -74,6 +75,7 @@ export const env = createEnv({
         PAYFAST_TEST_MSISDN: process.env.PAYFAST_TEST_MSISDN,
         VOUCHER_DEFAULT_TTL_HOURS: process.env.VOUCHER_DEFAULT_TTL_HOURS,
         RADIUSDESK_TOKEN: process.env.RADIUSDESK_TOKEN,
+        RADIUSDESK_USER_PREFIX: process.env.RADIUSDESK_USER_PREFIX,
         RADIUSDESK_REALM_ID: process.env.RADIUSDESK_REALM_ID,
         RADIUSDESK_PROFILE_ID: process.env.RADIUSDESK_PROFILE_ID,
         RADIUSDESK_CLOUD_ID: process.env.RADIUSDESK_CLOUD_ID,
