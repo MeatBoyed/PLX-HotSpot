@@ -119,7 +119,7 @@ services:
       - "4012:3000"
     env_file:
       - ./env/.env.shared
-      - ./env/roodepoort.env
+      - ./env/roodepoort-theatre.env
 
   ditsong-museum:
     <<: *portal-base
