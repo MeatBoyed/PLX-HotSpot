@@ -10,9 +10,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=auraconnect_test;Username=local_dev;Password=KQP2Hqg16gqp5u
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
     depends_on:
       postgres:
         condition: service_healthy
+      # seq:
+      #   condition: service_healthy
 
   postgres:
     image: postgres:17
@@ -76,6 +80,24 @@ services:
   #   volumes:
   #     - typesense_data:/data
 
+  # ── Seq (structured log UI) ────────────────────────────────────────────────
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  seq_data:
   # typesense_data:
