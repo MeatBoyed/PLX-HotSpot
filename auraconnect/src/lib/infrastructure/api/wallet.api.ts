@@ -31,6 +31,15 @@ export const walletApi = {
     return data as unknown as PagedTransactions
   },
 
+  async getTransactionById(transactionId: string): Promise<WalletTransactionResponse | null> {
+    const { data, response } = await apiClient.GET('/api/admin/wallet/transactions/{transactionId}', {
+      params: { path: { transactionId } },
+    })
+    if (response.status === 404) return null
+    if (!response.ok) throw new Error(`Failed to fetch transaction ${transactionId}: ${response.status}`)
+    return data as unknown as WalletTransactionResponse
+  },
+
   async getProfileBalance(profileId: string): Promise<WalletBalanceResponse | null> {
     const { data, response } = await apiClient.GET('/api/admin/wallet/profiles/{profileId}', {
       params: { path: { profileId } },

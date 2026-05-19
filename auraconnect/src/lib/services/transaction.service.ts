@@ -22,6 +22,11 @@ function toTransaction(api: ApiTransaction): Transaction {
 }
 
 export const transactionService = {
+  async getById(transactionId: string): Promise<Transaction | null> {
+    const api = await walletApi.getTransactionById(transactionId)
+    return api ? toTransaction(api) : null
+  },
+
   async getAll(params: TransactionListParams = {}): Promise<PagedTransactions> {
     const paged = await walletApi.getTransactions(params)
     return {
