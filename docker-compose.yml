@@ -10,6 +10,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=auraconnect_test;Username=local_dev;Password=KQP2Hqg16gqp5u
+      - AllowedDomainSuffix=.auraconnect.co.za
       - Serilog__WriteTo__1__Name=Seq
       - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
     depends_on:
