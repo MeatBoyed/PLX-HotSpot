@@ -17,7 +17,7 @@ function formatDate(iso: string): string {
 
 export default function TransactionItem({ transaction }: Props) {
   const isCredit = transaction.amount > 0;
-  const meta = TYPE_META[transaction.type];
+  const meta = TYPE_META[transaction.type] ?? { icon: '💳', label: transaction.type };
 
   return (
     <div className="flex items-center gap-3 py-3">

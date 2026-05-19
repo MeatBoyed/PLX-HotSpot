@@ -4,24 +4,22 @@ import { useAuth } from "@/components/auth/AuthContext";
 import { imageUrl } from "@/lib/image-url";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export default function SplashPage() {
     const { theme } = useTheme();
     const { user } = useAuth();
     const router = useRouter();
+    const { ssid } = useParams<{ ssid: string }>();
     const [checked, setChecked] = useState(false);
 
     const handleAccept = (e: React.FormEvent) => {
         e.preventDefault();
         if (!checked) return;
-        // If authenticated, go straight to the connect page.
-        // If not (or auth check still loading), send to login —
-        // the login page will auto-redirect if a valid session is found.
         if (user) {
-            router.push(`/${theme.ssid}/`);
+            router.push(`/${ssid}/`);
         } else {
-            router.push(`/${theme.ssid}/login`);
+            router.push(`/${ssid}/login`);
         }
     };
 

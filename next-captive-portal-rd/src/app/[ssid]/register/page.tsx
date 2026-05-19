@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useTheme } from '@/components/theme-provider';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -10,13 +10,13 @@ export default function RegisterPage() {
   const { user, loading } = useAuth();
   const { theme } = useTheme();
   const router = useRouter();
+  const { ssid } = useParams<{ ssid: string }>();
 
-  // If session already exists, skip registration
   useEffect(() => {
     if (!loading && user) {
-      router.replace(`/${theme.ssid}/`);
+      router.replace(`/${ssid}/`);
     }
-  }, [loading, user, theme.ssid, router]);
+  }, [loading, user, ssid, router]);
 
   if (loading) return null;
   if (user) return null;
@@ -39,8 +39,8 @@ export default function RegisterPage() {
           </p>
         </div>
         <RegisterForm
-          onSuccess={() => router.replace(`/${theme.ssid}/`)}
-          loginHref={`/${theme.ssid}/login`}
+          onSuccess={() => router.replace(`/${ssid}/`)}
+          loginHref={`/${ssid}/login`}
         />
       </div>
     </div>

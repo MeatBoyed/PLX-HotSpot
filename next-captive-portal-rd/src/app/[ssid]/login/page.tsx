@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useTheme } from '@/components/theme-provider';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -10,15 +10,14 @@ export default function LoginPage() {
   const { user, loading } = useAuth();
   const { theme } = useTheme();
   const router = useRouter();
+  const { ssid } = useParams<{ ssid: string }>();
 
-  // If session already exists, skip login and go straight to the connect page
   useEffect(() => {
     if (!loading && user) {
-      router.replace(`/${theme.ssid}/`);
+      router.replace(`/${ssid}/`);
     }
-  }, [loading, user, theme.ssid, router]);
+  }, [loading, user, ssid, router]);
 
-  // Show nothing while the session check is in flight to avoid flicker
   if (loading) return null;
   if (user) return null;
 
@@ -40,8 +39,8 @@ export default function LoginPage() {
           </p>
         </div>
         <LoginForm
-          onSuccess={() => router.replace(`/${theme.ssid}/`)}
-          registerHref={`/${theme.ssid}/register`}
+          onSuccess={() => router.replace(`/${ssid}/`)}
+          registerHref={`/${ssid}/register`}
         />
       </div>
     </div>

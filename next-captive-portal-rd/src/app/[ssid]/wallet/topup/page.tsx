@@ -26,9 +26,19 @@ export default function TopUpPage() {
       const origin = window.location.origin;
       const returnUrl = `${origin}/${ssid}/wallet/topup/success`;
       const cancelUrl = `${origin}/${ssid}/wallet/topup/cancel`;
-      const { payFastUrl } = await platformWalletApi.initiateTopUp(amount, returnUrl, cancelUrl);
-      // Hard redirect — PayFast is an external payment page
-      window.location.href = payFastUrl;
+      const { payFastAction, payFastFields } = await platformWalletApi.initiateTopUp(amount, returnUrl, cancelUrl);
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = payFastAction;
+      for (const [name, value] of Object.entries(payFastFields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      form.submit();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to initiate payment');
       setLoading(false);

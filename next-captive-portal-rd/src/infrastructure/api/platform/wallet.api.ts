@@ -1,23 +1,22 @@
 import { platformRequest } from './client';
 import type { WalletBalance, WalletTransaction, ActivePackage } from '@/lib/types';
 
-// ── API response shapes ────────────────────────────────────────────────────
+// ── API response shapes (match OpenAPI spec) ──────────────────────────────
 
 interface WalletBalanceResponse {
   profileId: string;
-  balance: number;
-  availableBalance: number;
+  balance: number | string;
+  availableBalance: number | string;
   currency: string;
 }
 
 interface WalletTransactionResponse {
   id: string;
-  blnkTransactionId: string | null;
-  type: 'TopUp' | 'PackagePurchase' | 'Refund';
-  amount: number;
+  type: string;
+  amount: number | string;
   currency: string;
   reference: string;
-  status: 'Pending' | 'Completed' | 'Failed';
+  status: string;
   createdAt: string;
 }
 
@@ -26,33 +25,33 @@ interface UserPackageResponse {
   packageId: string;
   packageName: string;
   siteId: string;
-  amountPaid: number;
+  amountPaid: number | string;
   currency: string;
-  status: 'Active' | 'Expired' | 'Pending';
+  status: string;
   purchasedAt: string;
   expiresAt: string | null;
 }
 
 export interface TopUpResponse {
   reference: string;
-  amount: number;
-  payFastUrl: string;
+  amount: number | string;
+  payFastAction: string;
+  payFastFields: Record<string, string>;
 }
 
 // ── Adapters ───────────────────────────────────────────────────────────────
 
 function toBalance(r: WalletBalanceResponse): WalletBalance {
-  // Use availableBalance (spendable) rather than gross balance
   return { balance: Number(r.availableBalance), currency: r.currency };
 }
 
 function toTransaction(r: WalletTransactionResponse): WalletTransaction {
   return {
     id: r.id,
-    type: r.type,
+    type: r.type as WalletTransaction['type'],
     amount: Number(r.amount),
     currency: r.currency,
-    status: r.status,
+    status: r.status as WalletTransaction['status'],
     reference: r.reference,
     createdAt: r.createdAt,
   };
@@ -64,7 +63,7 @@ function toActivePackage(r: UserPackageResponse): ActivePackage {
     packageName: r.packageName,
     purchasedAt: r.purchasedAt,
     expiresAt: r.expiresAt,
-    status: r.status,
+    status: r.status as ActivePackage['status'],
   };
 }
 
@@ -81,14 +80,12 @@ export const platformWalletApi = {
     return r.map(toTransaction);
   },
 
-  // Returns the most recent Active package, or null
   getActivePackage: async (): Promise<ActivePackage | null> => {
     const r = await platformRequest<UserPackageResponse[]>('/portal/wallet/packages');
     const active = r.find(p => p.status === 'Active') ?? null;
     return active ? toActivePackage(active) : null;
   },
 
-  // returnUrl / cancelUrl are absolute URLs PayFast will redirect back to
   initiateTopUp: async (amount: number, returnUrl: string, cancelUrl: string): Promise<TopUpResponse> => {
     return platformRequest<TopUpResponse>('/portal/wallet/topup', {
       method: 'POST',

@@ -11,7 +11,6 @@ export interface AuthProfile {
   lastName: string;
   displayName: string;
   phoneNumber: string | null;
-  blnkWalletId: string | null;
   status: 'Active' | 'Suspended';
   roles: string[];
   siteIds: string[];
