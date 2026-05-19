@@ -1,0 +1,24 @@
+x-portal-base: &portal-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  environment:
+    NODE_ENV: production
+    NEXT_TELEMETRY_DISABLED: "1"
+  restart: unless-stopped
+
+services:
+  dev:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        BUILD_ENV_FILE: docker/env/dev.env
+    image: auraconnect-portal-dev:latest
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./env/.env.shared
+      - ./env/dev.env
