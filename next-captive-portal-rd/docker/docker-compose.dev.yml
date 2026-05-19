@@ -1,3 +1,8 @@
+# --- Dokploy variant — dev ---
+# Shared env vars (API_URL, PayFast keys, etc.) come from the .env file
+# written by Dokploy (UI → Environment tab).
+# Dev-specific vars including TENANT_ID come from ./env/dev.env (tracked in repo).
+
 x-portal-base: &portal-base
   build:
     context: ..
@@ -14,11 +19,17 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       args:
-        SHARED_BUILD_ENV_FILE: docker/env/.env.shared
+        SHARED_BUILD_ENV_FILE: docker/.env
         BUILD_ENV_FILE: docker/env/dev.env
     image: auraconnect-portal-dev:latest
     ports:
       - "3001:3000"
     env_file:
-      - ./env/.env.shared
+      - .env
       - ./env/dev.env
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
