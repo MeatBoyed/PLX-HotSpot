@@ -24,7 +24,7 @@ export default function TopUpPage() {
     setError(null);
     try {
       const origin = window.location.origin;
-      const returnUrl = `${origin}/${ssid}/wallet/topup/success`;
+      const returnUrl = `${origin}/${ssid}/wallet/topup/success?amount=${amount}`;
       const cancelUrl = `${origin}/${ssid}/wallet/topup/cancel`;
       const { payFastAction, payFastFields } = await platformWalletApi.initiateTopUp(amount, returnUrl, cancelUrl);
       const form = document.createElement('form');

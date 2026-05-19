@@ -27,9 +27,30 @@ export type AuthTokenResponse = AuthProfile & {
   expiresAt: string;
 };
 
+export interface PatchMeBody {
+  firstName?: string | null;
+  lastName?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+}
+
+export interface MeResponse {
+  profileId: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  email: string;
+  phoneNumber: string | null;
+  balance: string;
+  status: string;
+}
+
 export const platformAuthApi = {
   me: () =>
     platformRequest<AuthTokenResponse>('/auth/me'),
+
+  patchMe: (body: PatchMeBody) =>
+    platformRequest<MeResponse>('/auth/me', { method: 'PATCH', body: JSON.stringify(body) }),
 
   login: (body: LoginBody) =>
     platformRequest<AuthTokenResponse>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),

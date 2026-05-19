@@ -239,7 +239,56 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateMeRequest"];
+                    "text/json": components["schemas"]["UpdateMeRequest"];
+                    "application/*+json": components["schemas"]["UpdateMeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MeResponse"];
+                        "application/json": components["schemas"]["MeResponse"];
+                        "text/json": components["schemas"]["MeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/portal/{tenantId}/gateway": {
@@ -2589,6 +2638,17 @@ export interface components {
             tenantId?: null | string;
             ssid?: null | string;
         };
+        MeResponse: {
+            profileId?: string;
+            firstName?: string;
+            lastName?: string;
+            displayName?: string;
+            email?: string;
+            phoneNumber?: null | string;
+            /** Format: double */
+            balance?: number | string;
+            status?: string;
+        };
         PackageResponse: {
             id?: string;
             siteId?: string;
@@ -2822,6 +2882,12 @@ export interface components {
             bannerOverlayUrl?: null | string;
             faviconUrl?: null | string;
             splashBgUrl?: null | string;
+        };
+        UpdateMeRequest: {
+            firstName?: null | string;
+            lastName?: null | string;
+            phoneNumber?: null | string;
+            email?: null | string;
         };
         UpdatePackageRequest: {
             name?: null | string;

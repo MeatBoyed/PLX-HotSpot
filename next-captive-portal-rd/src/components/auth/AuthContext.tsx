@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { platformAuthApi, setToken, type LoginBody, type RegisterBody, type AuthTokenResponse } from '@/infrastructure/api/platform/auth.api';
+import { platformAuthApi, setToken, type LoginBody, type RegisterBody, type AuthTokenResponse, type PatchMeBody } from '@/infrastructure/api/platform/auth.api';
 import type { AuthProfile } from '@/lib/types';
 
 interface AuthContextValue {
@@ -11,6 +11,7 @@ interface AuthContextValue {
   login: (body: LoginBody) => Promise<AuthProfile>;
   register: (body: RegisterBody) => Promise<AuthProfile>;
   logout: () => Promise<void>;
+  updateProfile: (body: PatchMeBody) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -97,8 +98,20 @@ export function AuthProvider({ children, ssid, tenantId }: AuthProviderProps) {
     setUser(null);
   };
 
+  const updateProfile = async (body: PatchMeBody): Promise<void> => {
+    const resp = await platformAuthApi.patchMe(body);
+    setUser(prev => prev ? {
+      ...prev,
+      firstName: resp.firstName,
+      lastName: resp.lastName,
+      displayName: resp.displayName,
+      email: resp.email,
+      phoneNumber: resp.phoneNumber,
+    } : prev);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
