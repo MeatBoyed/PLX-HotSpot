@@ -7,6 +7,7 @@ using AuraConnect.Infrastructure.Identity;
 using AuraConnect.Infrastructure.Repositories;
 using AuraConnect.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +50,14 @@ try
             .AllowAnyMethod()
             .AllowCredentials();
         });
+    });
+
+    // Trust X-Forwarded-Proto from the reverse proxy so Request.Scheme is "https" behind TLS termination
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
     });
 
     builder.Services.AddMemoryCache();
@@ -131,11 +140,10 @@ try
 
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.MapOpenApi();
-        app.MapScalarApiReference();
-    }
+    app.UseForwardedHeaders();
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 
     app.UseSerilogRequestLogging();
     app.UseCors("PortalCors");
