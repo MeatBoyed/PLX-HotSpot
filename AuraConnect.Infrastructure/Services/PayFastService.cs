@@ -93,8 +93,9 @@ namespace AuraConnect.Infrastructure.Services
                 .Where(kv => !string.IsNullOrEmpty(kv.Value))
                 .Select(kv => $"{kv.Key}={Encode(kv.Value)}"));
 
+            // PayFast docs append passphrase raw — no URL encoding
             if (!string.IsNullOrEmpty(passPhrase))
-                paramString += $"&passphrase={Encode(passPhrase)}";
+                paramString += $"&passphrase={passPhrase}";
             // TEMP DEBUG — remove before shipping
             Console.WriteLine($"[PayFast paramString] {paramString}");
 

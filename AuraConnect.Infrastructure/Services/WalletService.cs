@@ -14,6 +14,7 @@ namespace AuraConnect.Infrastructure.Services
         private readonly IWalletTransactionRepository _walletTransactionRepository;
         private readonly IUserPackageRepository _userPackageRepository;
         private readonly IPackageRepository _packageRepository;
+        private readonly ISiteRepository _siteRepository;
         private readonly ILogger<WalletService> _logger;
 
         public WalletService(
@@ -22,6 +23,7 @@ namespace AuraConnect.Infrastructure.Services
             IWalletTransactionRepository walletTransactionRepository,
             IUserPackageRepository userPackageRepository,
             IPackageRepository packageRepository,
+            ISiteRepository siteRepository,
             ILogger<WalletService> logger)
         {
             _payFast = payFast;
@@ -29,6 +31,7 @@ namespace AuraConnect.Infrastructure.Services
             _walletTransactionRepository = walletTransactionRepository;
             _userPackageRepository = userPackageRepository;
             _packageRepository = packageRepository;
+            _siteRepository = siteRepository;
             _logger = logger;
         }
 
@@ -68,7 +71,7 @@ namespace AuraConnect.Infrastructure.Services
             };
         }
 
-        public async Task<TopUpResponse> InitiateTopUpAsync(string profileId, decimal amount, string? notifyUrl, string? returnUrl, string? cancelUrl, CancellationToken cancellationToken = default)
+        public async Task<TopUpResponse> InitiateTopUpAsync(string profileId, decimal amount, string? siteId, string? notifyUrl, string? returnUrl, string? cancelUrl, CancellationToken cancellationToken = default)
         {
             if (amount <= 0)
                 throw new ArgumentException("Top-up amount must be greater than zero");
@@ -77,14 +80,31 @@ namespace AuraConnect.Infrastructure.Services
                 ?? throw new InvalidOperationException("Profile not found");
 
             var reference = Guid.NewGuid().ToString("N");
+            var itemName = await BuildItemNameAsync(amount, siteId, cancellationToken);
 
             var walletTx = new WalletTransaction(profileId, WalletTransactionType.TopUp, amount, "ZAR", reference);
             await _walletTransactionRepository.AddAsync(walletTx, cancellationToken);
             await _walletTransactionRepository.SaveChangesAsync(cancellationToken);
 
-            var (action, fields) = await _payFast.CreatePaymentFormAsync(amount, "AuraConnect Wallet Top-Up", reference, notifyUrl, returnUrl, cancelUrl);
+            var (action, fields) = await _payFast.CreatePaymentFormAsync(amount, itemName, reference, notifyUrl, returnUrl, cancelUrl);
 
             return new TopUpResponse { Reference = reference, Amount = amount, PayFastAction = action, PayFastFields = fields };
+        }
+
+        private async Task<string> BuildItemNameAsync(decimal amount, string? siteId, CancellationToken cancellationToken)
+        {
+            if (!string.IsNullOrEmpty(siteId))
+            {
+                var site = await _siteRepository.GetSiteWithDetailsAsync(siteId, cancellationToken);
+                if (site != null)
+                {
+                    var parts = string.IsNullOrEmpty(site.Tenant?.Name)
+                        ? $"{site.Name} - AuraConnect - Wallet Top-Up R{amount:F2}"
+                        : $"{site.Name} - {site.Tenant.Name} - AuraConnect - Wallet Top-Up R{amount:F2}";
+                    return parts.Length > 100 ? parts[..100] : parts;
+                }
+            }
+            return $"AuraConnect - Wallet Top-Up R{amount:F2}";
         }
 
         public async Task ProcessTopUpIpnAsync(Dictionary<string, string> ipnData, CancellationToken cancellationToken = default)
