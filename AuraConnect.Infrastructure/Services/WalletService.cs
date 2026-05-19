@@ -3,6 +3,8 @@ using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
 using AuraConnect.Core.Interfaces.Repositories;
+using AuraConnect.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace AuraConnect.Infrastructure.Services
@@ -15,6 +17,7 @@ namespace AuraConnect.Infrastructure.Services
         private readonly IUserPackageRepository _userPackageRepository;
         private readonly IPackageRepository _packageRepository;
         private readonly ISiteRepository _siteRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<WalletService> _logger;
 
         public WalletService(
@@ -24,6 +27,7 @@ namespace AuraConnect.Infrastructure.Services
             IUserPackageRepository userPackageRepository,
             IPackageRepository packageRepository,
             ISiteRepository siteRepository,
+            UserManager<ApplicationUser> userManager,
             ILogger<WalletService> logger)
         {
             _payFast = payFast;
@@ -32,6 +36,7 @@ namespace AuraConnect.Infrastructure.Services
             _userPackageRepository = userPackageRepository;
             _packageRepository = packageRepository;
             _siteRepository = siteRepository;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -76,35 +81,43 @@ namespace AuraConnect.Infrastructure.Services
             if (amount <= 0)
                 throw new ArgumentException("Top-up amount must be greater than zero");
 
-            _ = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
+            var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
                 ?? throw new InvalidOperationException("Profile not found");
 
-            var reference = Guid.NewGuid().ToString("N");
-            var itemName = await BuildItemNameAsync(amount, siteId, cancellationToken);
+            var identityUser = await _userManager.FindByIdAsync(profile.IdentityUserId);
 
-            var walletTx = new WalletTransaction(profileId, WalletTransactionType.TopUp, amount, "ZAR", reference);
-            await _walletTransactionRepository.AddAsync(walletTx, cancellationToken);
-            await _walletTransactionRepository.SaveChangesAsync(cancellationToken);
-
-            var (action, fields) = await _payFast.CreatePaymentFormAsync(amount, itemName, reference, notifyUrl, returnUrl, cancelUrl);
-
-            return new TopUpResponse { Reference = reference, Amount = amount, PayFastAction = action, PayFastFields = fields };
-        }
-
-        private async Task<string> BuildItemNameAsync(decimal amount, string? siteId, CancellationToken cancellationToken)
-        {
+            string? itemName = null;
+            string? tenantId = null;
             if (!string.IsNullOrEmpty(siteId))
             {
                 var site = await _siteRepository.GetSiteWithDetailsAsync(siteId, cancellationToken);
                 if (site != null)
                 {
-                    var parts = string.IsNullOrEmpty(site.Tenant?.Name)
+                    tenantId = site.TenantId;
+                    var raw = string.IsNullOrEmpty(site.Tenant?.Name)
                         ? $"{site.Name} - AuraConnect - Wallet Top-Up R{amount:F2}"
                         : $"{site.Name} - {site.Tenant.Name} - AuraConnect - Wallet Top-Up R{amount:F2}";
-                    return parts.Length > 100 ? parts[..100] : parts;
+                    itemName = raw.Length > 100 ? raw[..100] : raw;
                 }
             }
-            return $"AuraConnect - Wallet Top-Up R{amount:F2}";
+            itemName ??= $"AuraConnect - Wallet Top-Up R{amount:F2}";
+
+            var reference = Guid.NewGuid().ToString("N");
+
+            var walletTx = new WalletTransaction(profileId, WalletTransactionType.TopUp, amount, "ZAR", reference);
+            await _walletTransactionRepository.AddAsync(walletTx, cancellationToken);
+            await _walletTransactionRepository.SaveChangesAsync(cancellationToken);
+
+            var (action, fields) = await _payFast.CreatePaymentFormAsync(
+                amount, itemName, reference,
+                notifyUrl, returnUrl, cancelUrl,
+                buyerFirstName: profile.FirstName,
+                buyerLastName: profile.LastName,
+                buyerEmail: identityUser?.Email,
+                customStr1: siteId,
+                customStr2: tenantId);
+
+            return new TopUpResponse { Reference = reference, Amount = amount, PayFastAction = action, PayFastFields = fields };
         }
 
         public async Task ProcessTopUpIpnAsync(Dictionary<string, string> ipnData, CancellationToken cancellationToken = default)
@@ -132,10 +145,14 @@ namespace AuraConnect.Infrastructure.Services
 
             await _profileRepository.CreditBalanceAsync(walletTx.ProfileId, walletTx.Amount, cancellationToken);
 
-            walletTx.Complete();
+            ipnData.TryGetValue("pf_payment_id", out var pfPaymentId);
+            decimal? amountFee = ipnData.TryGetValue("amount_fee", out var feeStr) && decimal.TryParse(feeStr, out var fee) ? fee : null;
+            decimal? amountNet = ipnData.TryGetValue("amount_net", out var netStr) && decimal.TryParse(netStr, out var net) ? net : null;
+
+            walletTx.Complete(pfPaymentId, amountFee, amountNet);
             await _walletTransactionRepository.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Top-up completed for profile {ProfileId} — R{Amount} credited", walletTx.ProfileId, walletTx.Amount);
+            _logger.LogInformation("Top-up completed for profile {ProfileId} — R{Amount} credited (pf_payment_id={PfPaymentId} fee={Fee})", walletTx.ProfileId, walletTx.Amount, pfPaymentId, amountFee);
         }
 
         public async Task<UserPackageResponse> PurchasePackageAsync(string profileId, string packageId, CancellationToken cancellationToken = default)
@@ -203,7 +220,11 @@ namespace AuraConnect.Infrastructure.Services
             Currency = t.Currency,
             Reference = t.Reference,
             Status = t.Status,
-            CreatedAt = t.CreatedAt
+            CreatedAt = t.CreatedAt,
+            UpdatedAt = t.UpdatedAt,
+            PayFastPaymentId = t.PayFastPaymentId,
+            AmountFee = t.AmountFee,
+            AmountNet = t.AmountNet
         };
     }
 }

@@ -21,6 +21,8 @@ namespace AuraConnect.Infrastructure.Services
         public async Task<(string Action, Dictionary<string, string> Fields)> CreatePaymentFormAsync(
             decimal amount, string itemName, string reference,
             string? notifyUrl, string? returnUrl, string? cancelUrl,
+            string? buyerFirstName = null, string? buyerLastName = null, string? buyerEmail = null,
+            string? customStr1 = null, string? customStr2 = null,
             CancellationToken cancellationToken = default)
         {
             var settings = await _platformSettings.GetAsync(cancellationToken);
@@ -32,17 +34,22 @@ namespace AuraConnect.Infrastructure.Services
                 : "https://www.payfast.co.za/eng/process";
 
             // Field order must follow PayFast's documented attribute order exactly.
-            // URL fields are optional — omit when null/empty (e.g. for local testing without ngrok).
+            // URL and buyer fields are optional — empty values are excluded from the signature.
             var fields = new List<KeyValuePair<string, string>>
             {
-                new("merchant_id",  settings.PayFastMerchantId!),
-                new("merchant_key", settings.PayFastMerchantKey!),
-                new("return_url",   returnUrl  ?? string.Empty),
-                new("cancel_url",   cancelUrl  ?? string.Empty),
-                new("notify_url",   notifyUrl  ?? string.Empty),
-                new("m_payment_id", reference),
-                new("amount",       amount.ToString("F2")),
-                new("item_name",    itemName),
+                new("merchant_id",    settings.PayFastMerchantId!),
+                new("merchant_key",   settings.PayFastMerchantKey!),
+                new("return_url",     returnUrl       ?? string.Empty),
+                new("cancel_url",     cancelUrl       ?? string.Empty),
+                new("notify_url",     notifyUrl       ?? string.Empty),
+                new("name_first",     buyerFirstName  ?? string.Empty),
+                new("name_last",      buyerLastName   ?? string.Empty),
+                new("email_address",  buyerEmail      ?? string.Empty),
+                new("m_payment_id",   reference),
+                new("amount",         amount.ToString("F2")),
+                new("item_name",      itemName),
+                new("custom_str1",    customStr1      ?? string.Empty),
+                new("custom_str2",    customStr2      ?? string.Empty),
             };
 
             var signature = GenerateSignature(fields, settings.PayFastPassPhrase);
@@ -87,7 +94,7 @@ namespace AuraConnect.Infrastructure.Services
 
         // skipEmpty=true for form generation (omit blank fields).
         // skipEmpty=false for IPN verification (include all fields PayFast sent, even empty ones).
-        private string GenerateSignature(IEnumerable<KeyValuePair<string, string>> fields, string? passPhrase, bool skipEmpty = true)
+        private static string GenerateSignature(IEnumerable<KeyValuePair<string, string>> fields, string? passPhrase, bool skipEmpty = true)
         {
             var pairs = skipEmpty
                 ? fields.Where(kv => !string.IsNullOrEmpty(kv.Value))
@@ -98,12 +105,8 @@ namespace AuraConnect.Infrastructure.Services
             if (!string.IsNullOrEmpty(passPhrase))
                 paramString += $"&passphrase={Encode(passPhrase)}";
 
-            _logger.LogDebug("[PayFast paramString] {ParamString}", paramString);
-
             var signature = MD5.HashData(Encoding.UTF8.GetBytes(paramString))
                 .Aggregate(new StringBuilder(), (sb, b) => sb.AppendFormat("{0:x2}", b), sb => sb.ToString());
-
-            _logger.LogDebug("[PayFast signature] {Signature}", signature);
 
             return signature;
         }

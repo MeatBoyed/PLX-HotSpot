@@ -9,5 +9,9 @@ namespace AuraConnect.Application.DTOs.Wallet
         public string Reference { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public string? PayFastPaymentId { get; set; }
+        public decimal? AmountFee { get; set; }
+        public decimal? AmountNet { get; set; }
     }
 }
