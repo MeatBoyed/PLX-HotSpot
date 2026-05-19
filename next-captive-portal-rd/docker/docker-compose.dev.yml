@@ -27,9 +27,3 @@ services:
     env_file:
       - .env
       - ./env/dev.env
-    networks:
-      - dokploy-network
-
-networks:
-  dokploy-network:
-    external: true
