@@ -58,13 +58,13 @@ namespace AuraConnect.Infrastructure.Services
         {
             var settings = await _platformSettings.GetAsync(cancellationToken);
 
-            // Preserve the order PayFast sent the IPN fields — do not sort
+            // Preserve the order PayFast sent IPN fields — include empty values, exclude only signature
             var data = ipnData
                 .Where(kv => kv.Key != "signature")
                 .Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value))
                 .ToList();
 
-            var expected = GenerateSignature(data, settings?.PayFastPassPhrase);
+            var expected = GenerateSignature(data, settings?.PayFastPassPhrase, skipEmpty: false);
 
             if (!ipnData.TryGetValue("signature", out var received))
             {
@@ -85,25 +85,25 @@ namespace AuraConnect.Infrastructure.Services
         private static string Encode(string value) =>
             Uri.EscapeDataString(value.Trim()).Replace("%20", "+");
 
-        // Field order must follow PayFast's documented attribute order (maintained by caller via List<KVP>).
-        // Passphrase appended last as a salt before MD5 — blank passphrase is omitted entirely.
-        private static string GenerateSignature(IEnumerable<KeyValuePair<string, string>> fields, string? passPhrase)
+        // skipEmpty=true for form generation (omit blank fields).
+        // skipEmpty=false for IPN verification (include all fields PayFast sent, even empty ones).
+        private string GenerateSignature(IEnumerable<KeyValuePair<string, string>> fields, string? passPhrase, bool skipEmpty = true)
         {
-            var paramString = string.Join("&", fields
-                .Where(kv => !string.IsNullOrEmpty(kv.Value))
-                .Select(kv => $"{kv.Key}={Encode(kv.Value)}"));
+            var pairs = skipEmpty
+                ? fields.Where(kv => !string.IsNullOrEmpty(kv.Value))
+                : fields;
 
-            // PayFast docs append passphrase raw — no URL encoding
+            var paramString = string.Join("&", pairs.Select(kv => $"{kv.Key}={Encode(kv.Value)}"));
+
             if (!string.IsNullOrEmpty(passPhrase))
-                paramString += $"&passphrase={passPhrase}";
-            // TEMP DEBUG — remove before shipping
-            Console.WriteLine($"[PayFast paramString] {paramString}");
+                paramString += $"&passphrase={Encode(passPhrase)}";
 
+            _logger.LogDebug("[PayFast paramString] {ParamString}", paramString);
 
             var signature = MD5.HashData(Encoding.UTF8.GetBytes(paramString))
                 .Aggregate(new StringBuilder(), (sb, b) => sb.AppendFormat("{0:x2}", b), sb => sb.ToString());
-            Console.WriteLine($"[PayFast Signature] {signature}");
 
+            _logger.LogDebug("[PayFast signature] {Signature}", signature);
 
             return signature;
         }

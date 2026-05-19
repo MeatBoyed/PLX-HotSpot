@@ -80,6 +80,23 @@ services:
   #   volumes:
   #     - typesense_data:/data
 
+  # ── pgAdmin ────────────────────────────────────────────────────────────────
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@auraconnect.co.za
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   # ── Seq (structured log UI) ────────────────────────────────────────────────
 
   seq:
@@ -99,5 +116,6 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
   seq_data:
   # typesense_data:
