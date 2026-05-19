@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
+  allowedDevOrigins: ['*'],
   // crossOrigin: 'anonymous',
   async headers() {
     return [
@@ -62,3 +63,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
