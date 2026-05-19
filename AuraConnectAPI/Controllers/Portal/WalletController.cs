@@ -44,6 +44,16 @@ namespace AuraConnect.API.Controllers.Portal
             return Ok(result);
         }
 
+        [HttpGet("transactions/{transactionId}")]
+        [ProducesResponseType(typeof(WalletTransactionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTransaction(string transactionId, CancellationToken cancellationToken)
+        {
+            var result = await _walletService.GetTransactionByIdAsync(transactionId, GetProfileId(), cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+
         [HttpGet("packages")]
         [ProducesResponseType(typeof(IEnumerable<UserPackageResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

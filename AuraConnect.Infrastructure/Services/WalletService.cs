@@ -76,6 +76,14 @@ namespace AuraConnect.Infrastructure.Services
             };
         }
 
+        public async Task<WalletTransactionResponse?> GetTransactionByIdAsync(string transactionId, string? profileId, CancellationToken cancellationToken = default)
+        {
+            var tx = await _walletTransactionRepository.GetByIdAsync(transactionId, cancellationToken);
+            if (tx == null) return null;
+            if (profileId != null && tx.ProfileId != profileId) return null;
+            return MapTransaction(tx);
+        }
+
         public async Task<TopUpResponse> InitiateTopUpAsync(string profileId, decimal amount, string? siteId, string? notifyUrl, string? returnUrl, string? cancelUrl, CancellationToken cancellationToken = default)
         {
             if (amount <= 0)
