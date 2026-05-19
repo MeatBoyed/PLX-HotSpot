@@ -62,7 +62,20 @@ namespace AuraConnect.API.Controllers.Portal
             if (request.Amount <= 0)
                 return BadRequest(new { error = "Amount must be greater than zero" });
 
-            var notifyUrl = $"{Request.Scheme}://{Request.Host}/portal/wallet/topup/notify";
+            if (!string.IsNullOrEmpty(request.ReturnUrl) && !IsFqdn(request.ReturnUrl))
+                return BadRequest(new { error = "return_url must be a publicly accessible FQDN (no localhost)" });
+            if (!string.IsNullOrEmpty(request.CancelUrl) && !IsFqdn(request.CancelUrl))
+                return BadRequest(new { error = "cancel_url must be a publicly accessible FQDN (no localhost)" });
+            if (!string.IsNullOrEmpty(request.NotifyUrl) && !IsFqdn(request.NotifyUrl))
+                return BadRequest(new { error = "notify_url must be a publicly accessible FQDN (no localhost)" });
+
+            // Use caller-supplied notify_url if provided; fall back to auto-built only when API itself is publicly accessible
+            string? notifyUrl = request.NotifyUrl;
+            if (string.IsNullOrEmpty(notifyUrl))
+            {
+                var autoNotify = $"{Request.Scheme}://{Request.Host}/portal/wallet/topup/notify";
+                notifyUrl = IsFqdn(autoNotify) ? autoNotify : null;
+            }
 
             try
             {
@@ -76,6 +89,18 @@ namespace AuraConnect.API.Controllers.Portal
             }
         }
 
+        private static bool IsFqdn(string url)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return false;
+            var host = uri.Host;
+            return !string.IsNullOrEmpty(host)
+                && host != "localhost"
+                && !host.StartsWith("127.")
+                && !host.StartsWith("10.")
+                && !host.StartsWith("192.168.")
+                && host.Contains('.');
+        }
+
         [HttpPost("topup/notify")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -85,7 +110,7 @@ namespace AuraConnect.API.Controllers.Portal
 
             try
             {
-                await _walletService.ProcessTopUpIpnAsync(ipnData, "@PayFast", cancellationToken);
+                await _walletService.ProcessTopUpIpnAsync(ipnData, cancellationToken);
             }
             catch (UnauthorizedAccessException)
             {

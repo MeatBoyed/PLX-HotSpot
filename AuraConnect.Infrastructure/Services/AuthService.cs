@@ -18,7 +18,6 @@ namespace AuraConnect.Infrastructure.Services
         private readonly IProfileRepository _profileRepository;
         private readonly ISiteMembershipRepository _membershipRepository;
         private readonly ISiteRepository _siteRepository;
-        private readonly IWalletService _walletService;
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
@@ -29,14 +28,12 @@ namespace AuraConnect.Infrastructure.Services
             IProfileRepository profileRepository,
             ISiteMembershipRepository membershipRepository,
             ISiteRepository siteRepository,
-            IWalletService walletService,
             IConfiguration configuration)
         {
             _userManager = userManager;
             _profileRepository = profileRepository;
             _membershipRepository = membershipRepository;
             _siteRepository = siteRepository;
-            _walletService = walletService;
             _jwtSecret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is not configured");
             _jwtIssuer = configuration["Jwt:Issuer"] ?? "AuraConnect";
             _jwtAudience = configuration["Jwt:Audience"] ?? "AuraConnect";
@@ -65,8 +62,6 @@ namespace AuraConnect.Infrastructure.Services
             var profile = new Profile(user.Id, request.FirstName, request.LastName, request.PhoneNumber);
             await _profileRepository.AddAsync(profile, cancellationToken);
             await _profileRepository.SaveChangesAsync(cancellationToken);
-
-            await _walletService.InitializeWalletAsync(profile, cancellationToken);
 
             if (!string.IsNullOrWhiteSpace(request.TenantId) && !string.IsNullOrWhiteSpace(request.Ssid))
                 await CreateOrUpdateMembershipAsync(profile.Id, request.TenantId, request.Ssid, cancellationToken);
@@ -141,7 +136,6 @@ namespace AuraConnect.Infrastructure.Services
                 LastName = profile.LastName,
                 DisplayName = profile.DisplayName,
                 PhoneNumber = profile.PhoneNumber,
-                BlnkWalletId = profile.BlnkWalletId,
                 Status = profile.Status.ToString(),
                 Roles = [.. roles],
                 SiteIds = [.. siteIds]

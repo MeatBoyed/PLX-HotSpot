@@ -10,6 +10,8 @@ namespace AuraConnect.Core.Interfaces.Repositories
         Task<(List<Profile> Items, int Total)> GetPagedAsync(int page, int pageSize, string? tenantId, string? siteId, CancellationToken cancellationToken = default);
         Task AddAsync(Profile profile, CancellationToken cancellationToken = default);
         Task UpdateAsync(Profile profile, CancellationToken cancellationToken = default);
+        Task CreditBalanceAsync(string profileId, decimal amount, CancellationToken cancellationToken = default);
+        Task<bool> DebitBalanceAsync(string profileId, decimal amount, CancellationToken cancellationToken = default);
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

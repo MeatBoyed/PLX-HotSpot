@@ -13,7 +13,16 @@
       "WebSearch",
       "Bash(ls -la \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\\" | grep -i application)",
       "Read(//c/Users/charles.MBVIT/source/repos/**)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty Name)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty Name)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Application\\\\Interfaces\\\\IBlnkService.cs\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Infrastructure\\\\Services\\\\BlnkService.cs\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Application\\\\DTOs\\\\Wallet\\\\BlnkBalanceResponse.cs\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\charles.MBVIT\\\\source\\\\repos\\\\AuraConnectAPI\\\\AuraConnect.Application\\\\DTOs\\\\Wallet\\\\BlnkTransactionResponse.cs\" -Force)",
+      "Bash(Write-Host \"Deleted Blnk files\")",
+      "PowerShell(wsl -e docker ps --format \"table {{.Names}}\\\\t{{.Status}}\" 2>&1)",
+      "PowerShell(wsl -e docker ps -a --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\" 2>&1)",
+      "PowerShell(wsl -e docker start auraconnect-postgres-1 2>&1)",
+      "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)"
     ]
   }
 }

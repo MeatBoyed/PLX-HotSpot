@@ -10,7 +10,6 @@ namespace AuraConnect.Application.DTOs.Auth
         public string LastName { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
-        public string? BlnkWalletId { get; set; }
         public string Status { get; set; } = string.Empty;
         public string[] Roles { get; set; } = [];
         public string[] SiteIds { get; set; } = [];

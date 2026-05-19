@@ -1,5 +1,6 @@
+using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
-using Microsoft.Extensions.Configuration;
+using AuraConnect.Core.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,58 +9,62 @@ namespace AuraConnect.Infrastructure.Services
 {
     public class PayFastService : IPayFastService
     {
-        private readonly string _merchantId;
-        private readonly string _merchantKey;
-        private readonly string _passPhrase;
-        private readonly bool _sandboxMode;
+        private readonly IPlatformSettingsRepository _platformSettings;
         private readonly ILogger<PayFastService> _logger;
 
-        public PayFastService(IConfiguration configuration, ILogger<PayFastService> logger)
+        public PayFastService(IPlatformSettingsRepository platformSettings, ILogger<PayFastService> logger)
         {
-            _merchantId = configuration["PayFast:MerchantId"] ?? throw new InvalidOperationException("PayFast:MerchantId is not configured");
-            _merchantKey = configuration["PayFast:MerchantKey"] ?? throw new InvalidOperationException("PayFast:MerchantKey is not configured");
-            _passPhrase = configuration["PayFast:PassPhrase"] ?? string.Empty;
-            _sandboxMode = bool.TryParse(configuration["PayFast:SandboxMode"], out var sb) && sb;
+            _platformSettings = platformSettings;
             _logger = logger;
         }
 
-        public Task<string> CreatePaymentUrlAsync(decimal amount, string itemName, string reference, string notifyUrl, string returnUrl, string cancelUrl)
+        public async Task<(string Action, Dictionary<string, string> Fields)> CreatePaymentFormAsync(
+            decimal amount, string itemName, string reference,
+            string? notifyUrl, string? returnUrl, string? cancelUrl,
+            CancellationToken cancellationToken = default)
         {
-            var baseUrl = _sandboxMode
+            var settings = await _platformSettings.GetAsync(cancellationToken);
+            if (settings == null || !settings.IsPayFastConfigured)
+                throw new InvalidOperationException("PayFast is not configured. Set credentials via PATCH /api/admin/platform/settings/payfast.");
+
+            var action = settings.PayFastSandboxMode
                 ? "https://sandbox.payfast.co.za/eng/process"
                 : "https://www.payfast.co.za/eng/process";
 
-            var data = new Dictionary<string, string>
+            // Field order must follow PayFast's documented attribute order exactly.
+            // URL fields are optional — omit when null/empty (e.g. for local testing without ngrok).
+            var fields = new List<KeyValuePair<string, string>>
             {
-                ["merchant_id"] = _merchantId,
-                ["merchant_key"] = _merchantKey,
-                ["return_url"] = returnUrl,
-                ["cancel_url"] = cancelUrl,
-                ["notify_url"] = notifyUrl,
-                ["m_payment_id"] = reference,
-                ["amount"] = amount.ToString("F2"),
-                ["item_name"] = itemName,
+                new("merchant_id",  settings.PayFastMerchantId!),
+                new("merchant_key", settings.PayFastMerchantKey!),
+                new("return_url",   returnUrl  ?? string.Empty),
+                new("cancel_url",   cancelUrl  ?? string.Empty),
+                new("notify_url",   notifyUrl  ?? string.Empty),
+                new("m_payment_id", reference),
+                new("amount",       amount.ToString("F2")),
+                new("item_name",    itemName),
             };
 
-            var signature = GenerateSignature(data);
-            data["signature"] = signature;
+            var signature = GenerateSignature(fields, settings.PayFastPassPhrase);
+            fields.Add(new("signature", signature));
 
-            var query = string.Join("&", data.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
-            var url = $"{baseUrl}?{query}";
+            _logger.LogInformation("Generated PayFast form for reference {Reference} amount {Amount}", reference, amount);
 
-            _logger.LogInformation("Generated PayFast URL for reference {Reference} amount {Amount}", reference, amount);
-            return Task.FromResult(url);
+            // Return as Dictionary preserving insertion order (.NET 5+ guarantee for Dictionary)
+            return (action, fields.ToDictionary(kv => kv.Key, kv => kv.Value));
         }
 
-        public bool VerifyIpn(Dictionary<string, string> ipnData)
+        public async Task<bool> VerifyIpnAsync(Dictionary<string, string> ipnData, CancellationToken cancellationToken = default)
         {
-            // Remove signature from data before recalculating
+            var settings = await _platformSettings.GetAsync(cancellationToken);
+
+            // Preserve the order PayFast sent the IPN fields — do not sort
             var data = ipnData
                 .Where(kv => kv.Key != "signature")
-                .OrderBy(kv => kv.Key)
-                .ToDictionary(kv => kv.Key, kv => kv.Value);
+                .Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value))
+                .ToList();
 
-            var expected = GenerateSignature(data);
+            var expected = GenerateSignature(data, settings?.PayFastPassPhrase);
 
             if (!ipnData.TryGetValue("signature", out var received))
             {
@@ -74,12 +79,22 @@ namespace AuraConnect.Infrastructure.Services
             return valid;
         }
 
-        private string GenerateSignature(Dictionary<string, string> data)
-        {
-            var paramString = string.Join("&", data.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        // Matches JS: encodeURIComponent(value.trim()).replace(/%20/g, "+")
+        // Uri.EscapeDataString produces uppercase hex (%3A not %3a) — PayFast requires uppercase.
+        // WebUtility.UrlEncode produces lowercase hex and must NOT be used here.
+        private static string Encode(string value) =>
+            Uri.EscapeDataString(value.Trim()).Replace("%20", "+");
 
-            if (!string.IsNullOrEmpty(_passPhrase))
-                paramString += $"&passphrase={Uri.EscapeDataString(_passPhrase)}";
+        // Field order must follow PayFast's documented attribute order (maintained by caller via List<KVP>).
+        // Passphrase appended last as a salt before MD5 — blank passphrase is omitted entirely.
+        private static string GenerateSignature(IEnumerable<KeyValuePair<string, string>> fields, string? passPhrase)
+        {
+            var paramString = string.Join("&", fields
+                .Where(kv => !string.IsNullOrEmpty(kv.Value))
+                .Select(kv => $"{kv.Key}={Encode(kv.Value)}"));
+
+            if (!string.IsNullOrEmpty(passPhrase))
+                paramString += $"&passphrase={Encode(passPhrase)}";
 
             return MD5.HashData(Encoding.UTF8.GetBytes(paramString))
                 .Aggregate(new StringBuilder(), (sb, b) => sb.AppendFormat("{0:x2}", b), sb => sb.ToString());

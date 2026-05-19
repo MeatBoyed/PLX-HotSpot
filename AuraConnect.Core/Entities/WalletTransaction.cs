@@ -4,7 +4,6 @@ namespace AuraConnect.Core.Entities
     {
         public string Id { get; private set; }
         public string ProfileId { get; private set; }
-        public string? BlnkTransactionId { get; private set; }
         public WalletTransactionType Type { get; private set; }
         public decimal Amount { get; private set; }
         public string Currency { get; private set; }
@@ -28,11 +27,7 @@ namespace AuraConnect.Core.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public void Complete(string blnkTransactionId)
-        {
-            BlnkTransactionId = blnkTransactionId;
-            Status = "Completed";
-        }
+        public void Complete() => Status = "Completed";
 
         public void Fail() => Status = "Failed";
     }

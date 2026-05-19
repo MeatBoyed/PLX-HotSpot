@@ -1,4 +1,5 @@
 using AuraConnect.Application.DTOs.Admin;
+using AuraConnect.Application.DTOs.Wallet;
 using AuraConnect.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -65,6 +66,23 @@ namespace AuraConnect.API.Controllers.Admin
             }
         }
 
+        // GET /api/admin/profiles/{profileId}/wallet
+        [HttpGet("{profileId}/wallet")]
+        [ProducesResponseType(typeof(WalletBalanceResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProfileWallet(string profileId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _walletService.GetBalanceAsync(profileId, cancellationToken);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
         // PATCH /api/admin/profiles/{profileId}
         [HttpPatch("{profileId}")]
         [ProducesResponseType(typeof(AdminProfileDetail), StatusCodes.Status200OK)]
@@ -84,23 +102,6 @@ namespace AuraConnect.API.Controllers.Admin
             catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
-            }
-        }
-
-        // PATCH /api/admin/profiles/{profileId}/wallet
-        [HttpPatch("{profileId}/wallet")]
-        [ProducesResponseType(typeof(AdminProfileDetail), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateWalletIds(string profileId, [FromBody] UpdateWalletIdsRequest request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var result = await _profileService.UpdateWalletIdsAsync(profileId, request, cancellationToken);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { error = ex.Message });
             }
         }
 

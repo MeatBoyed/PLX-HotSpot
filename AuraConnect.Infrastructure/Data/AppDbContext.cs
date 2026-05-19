@@ -23,6 +23,7 @@ namespace AuraConnect.Infrastructure.Data
         public DbSet<SiteMembership> SiteMemberships { get; set; }
         public DbSet<UserPackage> UserPackages { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<PlatformSettings> PlatformSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

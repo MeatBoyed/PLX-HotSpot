@@ -12,7 +12,6 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.HasKey(w => w.Id);
             builder.Property(w => w.Id).HasMaxLength(32);
             builder.Property(w => w.ProfileId).IsRequired().HasMaxLength(32).HasColumnName("profile_id");
-            builder.Property(w => w.BlnkTransactionId).HasMaxLength(255).HasColumnName("blnk_transaction_id");
             builder.Property(w => w.Type).HasColumnName("type");
             builder.Property(w => w.Amount).HasColumnType("decimal(18,2)").HasColumnName("amount");
             builder.Property(w => w.Currency).IsRequired().HasMaxLength(10).HasColumnName("currency");

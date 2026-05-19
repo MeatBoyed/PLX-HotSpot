@@ -39,7 +39,7 @@ namespace AuraConnect.Infrastructure.Services
                 DisplayName = p.DisplayName,
                 Email = emailMap.GetValueOrDefault(p.IdentityUserId, string.Empty),
                 PhoneNumber = p.PhoneNumber,
-                BlnkWalletId = p.BlnkWalletId,
+                Balance = p.Balance,
                 Status = p.Status.ToString(),
                 CreatedAt = p.CreatedAt,
                 SiteIds = p.SiteMemberships.Select(m => m.SiteId).ToList()
@@ -83,20 +83,6 @@ namespace AuraConnect.Infrastructure.Services
             return await GetProfileByIdAsync(profileId, cancellationToken);
         }
 
-        public async Task<AdminProfileDetail> UpdateWalletIdsAsync(string profileId, UpdateWalletIdsRequest request, CancellationToken cancellationToken = default)
-        {
-            var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
-                ?? throw new InvalidOperationException("Profile not found");
-
-            profile.SetBlnkIdentityId(request.BlnkIdentityId);
-            profile.SetBlnkWalletId(request.BlnkWalletId);
-
-            await _profileRepository.UpdateAsync(profile, cancellationToken);
-            await _profileRepository.SaveChangesAsync(cancellationToken);
-
-            return await GetProfileByIdAsync(profileId, cancellationToken);
-        }
-
         public async Task<AdminProfileDetail> SetStatusAsync(string profileId, string status, CancellationToken cancellationToken = default)
         {
             var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken)
@@ -124,7 +110,6 @@ namespace AuraConnect.Infrastructure.Services
             await _profileRepository.UpdateAsync(profile, cancellationToken);
             await _profileRepository.SaveChangesAsync(cancellationToken);
 
-            // Lock the identity account so they cannot log in
             var user = await _userManager.FindByIdAsync(profile.IdentityUserId);
             if (user != null)
             {
@@ -141,7 +126,6 @@ namespace AuraConnect.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(profile.IdentityUserId)
                 ?? throw new InvalidOperationException("Identity user not found");
 
-            // Deleting the identity user cascades: Profile → SiteMemberships, WalletTransactions, UserPackages
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
                 throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
@@ -155,8 +139,7 @@ namespace AuraConnect.Infrastructure.Services
             DisplayName = profile.DisplayName,
             Email = email,
             PhoneNumber = profile.PhoneNumber,
-            BlnkIdentityId = profile.BlnkIdentityId,
-            BlnkWalletId = profile.BlnkWalletId,
+            Balance = profile.Balance,
             Status = profile.Status.ToString(),
             CreatedAt = profile.CreatedAt,
             UpdatedAt = profile.UpdatedAt,

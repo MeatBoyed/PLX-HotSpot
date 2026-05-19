@@ -108,13 +108,9 @@ try
     builder.Services.AddScoped<IPackageRepository, PackageRepository>();
     builder.Services.AddScoped<IUserPackageRepository, UserPackageRepository>();
     builder.Services.AddScoped<IWalletTransactionRepository, WalletTransactionRepository>();
+    builder.Services.AddScoped<IPlatformSettingsRepository, PlatformSettingsRepository>();
 
     // Wallet / payment services
-    builder.Services.AddHttpClient<IBlnkService, BlnkService>(client =>
-    {
-        client.BaseAddress = new Uri(builder.Configuration["Blnk:BaseUrl"]
-            ?? throw new InvalidOperationException("Blnk:BaseUrl is not configured"));
-    });
     builder.Services.AddScoped<IPayFastService, PayFastService>();
     builder.Services.AddScoped<IWalletService, WalletService>();
 
@@ -127,6 +123,7 @@ try
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IAdminProfileService, AdminProfileService>();
     builder.Services.AddScoped<IPackageService, PackageService>();
+    builder.Services.AddScoped<IPlatformSettingsService, PlatformSettingsService>();
     builder.Services.AddScoped<IRadiusProvisioningService, RadiusProvisioningService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
@@ -167,6 +164,7 @@ try
             await roleManager.CreateAsync(new IdentityRole("User"));
             Log.Information("Seeded role: User");
         }
+
     }
 
     app.Run();

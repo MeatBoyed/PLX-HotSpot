@@ -4,6 +4,9 @@ namespace AuraConnect.Application.DTOs.Wallet
     {
         public string Reference { get; set; } = string.Empty;
         public decimal Amount { get; set; }
-        public string PayFastUrl { get; set; } = string.Empty;
+        /// <summary>POST target: https://sandbox.payfast.co.za/eng/process or live URL</summary>
+        public string PayFastAction { get; set; } = string.Empty;
+        /// <summary>Hidden form fields to POST — includes signature as the last field</summary>
+        public Dictionary<string, string> PayFastFields { get; set; } = [];
     }
 }

@@ -60,6 +60,19 @@ namespace AuraConnect.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
+        public async Task CreditBalanceAsync(string profileId, decimal amount, CancellationToken cancellationToken = default) =>
+            await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE profiles SET balance = balance + {amount}, updated_at = NOW() WHERE id = {profileId}",
+                cancellationToken);
+
+        public async Task<bool> DebitBalanceAsync(string profileId, decimal amount, CancellationToken cancellationToken = default)
+        {
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE profiles SET balance = balance - {amount}, updated_at = NOW() WHERE id = {profileId} AND balance >= {amount}",
+                cancellationToken);
+            return rows > 0;
+        }
+
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
             await _context.SaveChangesAsync(cancellationToken);
     }
