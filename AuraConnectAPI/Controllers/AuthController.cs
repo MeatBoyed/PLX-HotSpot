@@ -1,4 +1,5 @@
 using AuraConnect.Application.DTOs.Auth;
+using AuraConnect.Application.DTOs.Portal;
 using AuraConnect.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,6 +79,32 @@ namespace AuraConnect.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return NotFound(new { error = ex.Message });
+            }
+        }
+
+        [HttpPatch("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> UpdateMe([FromBody] UpdateMeRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var response = await _authService.UpdateMeAsync(User, request, cancellationToken);
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            {
+                return Conflict(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

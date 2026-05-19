@@ -111,20 +111,6 @@ namespace AuraConnect.Infrastructure.Services
             return await BuildResponseAsync(user, profile, cancellationToken);
         }
 
-        public async Task<MeResponse> GetMeAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
-        {
-            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? throw new InvalidOperationException("User not found");
-
-            var user = await _userManager.FindByIdAsync(userId)
-                ?? throw new InvalidOperationException("User not found");
-
-            var profile = await _profileRepository.GetByIdentityUserIdAsync(user.Id, cancellationToken)
-                ?? throw new InvalidOperationException("Profile not found");
-
-            return BuildMeResponse(user, profile);
-        }
-
         public async Task<MeResponse> UpdateMeAsync(ClaimsPrincipal principal, UpdateMeRequest request, CancellationToken cancellationToken = default)
         {
             var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)
