@@ -23,7 +23,7 @@ services:
         BUILD_ENV_FILE: docker/env/dev.env
     image: auraconnect-portal-dev:latest
     ports:
-      - "3001:3000"
+      - "0.0.0.0:3001:3000"
     env_file:
       - .env
       - ./env/dev.env
