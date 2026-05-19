@@ -14,10 +14,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const [tenants, sites] = await Promise.all([
-    tenantService.getAll(),
-    siteService.getAll(),
-  ])
+  const tenants = await tenantService.getAll()
+  const sitesPerTenant = await Promise.all(tenants.map((t) => siteService.getByTenantId(t.id).catch(() => [])))
+  const sites = sitesPerTenant.flat()
 
   return (
     <div className="flex h-screen overflow-hidden">

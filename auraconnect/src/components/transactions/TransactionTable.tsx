@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Separator } from '@/components/ui/separator'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -38,7 +40,89 @@ function statusBadgeVariant(status: string): 'default' | 'secondary' | 'outline'
   return 'secondary'
 }
 
+function TransactionDetail({ tx, open, onClose }: { tx: Transaction; open: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-mono text-sm">{tx.reference}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Type</p>
+              <Badge variant={typeBadgeVariant(tx.type)} className="mt-0.5">{tx.type}</Badge>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Status</p>
+              <Badge variant={statusBadgeVariant(tx.status)} className="mt-0.5">{tx.status}</Badge>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Amount</p>
+              <p className={cn('font-semibold tabular-nums', tx.amount > 0 ? 'text-green-700 dark:text-green-400' : '')}>
+                {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount, tx.currency)}
+              </p>
+            </div>
+            {tx.amountFee != null && (
+              <div>
+                <p className="text-xs text-muted-foreground">Fee</p>
+                <p className="tabular-nums">{formatCurrency(tx.amountFee, tx.currency)}</p>
+              </div>
+            )}
+            {tx.amountNet != null && (
+              <div>
+                <p className="text-xs text-muted-foreground">Net</p>
+                <p className="tabular-nums">{formatCurrency(tx.amountNet, tx.currency)}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-muted-foreground">Currency</p>
+              <p>{tx.currency}</p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Transaction ID</p>
+              <p className="font-mono text-xs break-all">{tx.id}</p>
+            </div>
+            {tx.payFastPaymentId && (
+              <div>
+                <p className="text-xs text-muted-foreground">PayFast Payment ID</p>
+                <p className="font-mono text-xs">{tx.payFastPaymentId}</p>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Created</p>
+              <p className="text-xs">{formatDateTime(tx.createdAt)}</p>
+            </div>
+            {tx.updatedAt && (
+              <div>
+                <p className="text-xs text-muted-foreground">Updated</p>
+                <p className="text-xs">{formatDateTime(tx.updatedAt)}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function TransactionTable({ transactions, filename = 'transactions', compact = false }: TransactionTableProps) {
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -178,7 +262,11 @@ export function TransactionTable({ transactions, filename = 'transactions', comp
               </TableRow>
             ) : (
               filtered.map((t) => (
-                <TableRow key={t.id}>
+                <TableRow
+                  key={t.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => setSelectedTx(t)}
+                >
                   <TableCell>
                     <p className="text-sm font-mono">{t.reference}</p>
                     {t.payFastPaymentId && (
@@ -213,6 +301,14 @@ export function TransactionTable({ transactions, filename = 'transactions', comp
           </TableBody>
         </Table>
       </div>
+
+      {selectedTx && (
+        <TransactionDetail
+          tx={selectedTx}
+          open={!!selectedTx}
+          onClose={() => setSelectedTx(null)}
+        />
+      )}
     </div>
   )
 }
