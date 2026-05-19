@@ -95,9 +95,16 @@ namespace AuraConnect.Infrastructure.Services
 
             if (!string.IsNullOrEmpty(passPhrase))
                 paramString += $"&passphrase={Encode(passPhrase)}";
+            // TEMP DEBUG — remove before shipping
+            Console.WriteLine($"[PayFast paramString] {paramString}");
 
-            return MD5.HashData(Encoding.UTF8.GetBytes(paramString))
+
+            var signature = MD5.HashData(Encoding.UTF8.GetBytes(paramString))
                 .Aggregate(new StringBuilder(), (sb, b) => sb.AppendFormat("{0:x2}", b), sb => sb.ToString());
+            Console.WriteLine($"[PayFast Signature] {signature}");
+
+
+            return signature;
         }
     }
 }
