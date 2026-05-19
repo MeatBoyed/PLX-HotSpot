@@ -18,6 +18,10 @@ interface WalletTransactionResponse {
   reference: string;
   status: string;
   createdAt: string;
+  updatedAt: string;
+  payFastPaymentId: string | null;
+  amountFee: number | string | null;
+  amountNet: number | string | null;
 }
 
 interface UserPackageResponse {
@@ -54,6 +58,10 @@ function toTransaction(r: WalletTransactionResponse): WalletTransaction {
     status: r.status as WalletTransaction['status'],
     reference: r.reference,
     createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    payFastPaymentId: r.payFastPaymentId ?? null,
+    amountFee: r.amountFee != null ? Number(r.amountFee) : null,
+    amountNet: r.amountNet != null ? Number(r.amountNet) : null,
   };
 }
 
@@ -80,6 +88,11 @@ export const platformWalletApi = {
     return r.map(toTransaction);
   },
 
+  getTransaction: async (transactionId: string): Promise<WalletTransaction> => {
+    const r = await platformRequest<WalletTransactionResponse>(`/portal/wallet/transactions/${transactionId}`);
+    return toTransaction(r);
+  },
+
   getActivePackage: async (): Promise<ActivePackage | null> => {
     const r = await platformRequest<UserPackageResponse[]>('/portal/wallet/packages');
     const active = r.find(p => p.status === 'Active') ?? null;
@@ -89,7 +102,7 @@ export const platformWalletApi = {
   initiateTopUp: async (amount: number, returnUrl: string, cancelUrl: string): Promise<TopUpResponse> => {
     return platformRequest<TopUpResponse>('/portal/wallet/topup', {
       method: 'POST',
-      body: JSON.stringify({ amount, returnUrl, cancelUrl }),
+      body: JSON.stringify({ amount, siteId: null, returnUrl, cancelUrl }),
     });
   },
 

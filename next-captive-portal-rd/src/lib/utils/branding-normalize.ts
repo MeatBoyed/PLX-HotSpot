@@ -3,7 +3,7 @@ import { pluxnetTheme } from "@/lib/theme";
 
 // Keep list of known keys to optionally strip unknown props (basic allowlist)
 const KNOWN_KEYS = new Set<keyof BrandingConfig>([
-  "id", "ssid", "name", "brandPrimary", "brandPrimaryHover", "brandSecondary", "brandAccent", "textPrimary", "textSecondary", "textTertiary", "textMuted", "surfaceCard", "surfaceWhite", "surfaceBorder", "buttonPrimary", "buttonPrimaryHover", "buttonPrimaryText", "buttonSecondary", "buttonSecondaryHover", "buttonSecondaryText", "logo", "logoWhite", "connectCardBackground", "bannerOverlay", "favicon", "adsReviveServerUrl", "adsZoneId", "adsReviveId", "adsVastUrl", "termsLinks", "heading", "subheading", "buttonText", "splashBackground", "splashHeading", "authMethods", "marketingOptIn", "parentSsid", "venueLabel", "venueRoute", "sortOrder", "createdAt", "updatedAt"
+  "id", "ssid", "name", "brandPrimary", "brandPrimaryHover", "brandSecondary", "brandAccent", "textPrimary", "textSecondary", "textTertiary", "textMuted", "surfaceCard", "surfaceWhite", "surfaceBorder", "buttonPrimary", "buttonPrimaryHover", "buttonPrimaryText", "buttonSecondary", "buttonSecondaryHover", "buttonSecondaryText", "logo", "logoWhite", "connectCardBackground", "bannerOverlay", "favicon", "adsEnabled", "adsReviveServerUrl", "adsZoneId", "adsReviveId", "adsVastUrl", "termsLinks", "heading", "subheading", "buttonText", "splashBackground", "splashHeading", "authMethods", "marketingOptIn", "parentSsid", "venueLabel", "venueRoute", "sortOrder", "createdAt", "updatedAt"
 ]);
 
 export function normalizeBranding(input: Partial<BrandingConfig> | null | undefined): BrandingConfig {

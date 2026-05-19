@@ -8,6 +8,11 @@ import Footer from "@/components/footer";
 export const metadata: Metadata = {
   title: env.SITE_TITLE,
   description: env.SITE_DESCRIPTION,
+  icons: {
+    icon: '/AuraConnect-48px.png',
+    shortcut: '/AuraConnect-48px.png',
+    apple: '/AuraConnect-48px.png',
+  },
 };
 
 // Root layout — shell only. Per-site branding is loaded by [ssid]/layout.tsx.

@@ -1,11 +1,13 @@
 'use client';
+import Link from 'next/link';
 import type { WalletTransaction } from '@/lib/types';
 
 interface Props {
   transaction: WalletTransaction;
+  href?: string;
 }
 
-const TYPE_META: Record<WalletTransaction['type'], { icon: string; label: string }> = {
+const TYPE_META: Record<string, { icon: string; label: string }> = {
   TopUp:           { icon: '⬆️', label: 'Wallet top-up' },
   PackagePurchase: { icon: '📦', label: 'Package purchase' },
   Refund:          { icon: '↩️', label: 'Refund' },
@@ -15,11 +17,11 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export default function TransactionItem({ transaction }: Props) {
+export default function TransactionItem({ transaction, href }: Props) {
   const isCredit = transaction.amount > 0;
   const meta = TYPE_META[transaction.type] ?? { icon: '💳', label: transaction.type };
 
-  return (
+  const inner = (
     <div className="flex items-center gap-3 py-3">
       <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${isCredit ? 'bg-green-50' : 'bg-red-50'}`}>
         {meta.icon}
@@ -33,4 +35,9 @@ export default function TransactionItem({ transaction }: Props) {
       </span>
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block hover:bg-gray-50 -mx-4 px-4 rounded-xl transition-colors">{inner}</Link>;
+  }
+  return inner;
 }

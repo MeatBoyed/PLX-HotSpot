@@ -55,6 +55,7 @@ function toAppBranding(api: PortalBrandingResponse): BrandingConfig {
         m === 'free' || m === 'voucher' || m === 'pu-login' || m === 'pu-phonename'
     ),
     marketingOptIn: api.marketingOptIn,
+    adsEnabled: api.adsEnabled,
     adsReviveServerUrl: api.adsReviveServerUrl ?? null,
     adsZoneId: api.adsReviveZoneId ?? null,
     adsReviveId: api.adsReviveId ?? null,

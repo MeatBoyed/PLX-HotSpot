@@ -38,7 +38,7 @@ export default function TransactionsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4">
-            <TransactionList transactions={transactions} />
+            <TransactionList transactions={transactions} ssid={ssid} />
           </div>
         )}
       </div>

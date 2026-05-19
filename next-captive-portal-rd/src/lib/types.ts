@@ -52,6 +52,7 @@ export interface BrandingConfig {
     connectCardBackground?: string | null;
     bannerOverlay?: string | null;
     favicon?: string | null;
+    adsEnabled?: boolean;
     adsReviveServerUrl?: string | null;
     adsZoneId?: string | null;
     adsReviveId?: string | null;
@@ -87,6 +88,10 @@ export interface WalletTransaction {
   status: 'Pending' | 'Completed' | 'Failed';
   reference: string;
   createdAt: string;
+  updatedAt: string;
+  payFastPaymentId: string | null;
+  amountFee: number | null;
+  amountNet: number | null;
 }
 
 export interface ActivePackage {

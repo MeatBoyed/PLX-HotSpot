@@ -72,7 +72,7 @@ export default function WalletPage() {
             </Link>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4">
-            <TransactionList transactions={transactions.slice(0, 5)} />
+            <TransactionList transactions={transactions.slice(0, 5)} ssid={ssid} />
           </div>
         </div>
       </div>

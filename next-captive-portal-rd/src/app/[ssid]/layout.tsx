@@ -18,8 +18,8 @@ export async function generateMetadata({
             title: branding.name ?? env.SITE_TITLE,
             description: env.SITE_DESCRIPTION,
             icons: {
-                icon: branding.favicon ?? '/favicon.svg',
-                shortcut: branding.favicon ?? '/favicon.svg',
+                icon: branding.favicon ?? '/AuraConnect-48px.png',
+                shortcut: branding.favicon ?? '/AuraConnect-48px.png',
             },
         };
     } catch {
