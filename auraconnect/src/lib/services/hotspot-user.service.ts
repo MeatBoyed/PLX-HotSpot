@@ -4,7 +4,6 @@ import type { components } from '@/lib/infrastructure/api/schema'
 import type {
   HotspotUser,
   HotspotUserDetail,
-  WalletBalance,
   UserPackage,
   PagedProfiles,
 } from '@/lib/types/hotspot-user.types'
@@ -12,7 +11,6 @@ import type { ProfileListParams } from '@/lib/infrastructure/api/profiles.api'
 
 type ApiListItem = components['schemas']['AdminProfileListItem']
 type ApiDetail = components['schemas']['AdminProfileDetail']
-type ApiBalance = components['schemas']['WalletBalanceResponse']
 type ApiPackage = components['schemas']['UserPackageResponse']
 type ApiMembership = components['schemas']['AdminMembershipSummary']
 
@@ -24,7 +22,7 @@ function toHotspotUser(item: ApiListItem): HotspotUser {
     lastName: item.lastName ?? '',
     displayName: item.displayName ?? '',
     phoneNumber: item.phoneNumber,
-    blnkWalletId: item.blnkWalletId,
+    balance: Number(item.balance ?? 0),
     status: item.status ?? 'active',
     createdAt: item.createdAt ?? '',
     siteIds: item.siteIds ?? [],
@@ -39,8 +37,7 @@ function toHotspotUserDetail(detail: ApiDetail): HotspotUserDetail {
     lastName: detail.lastName ?? '',
     displayName: detail.displayName ?? '',
     phoneNumber: detail.phoneNumber,
-    blnkIdentityId: detail.blnkIdentityId,
-    blnkWalletId: detail.blnkWalletId,
+    balance: Number(detail.balance ?? 0),
     status: detail.status ?? 'active',
     createdAt: detail.createdAt ?? '',
     updatedAt: detail.updatedAt ?? '',
@@ -51,15 +48,6 @@ function toHotspotUserDetail(detail: ApiDetail): HotspotUserDetail {
       firstVisitAt: m.firstVisitAt ?? '',
       lastVisitAt: m.lastVisitAt ?? '',
     })),
-  }
-}
-
-function toWalletBalance(api: ApiBalance): WalletBalance {
-  return {
-    profileId: api.profileId ?? '',
-    balance: Number(api.balance ?? 0),
-    availableBalance: Number(api.availableBalance ?? 0),
-    currency: api.currency ?? 'ZAR',
   }
 }
 
@@ -95,12 +83,6 @@ export const hotspotUserService = {
     const detail = await profilesApi.getById(profileId)
     if (!detail) return null
     return toHotspotUserDetail(detail)
-  },
-
-  async getWalletBalance(profileId: string): Promise<WalletBalance | null> {
-    const api = await walletApi.getProfileBalance(profileId)
-    if (!api) return null
-    return toWalletBalance(api)
   },
 
   async getPackages(profileId: string): Promise<UserPackage[]> {

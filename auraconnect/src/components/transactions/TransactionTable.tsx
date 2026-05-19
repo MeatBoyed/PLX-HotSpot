@@ -181,8 +181,8 @@ export function TransactionTable({ transactions, filename = 'transactions', comp
                 <TableRow key={t.id}>
                   <TableCell>
                     <p className="text-sm font-mono">{t.reference}</p>
-                    {t.blnkTransactionId && (
-                      <p className="text-xs text-muted-foreground font-mono">{t.blnkTransactionId}</p>
+                    {t.payFastPaymentId && (
+                      <p className="text-xs text-muted-foreground font-mono">PF: {t.payFastPaymentId}</p>
                     )}
                   </TableCell>
                   <TableCell>
@@ -194,6 +194,12 @@ export function TransactionTable({ transactions, filename = 'transactions', comp
                     )}>
                       {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount, t.currency)}
                     </span>
+                    {t.amountFee != null && (
+                      <p className="text-xs text-muted-foreground tabular-nums">
+                        Fee: {formatCurrency(t.amountFee, t.currency)}
+                        {t.amountNet != null && <> · Net: {formatCurrency(t.amountNet, t.currency)}</>}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusBadgeVariant(t.status)}>{t.status}</Badge>

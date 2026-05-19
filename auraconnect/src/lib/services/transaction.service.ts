@@ -8,13 +8,16 @@ type ApiTransaction = components['schemas']['WalletTransactionResponse']
 function toTransaction(api: ApiTransaction): Transaction {
   return {
     id: api.id ?? '',
-    blnkTransactionId: api.blnkTransactionId,
     type: api.type ?? '',
     amount: Number(api.amount ?? 0),
     currency: api.currency ?? 'ZAR',
     reference: api.reference ?? '',
     status: api.status ?? '',
     createdAt: api.createdAt ?? '',
+    updatedAt: api.updatedAt,
+    payFastPaymentId: api.payFastPaymentId,
+    amountFee: api.amountFee != null ? Number(api.amountFee) : null,
+    amountNet: api.amountNet != null ? Number(api.amountNet) : null,
   }
 }
 

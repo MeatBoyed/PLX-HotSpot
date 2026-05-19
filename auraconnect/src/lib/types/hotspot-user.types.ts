@@ -5,7 +5,7 @@ export interface HotspotUser {
   lastName: string
   displayName: string
   phoneNumber?: string | null
-  blnkWalletId?: string | null
+  balance: number
   status: string
   createdAt: string
   siteIds: string[]
@@ -26,19 +26,11 @@ export interface HotspotUserDetail {
   lastName: string
   displayName: string
   phoneNumber?: string | null
-  blnkIdentityId?: string | null
-  blnkWalletId?: string | null
+  balance: number
   status: string
   createdAt: string
   updatedAt: string
   memberships: MembershipSummary[]
-}
-
-export interface WalletBalance {
-  profileId: string
-  balance: number
-  availableBalance: number
-  currency: string
 }
 
 export interface UserPackage {

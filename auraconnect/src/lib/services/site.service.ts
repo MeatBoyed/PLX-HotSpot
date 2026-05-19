@@ -60,6 +60,10 @@ export const siteService = {
     return toSite(result)
   },
 
+  async updateStatus(id: string, status: number): Promise<void> {
+    await sitesApi.updateStatus(id, { status })
+  },
+
   async delete(id: string): Promise<void> {
     await sitesApi.delete(id)
   },

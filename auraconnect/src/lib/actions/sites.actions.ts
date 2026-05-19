@@ -11,6 +11,10 @@ export async function updateSiteAction(id: string, input: UpdateSiteInput) {
   return siteService.update(id, input)
 }
 
+export async function updateSiteStatusAction(id: string, status: number) {
+  return siteService.updateStatus(id, status)
+}
+
 export async function deleteSiteAction(id: string) {
   return siteService.delete(id)
 }

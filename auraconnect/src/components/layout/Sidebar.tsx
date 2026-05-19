@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Wifi,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { label: 'Hotspot Users', href: '/admin/hotspot-users', icon: <UsersRound className="h-5 w-5" /> },
   { label: 'Transactions', href: '/admin/transactions', icon: <CreditCard className="h-5 w-5" /> },
   { label: 'Admin Users', href: '/admin/users', icon: <Users className="h-5 w-5" />, superAdminOnly: true },
+  { label: 'Settings', href: '/admin/settings', icon: <Settings className="h-5 w-5" />, superAdminOnly: true },
 ]
 
 interface SidebarProps {

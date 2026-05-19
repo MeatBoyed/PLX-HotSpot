@@ -10,9 +10,8 @@ interface Props {
 }
 
 async function UserDetailContent({ userId }: { userId: string }) {
-  const [user, walletBalance, packages, txPaged] = await Promise.all([
+  const [user, packages, txPaged] = await Promise.all([
     hotspotUserService.getById(userId),
-    hotspotUserService.getWalletBalance(userId),
     hotspotUserService.getPackages(userId),
     transactionService.getAll({ profileId: userId, pageSize: 100 }),
   ])
@@ -22,7 +21,6 @@ async function UserDetailContent({ userId }: { userId: string }) {
   return (
     <HotspotUserDetailClient
       user={user}
-      walletBalance={walletBalance}
       packages={packages}
       transactions={txPaged.items}
     />

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Wallet, Package, Activity, UserX, UserCheck, MapPin, Building2, Clock, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Wallet, Package, Activity, UserX, UserCheck, MapPin, Building2, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -14,12 +14,11 @@ import { TransactionTable } from '@/components/transactions/TransactionTable'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
 import { updateProfileStatusAction, softDeleteProfileAction, hardDeleteProfileAction } from '@/lib/actions/hotspot-users.actions'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
-import type { HotspotUserDetail, WalletBalance, UserPackage } from '@/lib/types/hotspot-user.types'
+import type { HotspotUserDetail, UserPackage } from '@/lib/types/hotspot-user.types'
 import type { Transaction } from '@/lib/types/transaction.types'
 
 interface Props {
   user: HotspotUserDetail
-  walletBalance: WalletBalance | null
   packages: UserPackage[]
   transactions: Transaction[]
 }
@@ -30,7 +29,7 @@ function statusVariant(status: string): 'outline' | 'destructive' | 'secondary' 
   return 'secondary'
 }
 
-export function HotspotUserDetailClient({ user: initialUser, walletBalance, packages, transactions }: Props) {
+export function HotspotUserDetailClient({ user: initialUser, packages, transactions }: Props) {
   const router = useRouter()
   const [user, setUser] = useState(initialUser)
   const [updating, setUpdating] = useState(false)
@@ -133,20 +132,9 @@ export function HotspotUserDetailClient({ user: initialUser, walletBalance, pack
             <CardTitle className="text-sm">Wallet Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            {walletBalance ? (
-              <>
-                <p className="text-2xl font-bold tabular-nums">
-                  {formatCurrency(walletBalance.balance, walletBalance.currency)}
-                </p>
-                {walletBalance.availableBalance !== walletBalance.balance && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Available: {formatCurrency(walletBalance.availableBalance, walletBalance.currency)}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">No wallet linked</p>
-            )}
+            <p className="text-2xl font-bold tabular-nums">
+              {formatCurrency(user.balance, 'ZAR')}
+            </p>
           </CardContent>
         </Card>
 
@@ -260,31 +248,6 @@ export function HotspotUserDetailClient({ user: initialUser, walletBalance, pack
         </div>
       )}
 
-      {/* Wallet IDs */}
-      {(user.blnkIdentityId || user.blnkWalletId) && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Clock className="h-4 w-4" /> Blnk Integration
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {user.blnkIdentityId && (
-              <div>
-                <p className="text-xs text-muted-foreground">Identity ID</p>
-                <p className="text-xs font-mono">{user.blnkIdentityId}</p>
-              </div>
-            )}
-            {user.blnkWalletId && (
-              <div>
-                <p className="text-xs text-muted-foreground">Wallet ID</p>
-                <p className="text-xs font-mono">{user.blnkWalletId}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Transactions */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
@@ -310,8 +273,7 @@ export function HotspotUserDetailClient({ user: initialUser, walletBalance, pack
             <p className="text-xs text-muted-foreground">Marks this user as deleted. They will not be able to log in but their data is preserved.</p>
           </div>
           <Button
-            variant="outline"
-            size="sm"
+            variant="outline" size="sm"
             className="text-destructive border-destructive/30 hover:bg-destructive/5 shrink-0"
             onClick={() => setSoftDeleteOpen(true)}
             disabled={deleting || user.status.toLowerCase() === 'deleted'}
@@ -327,9 +289,7 @@ export function HotspotUserDetailClient({ user: initialUser, walletBalance, pack
             <p className="text-xs text-muted-foreground">Irreversibly removes this user and all associated data. This cannot be undone.</p>
           </div>
           <Button
-            variant="destructive"
-            size="sm"
-            className="shrink-0"
+            variant="destructive" size="sm" className="shrink-0"
             onClick={() => setHardDeleteOpen(true)}
             disabled={deleting}
           >
@@ -343,7 +303,7 @@ export function HotspotUserDetailClient({ user: initialUser, walletBalance, pack
         open={softDeleteOpen}
         onOpenChange={setSoftDeleteOpen}
         title="Delete User"
-        description={`This will mark ${user.firstName} ${user.lastName} as deleted. They will not be able to log in, but their data is preserved and can be recovered.`}
+        description={`This will mark ${user.firstName} ${user.lastName} as deleted. They will not be able to log in, but their data is preserved.`}
         loading={deleting}
         onConfirm={handleSoftDelete}
       />

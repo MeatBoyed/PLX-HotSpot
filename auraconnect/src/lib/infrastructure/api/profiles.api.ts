@@ -6,7 +6,6 @@ type AdminProfileDetail = components['schemas']['AdminProfileDetail']
 type PagedProfileList = components['schemas']['PagedResultOfAdminProfileListItem']
 type UpdateProfileBody = components['schemas']['UpdateProfileRequest']
 type UpdateStatusBody = components['schemas']['UpdateProfileStatusRequest']
-type UpdateWalletIdsBody = components['schemas']['UpdateWalletIdsRequest']
 
 export interface ProfileListParams {
   page?: number
@@ -60,18 +59,6 @@ export const profilesApi = {
     if (!response.ok) {
       const text = await response.text().catch(() => '')
       throw new Error(`Failed to update profile status ${profileId}: ${response.status} — ${text}`)
-    }
-    return data as unknown as AdminProfileDetail
-  },
-
-  async updateWalletIds(profileId: string, body: UpdateWalletIdsBody): Promise<AdminProfileDetail> {
-    const { data, response } = await apiClient.PATCH('/api/admin/profiles/{profileId}/wallet', {
-      params: { path: { profileId } },
-      body,
-    })
-    if (!response.ok) {
-      const text = await response.text().catch(() => '')
-      throw new Error(`Failed to update wallet IDs for ${profileId}: ${response.status} — ${text}`)
     }
     return data as unknown as AdminProfileDetail
   },

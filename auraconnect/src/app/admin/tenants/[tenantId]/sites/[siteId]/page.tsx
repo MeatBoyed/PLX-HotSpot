@@ -8,6 +8,7 @@ import { SiteConfigurationTabs } from '@/components/sites/SiteConfigurationTabs'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton'
+import { SiteStatusToggle } from './SiteStatusToggle'
 import { tenantService } from '@/lib/services/tenant.service'
 import { siteService } from '@/lib/services/site.service'
 import { dashboardService } from '@/lib/services/dashboard.service'
@@ -41,7 +42,12 @@ async function SiteOverviewContent({ tenantId, siteId }: { tenantId: string; sit
       <PageHeader
         title={site.name}
         description={site.ssid}
-        actions={<StatusBadge status={site.status} />}
+        actions={
+          <div className="flex items-center gap-2">
+            <StatusBadge status={site.status} />
+            <SiteStatusToggle siteId={siteId} currentStatus={site.status} />
+          </div>
+        }
       />
 
       <SiteConfigurationTabs tenantId={tenantId} siteId={siteId} />

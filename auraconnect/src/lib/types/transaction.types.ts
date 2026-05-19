@@ -1,12 +1,15 @@
 export interface Transaction {
   id: string
-  blnkTransactionId?: string | null
   type: string
   amount: number
   currency: string
   reference: string
   status: string
   createdAt: string
+  updatedAt?: string
+  payFastPaymentId?: string | null
+  amountFee?: number | null
+  amountNet?: number | null
 }
 
 export interface PagedTransactions {

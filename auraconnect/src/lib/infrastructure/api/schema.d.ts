@@ -1047,6 +1047,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/platform/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/platform/settings/payfast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdatePayFastSettingsRequest"];
+                    "text/json": components["schemas"]["UpdatePayFastSettingsRequest"];
+                    "application/*+json": components["schemas"]["UpdatePayFastSettingsRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/admin/profiles": {
         parameters: {
             query?: never;
@@ -1273,13 +1345,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: {
+        get: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -1288,13 +1354,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateWalletIdsRequest"];
-                    "text/json": components["schemas"]["UpdateWalletIdsRequest"];
-                    "application/*+json": components["schemas"]["UpdateWalletIdsRequest"];
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description OK */
                 200: {
@@ -1302,9 +1362,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["AdminProfileDetail"];
-                        "application/json": components["schemas"]["AdminProfileDetail"];
-                        "text/json": components["schemas"]["AdminProfileDetail"];
+                        "text/plain": components["schemas"]["WalletBalanceResponse"];
+                        "application/json": components["schemas"]["WalletBalanceResponse"];
+                        "text/json": components["schemas"]["WalletBalanceResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -1320,6 +1380,12 @@ export interface paths {
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/admin/profiles/{profileId}/permanent": {
@@ -2335,8 +2401,8 @@ export interface components {
             displayName?: string;
             email?: string;
             phoneNumber?: null | string;
-            blnkIdentityId?: null | string;
-            blnkWalletId?: null | string;
+            /** Format: double */
+            balance?: number | string;
             status?: string;
             /** Format: date-time */
             createdAt?: string;
@@ -2351,7 +2417,8 @@ export interface components {
             displayName?: string;
             email?: string;
             phoneNumber?: null | string;
-            blnkWalletId?: null | string;
+            /** Format: double */
+            balance?: number | string;
             status?: string;
             /** Format: date-time */
             createdAt?: string;
@@ -2367,7 +2434,6 @@ export interface components {
             lastName?: string;
             displayName?: string;
             phoneNumber?: null | string;
-            blnkWalletId?: null | string;
             status?: string;
             roles?: string[];
             siteIds?: string[];
@@ -2552,14 +2618,18 @@ export interface components {
         TopUpRequest: {
             /** Format: double */
             amount?: number | string;
-            returnUrl?: string;
-            cancelUrl?: string;
+            siteId?: null | string;
+            returnUrl?: null | string;
+            cancelUrl?: null | string;
         };
         TopUpResponse: {
             reference?: string;
             /** Format: double */
             amount?: number | string;
-            payFastUrl?: string;
+            payFastAction?: string;
+            payFastFields?: {
+                [key: string]: string;
+            };
         };
         UpdateAdsConfigRequest: {
             reviveServerUrl?: null | string;
@@ -2654,6 +2724,12 @@ export interface components {
             /** Format: int32 */
             sortOrder?: null | number | string;
         };
+        UpdatePayFastSettingsRequest: {
+            merchantId?: string;
+            merchantKey?: string;
+            passPhrase?: null | string;
+            sandboxMode?: boolean;
+        };
         UpdateProfileRequest: {
             firstName?: string;
             lastName?: string;
@@ -2687,10 +2763,6 @@ export interface components {
             name?: string;
             slug?: string;
         };
-        UpdateWalletIdsRequest: {
-            blnkIdentityId?: null | string;
-            blnkWalletId?: null | string;
-        };
         UserPackageResponse: {
             id?: string;
             packageId?: string;
@@ -2715,7 +2787,6 @@ export interface components {
         };
         WalletTransactionResponse: {
             id?: string;
-            blnkTransactionId?: null | string;
             type?: string;
             /** Format: double */
             amount?: number | string;
@@ -2724,6 +2795,13 @@ export interface components {
             status?: string;
             /** Format: date-time */
             createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            payFastPaymentId?: null | string;
+            /** Format: double */
+            amountFee?: null | number | string;
+            /** Format: double */
+            amountNet?: null | number | string;
         };
         WeatherForecast: {
             /** Format: date */
