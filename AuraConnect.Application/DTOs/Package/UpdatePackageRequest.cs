@@ -5,8 +5,7 @@ namespace AuraConnect.Application.DTOs.Package
         public string? Name { get; init; }
         public string? Description { get; init; }
         public decimal? Price { get; init; }
-        public string? RadiusProfile { get; init; }
-        public int? RadiusProfileId { get; init; }  // RD profile ID — obtained from RadiusDesk admin UI
+        public int? RadiusProfileId { get; init; }  // admin escape hatch — override auto-assigned RD profile ID
         public bool? IsActive { get; init; }
         public int? SortOrder { get; init; }
         public int? DurationDays { get; init; }

@@ -10,15 +10,21 @@ namespace AuraConnect.Infrastructure.Services
     {
         private readonly IPackageRepository _packageRepository;
         private readonly ISiteRepository _siteRepository;
+        private readonly IRadiusConfigRepository _radiusConfigRepository;
+        private readonly IRadiusProvisioningService _radiusProvisioning;
         private readonly ILogger<PackageService> _logger;
 
         public PackageService(
             IPackageRepository packageRepository,
             ISiteRepository siteRepository,
+            IRadiusConfigRepository radiusConfigRepository,
+            IRadiusProvisioningService radiusProvisioning,
             ILogger<PackageService> logger)
         {
             _packageRepository = packageRepository;
             _siteRepository = siteRepository;
+            _radiusConfigRepository = radiusConfigRepository;
+            _radiusProvisioning = radiusProvisioning;
             _logger = logger;
         }
 
@@ -43,13 +49,12 @@ namespace AuraConnect.Infrastructure.Services
         {
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new ArgumentException("Package name is required");
-            if (string.IsNullOrWhiteSpace(request.RadiusProfile))
-                throw new ArgumentException("RadiusProfile is required");
 
             _ = await _siteRepository.GetByIdAsync(siteId, cancellationToken)
                 ?? throw new InvalidOperationException("Site not found");
 
-            var package = new Package(siteId, request.Name, request.RadiusProfile, request.Price);
+            // RadiusProfile name mirrors the package name
+            var package = new Package(siteId, request.Name, request.Name, request.Price);
             if (request.Description != null) package.SetDescription(request.Description);
             package.SetSortOrder(request.SortOrder);
             package.SetDurationDays(request.DurationDays);
@@ -59,8 +64,23 @@ namespace AuraConnect.Infrastructure.Services
                 request.SpeedLimitEnabled, request.SpeedUploadAmount, request.SpeedUploadUnit, request.SpeedDownloadAmount, request.SpeedDownloadUnit,
                 request.SessionLimitEnabled, request.SessionLimit);
 
-            if (request.RadiusProfileId.HasValue)
-                package.SetRadiusProfileId(request.RadiusProfileId.Value);
+            var radiusConfig = await _radiusConfigRepository.GetBySiteIdAsync(siteId, cancellationToken);
+            if (IsRdConfigured(radiusConfig))
+            {
+                var rdConfig = BuildRdConfig(radiusConfig!);
+                var rdRequest = BuildRdProfileRequest(request.Name, package);
+
+                var rdResult = await _radiusProvisioning.CreateProfileAsync(rdConfig, rdRequest, cancellationToken);
+                if (!rdResult.Success)
+                    throw new InvalidOperationException($"Failed to create RadiusDesk profile: {rdResult.Error}");
+
+                if (rdResult.RdProfileId.HasValue)
+                    package.SetRadiusProfileId(rdResult.RdProfileId.Value);
+            }
+            else
+            {
+                _logger.LogWarning("Package {PackageName} created without RD profile — site {SiteId} has no RADIUS config", request.Name, siteId);
+            }
 
             await _packageRepository.AddAsync(package, cancellationToken);
             await _packageRepository.SaveChangesAsync(cancellationToken);
@@ -77,10 +97,15 @@ namespace AuraConnect.Infrastructure.Services
             if (package.SiteId != siteId)
                 throw new InvalidOperationException("Package not found");
 
-            if (!string.IsNullOrWhiteSpace(request.Name)) package.SetName(request.Name);
+            bool nameChanged = !string.IsNullOrWhiteSpace(request.Name) && request.Name != package.Name;
+
+            if (nameChanged)
+            {
+                package.SetName(request.Name!);
+                package.SetRadiusProfile(request.Name!);
+            }
             if (request.Description != null) package.SetDescription(request.Description);
             if (request.Price.HasValue) package.SetPrice(request.Price.Value);
-            if (!string.IsNullOrWhiteSpace(request.RadiusProfile)) package.SetRadiusProfile(request.RadiusProfile);
             if (request.RadiusProfileId.HasValue) package.SetRadiusProfileId(request.RadiusProfileId.Value);
             if (request.SortOrder.HasValue) package.SetSortOrder(request.SortOrder.Value);
             if (request.DurationDays.HasValue) package.SetDurationDays(request.DurationDays.Value);
@@ -91,10 +116,14 @@ namespace AuraConnect.Infrastructure.Services
                 else package.Deactivate();
             }
 
-            var limitsChanged = request.DataLimitEnabled.HasValue || request.DataAmount.HasValue || request.DataUnit != null ||
-                                request.TimeLimitEnabled.HasValue || request.TimeAmount.HasValue ||
-                                request.SpeedLimitEnabled.HasValue || request.SpeedUploadAmount.HasValue || request.SpeedDownloadAmount.HasValue ||
-                                request.SessionLimitEnabled.HasValue || request.SessionLimit.HasValue;
+            var limitsChanged =
+                request.DataLimitEnabled.HasValue || request.DataAmount.HasValue ||
+                request.DataUnit != null || request.DataReset != null || request.DataCap != null ||
+                request.TimeLimitEnabled.HasValue || request.TimeAmount.HasValue ||
+                request.TimeUnit != null || request.TimeReset != null || request.TimeCap != null ||
+                request.SpeedLimitEnabled.HasValue || request.SpeedUploadAmount.HasValue || request.SpeedUploadUnit != null ||
+                request.SpeedDownloadAmount.HasValue || request.SpeedDownloadUnit != null ||
+                request.SessionLimitEnabled.HasValue || request.SessionLimit.HasValue;
 
             if (limitsChanged)
             {
@@ -110,6 +139,20 @@ namespace AuraConnect.Infrastructure.Services
                     request.SpeedDownloadAmount ?? package.SpeedDownloadAmount, request.SpeedDownloadUnit ?? package.SpeedDownloadUnit,
                     request.SessionLimitEnabled ?? package.SessionLimitEnabled,
                     request.SessionLimit ?? package.SessionLimit);
+            }
+
+            // Sync RD profile when name or limits change
+            if ((nameChanged || limitsChanged) && package.RadiusProfileId is > 0)
+            {
+                var radiusConfig = await _radiusConfigRepository.GetBySiteIdAsync(siteId, cancellationToken);
+                if (IsRdConfigured(radiusConfig))
+                {
+                    var rdConfig = BuildRdConfig(radiusConfig!);
+                    var rdRequest = BuildRdProfileRequest(package.Name, package);
+                    var ok = await _radiusProvisioning.UpdateProfileAsync(rdConfig, package.RadiusProfileId!.Value, rdRequest, cancellationToken);
+                    if (!ok)
+                        throw new InvalidOperationException("Failed to update RadiusDesk profile");
+                }
             }
 
             await _packageRepository.UpdateAsync(package, cancellationToken);
@@ -140,6 +183,24 @@ namespace AuraConnect.Infrastructure.Services
             var packages = await _packageRepository.GetBySiteIdAsync(site.Id, cancellationToken);
             return packages.Select(MapToPortalResponse);
         }
+
+        // ── Helpers ─────────────────────────────────────────────────────────────
+
+        private static bool IsRdConfigured(RadiusConfig? config) =>
+            config != null &&
+            !string.IsNullOrEmpty(config.RadiusDeskUrl) &&
+            !string.IsNullOrEmpty(config.RadiusDeskApiToken) &&
+            !string.IsNullOrEmpty(config.RadiusDeskRealmId);
+
+        private static RdSiteConfig BuildRdConfig(RadiusConfig config) =>
+            new(config.RadiusDeskUrl!, config.RadiusDeskApiToken!, config.RadiusDeskRealmId!, config.RadiusDeskCloudId);
+
+        private static RdProfileRequest BuildRdProfileRequest(string name, Package p) =>
+            new(name,
+                p.DataLimitEnabled, p.DataAmount, p.DataUnit, p.DataReset, p.DataCap,
+                p.TimeLimitEnabled, p.TimeAmount, p.TimeUnit, p.TimeReset, p.TimeCap,
+                p.SpeedLimitEnabled, p.SpeedUploadAmount, p.SpeedUploadUnit, p.SpeedDownloadAmount, p.SpeedDownloadUnit,
+                p.SessionLimitEnabled, p.SessionLimit);
 
         // ── Mappers ─────────────────────────────────────────────────────────────
 

@@ -32,9 +32,14 @@ namespace AuraConnect.Infrastructure.Services
                 return new(false, null, err);
             }
 
-            // simple_add.json returns {"success":true} with no data.id — ID must be looked up separately
-            _logger.LogInformation("RD Profile created: name={Name}", request.Name);
-            return new(true, null, null);
+            // simple_add.json returns {"success":true} with no data.id — look up ID by name
+            var profileId = await GetProfileIdByNameAsync(config.BaseUrl, config.ApiToken, config.CloudId, request.Name, ct);
+            if (!profileId.HasValue)
+                _logger.LogWarning("RD Profile created but ID could not be resolved for name={Name}", request.Name);
+            else
+                _logger.LogInformation("RD Profile created: id={Id} name={Name}", profileId, request.Name);
+
+            return new(true, profileId, null);
         }
 
         public async Task<bool> UpdateProfileAsync(RdSiteConfig config, int rdProfileId, RdProfileRequest request, CancellationToken ct = default)
@@ -175,14 +180,70 @@ namespace AuraConnect.Infrastructure.Services
             return fields;
         }
 
+        private async Task<int?> GetProfileIdByNameAsync(string baseUrl, string token, string? cloudId, string profileName, CancellationToken ct)
+        {
+            var url = $"{baseUrl.TrimEnd('/')}/cake4/rd_cake/profiles/index.json?token={Uri.EscapeDataString(token)}&limit=500";
+            if (!string.IsNullOrEmpty(cloudId))
+                url += $"&cloud_id={Uri.EscapeDataString(cloudId)}";
+
+            var json = await GetAsync(url, ct);
+            if (json == null) return null;
+
+            if (!json.RootElement.TryGetProperty("data", out var data)) return null;
+
+            foreach (var profile in data.EnumerateArray())
+            {
+                if (profile.TryGetProperty("name", out var nameProp) &&
+                    nameProp.GetString()?.Equals(profileName, StringComparison.OrdinalIgnoreCase) == true &&
+                    profile.TryGetProperty("id", out var idProp))
+                {
+                    return idProp.GetInt32();
+                }
+            }
+
+            return null;
+        }
+
+        private async Task<JsonDocument?> GetAsync(string url, CancellationToken ct)
+        {
+            try
+            {
+                _logger.LogDebug("RD GET {Url}", url);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+                using var response = await _httpClient.SendAsync(request, ct);
+
+                var body = await response.Content.ReadAsStringAsync(ct);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("RD HTTP {Status} for {Url} — body: {Body}", (int)response.StatusCode, url, body);
+                    return null;
+                }
+
+                return JsonDocument.Parse(body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "RD GET request failed for {Url}", url);
+                return null;
+            }
+        }
+
         private async Task<JsonDocument?> PostAsync(string baseUrl, string path, List<KeyValuePair<string, string>> fields, CancellationToken ct)
         {
             try
             {
+                var token = fields.FirstOrDefault(f => f.Key == "token").Value;
                 var url = $"{baseUrl.TrimEnd('/')}/{path}";
+                if (!string.IsNullOrEmpty(token))
+                    url += $"?token={Uri.EscapeDataString(token)}";
+
                 _logger.LogDebug("RD POST {Url}", url);
                 using var content = new FormUrlEncodedContent(fields);
-                using var response = await _httpClient.PostAsync(url, content, ct);
+                using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+                request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+                using var response = await _httpClient.SendAsync(request, ct);
 
                 var body = await response.Content.ReadAsStringAsync(ct);
 

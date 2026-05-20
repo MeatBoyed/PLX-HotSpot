@@ -48,9 +48,6 @@ namespace AuraConnect.API.Controllers.Admin
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { error = "Name is required" });
 
-            if (string.IsNullOrWhiteSpace(request.RadiusProfile))
-                return BadRequest(new { error = "RadiusProfile is required" });
-
             try
             {
                 var result = await _packageService.CreateAsync(siteId, request, cancellationToken);
