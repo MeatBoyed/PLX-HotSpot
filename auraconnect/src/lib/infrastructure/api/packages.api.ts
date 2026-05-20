@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type { components } from './schema'
+import { logger } from '@/lib/utils/logger'
 
 type PackageResponse = components['schemas']['PackageResponse']
 type CreateBody = components['schemas']['CreatePackageRequest']
@@ -17,7 +18,11 @@ export const packagesApi = {
     const { data, response } = await apiClient.GET('/api/admin/sites/{siteId}/packages', {
       params: { path: { siteId } },
     })
-    if (!response.ok) throw new Error(`Failed to fetch packages for site ${siteId}: ${response.status}`)
+    if (!response.ok) {
+      const msg = `Failed to fetch packages for site ${siteId}: ${response.status}`
+      logger.error('packages.api', msg, { siteId, status: response.status })
+      throw new Error(msg)
+    }
     return (data as unknown as PackageResponse[]) ?? []
   },
 
@@ -26,7 +31,11 @@ export const packagesApi = {
       params: { path: { siteId, packageId } },
     })
     if (response.status === 404) return null
-    if (!response.ok) throw new Error(`Failed to fetch package ${packageId}: ${response.status}`)
+    if (!response.ok) {
+      const msg = `Failed to fetch package ${packageId}: ${response.status}`
+      logger.error('packages.api', msg, { siteId, packageId, status: response.status })
+      throw new Error(msg)
+    }
     return data as unknown as PackageResponse
   },
 
@@ -35,8 +44,16 @@ export const packagesApi = {
       params: { path: { siteId } },
       body,
     })
-    if (response.status === 409) throw new Error("This site's RADIUS configuration is incomplete. Set the RadiusDesk Realm ID and Cloud ID in the site's RADIUS settings before creating packages.")
-    if (!response.ok) throw new Error(extractError(error, `Failed to create package (${response.status})`))
+    if (response.status === 409) {
+      const msg = "This site's RADIUS configuration is incomplete. Set the RadiusDesk Realm ID and Cloud ID in the site's RADIUS settings before creating packages."
+      logger.warn('packages.api', `409 conflict creating package for site ${siteId}`)
+      throw new Error(msg)
+    }
+    if (!response.ok) {
+      const msg = extractError(error, `Failed to create package (${response.status})`)
+      logger.error('packages.api', msg, { siteId, status: response.status, body: JSON.stringify(body) })
+      throw new Error(msg)
+    }
     return data as unknown as PackageResponse
   },
 
@@ -45,7 +62,11 @@ export const packagesApi = {
       params: { path: { siteId, packageId } },
       body,
     })
-    if (!response.ok) throw new Error(extractError(error, 'Failed to update package'))
+    if (!response.ok) {
+      const msg = extractError(error, `Failed to update package ${packageId} (${response.status})`)
+      logger.error('packages.api', msg, { siteId, packageId, status: response.status })
+      throw new Error(msg)
+    }
     return data as unknown as PackageResponse
   },
 
@@ -53,6 +74,10 @@ export const packagesApi = {
     const { response } = await apiClient.DELETE('/api/admin/sites/{siteId}/packages/{packageId}', {
       params: { path: { siteId, packageId } },
     })
-    if (!response.ok) throw new Error(`Failed to delete package ${packageId}: ${response.status}`)
+    if (!response.ok) {
+      const msg = `Failed to delete package ${packageId}: ${response.status}`
+      logger.error('packages.api', msg, { siteId, packageId, status: response.status })
+      throw new Error(msg)
+    }
   },
 }
