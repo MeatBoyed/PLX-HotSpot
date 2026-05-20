@@ -219,11 +219,11 @@ namespace AuraConnect.Infrastructure.Services
 
         private async Task<int?> GetProfileIdByNameAsync(string baseUrl, string token, string? cloudId, string profileName, CancellationToken ct)
         {
-            var url = $"{baseUrl.TrimEnd('/')}/cake4/rd_cake/profiles/index.json?token={Uri.EscapeDataString(token)}&limit=500";
+            var url = $"{baseUrl.TrimEnd('/')}/cake4/rd_cake/profiles/index.json?page=1&start=0&limit=500&token={Uri.EscapeDataString(token)}";
             if (!string.IsNullOrEmpty(cloudId))
                 url += $"&cloud_id={Uri.EscapeDataString(cloudId)}";
 
-            var json = await GetAsync(url, token, ct);
+            var json = await GetAsync(url, ct);
             if (json == null) return null;
 
             if (!json.RootElement.TryGetProperty("data", out var data)) return null;
@@ -241,14 +241,13 @@ namespace AuraConnect.Infrastructure.Services
             return null;
         }
 
-        private async Task<JsonDocument?> GetAsync(string url, string token, CancellationToken ct)
+        private async Task<JsonDocument?> GetAsync(string url, CancellationToken ct)
         {
             try
             {
                 _logger.LogDebug("RD GET {Url}", url);
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-                request.Headers.Add("Cookie", $"Token={token}");
                 using var response = await _httpClient.SendAsync(request, ct);
 
                 var body = await response.Content.ReadAsStringAsync(ct);
@@ -256,6 +255,12 @@ namespace AuraConnect.Infrastructure.Services
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("RD HTTP {Status} for {Url} — body: {Body}", (int)response.StatusCode, url, body);
+                    return null;
+                }
+
+                if (body.TrimStart().StartsWith('<'))
+                {
+                    _logger.LogWarning("RD GET returned HTML instead of JSON for {Url} — first 300 chars: {Body}", url, body[..Math.Min(300, body.Length)]);
                     return null;
                 }
 
