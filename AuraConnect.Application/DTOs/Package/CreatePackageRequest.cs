@@ -2,10 +2,10 @@ namespace AuraConnect.Application.DTOs.Package
 {
     public class CreatePackageRequest
     {
-        public string Name { get; init; } = string.Empty;
+        public string? Name { get; init; }
         public string? Description { get; init; }
         public decimal Price { get; init; }
-        public string RadiusProfile { get; init; } = string.Empty;
+        public string? RadiusProfile { get; init; }
         public int SortOrder { get; init; }
         public int DurationDays { get; init; } = 0;
 

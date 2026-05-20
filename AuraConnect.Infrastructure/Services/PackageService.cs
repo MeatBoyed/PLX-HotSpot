@@ -57,6 +57,11 @@ namespace AuraConnect.Infrastructure.Services
                 throw new InvalidOperationException(
                     "This site's RADIUS configuration is incomplete. Set RadiusDesk URL, API token, Realm ID and Cloud ID before creating packages.");
 
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new ArgumentException("Package name is required");
+            if (string.IsNullOrWhiteSpace(request.RadiusProfile))
+                throw new ArgumentException("RadiusProfile is required");
+
             var package = new Package(siteId, request.Name, request.RadiusProfile, request.Price);
             if (request.Description != null) package.SetDescription(request.Description);
             package.SetSortOrder(request.SortOrder);
