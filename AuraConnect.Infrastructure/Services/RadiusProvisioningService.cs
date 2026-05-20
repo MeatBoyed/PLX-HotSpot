@@ -223,7 +223,7 @@ namespace AuraConnect.Infrastructure.Services
             if (!string.IsNullOrEmpty(cloudId))
                 url += $"&cloud_id={Uri.EscapeDataString(cloudId)}";
 
-            var json = await GetAsync(url, ct);
+            var json = await GetAsync(url, token, ct);
             if (json == null) return null;
 
             if (!json.RootElement.TryGetProperty("data", out var data)) return null;
@@ -241,13 +241,14 @@ namespace AuraConnect.Infrastructure.Services
             return null;
         }
 
-        private async Task<JsonDocument?> GetAsync(string url, CancellationToken ct)
+        private async Task<JsonDocument?> GetAsync(string url, string token, CancellationToken ct)
         {
             try
             {
                 _logger.LogDebug("RD GET {Url}", url);
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+                request.Headers.Add("Cookie", $"Token={token}");
                 using var response = await _httpClient.SendAsync(request, ct);
 
                 var body = await response.Content.ReadAsStringAsync(ct);
