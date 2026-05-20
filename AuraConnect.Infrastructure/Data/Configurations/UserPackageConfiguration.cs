@@ -18,6 +18,9 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.Property(u => u.Status).HasColumnName("status");
             builder.Property(u => u.PurchasedAt).HasColumnName("purchased_at");
             builder.Property(u => u.ExpiresAt).HasColumnName("expires_at");
+            builder.Property(u => u.RdUsername).HasColumnName("rd_username").HasMaxLength(255);
+            builder.Property(u => u.RdPassword).HasColumnName("rd_password").HasMaxLength(255);
+            builder.Property(u => u.RdUserId).HasColumnName("rd_user_id");
 
             builder.HasOne(u => u.Profile)
                 .WithMany()

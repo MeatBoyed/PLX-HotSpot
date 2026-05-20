@@ -133,7 +133,7 @@ try
     builder.Services.AddScoped<IAdminProfileService, AdminProfileService>();
     builder.Services.AddScoped<IPackageService, PackageService>();
     builder.Services.AddScoped<IPlatformSettingsService, PlatformSettingsService>();
-    builder.Services.AddScoped<IRadiusProvisioningService, RadiusProvisioningService>();
+    builder.Services.AddHttpClient<IRadiusProvisioningService, RadiusProvisioningService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);

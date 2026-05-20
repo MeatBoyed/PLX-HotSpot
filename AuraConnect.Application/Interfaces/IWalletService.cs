@@ -13,5 +13,7 @@ namespace AuraConnect.Application.Interfaces
         Task ProcessTopUpIpnAsync(Dictionary<string, string> ipnData, CancellationToken cancellationToken = default);
         Task<UserPackageResponse> PurchasePackageAsync(string profileId, string packageId, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserPackageResponse>> GetUserPackagesAsync(string profileId, CancellationToken cancellationToken = default);
+        Task<PackageCredentialsResponse?> GetPackageCredentialsAsync(string userPackageId, string? profileId, CancellationToken cancellationToken = default);
+        Task SetUserPackageActiveAsync(string userPackageId, bool active, CancellationToken cancellationToken = default);
     }
 }

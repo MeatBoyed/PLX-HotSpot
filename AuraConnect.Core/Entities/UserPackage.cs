@@ -10,6 +10,9 @@ namespace AuraConnect.Core.Entities
         public UserPackageStatus Status { get; private set; }
         public DateTime PurchasedAt { get; private set; }
         public DateTime? ExpiresAt { get; private set; }
+        public string? RdUsername { get; private set; }
+        public string? RdPassword { get; private set; }
+        public int? RdUserId { get; private set; }
 
         public virtual Profile Profile { get; private set; } = null!;
         public virtual Package Package { get; private set; } = null!;
@@ -27,6 +30,13 @@ namespace AuraConnect.Core.Entities
             Status = UserPackageStatus.Active;
             PurchasedAt = DateTime.UtcNow;
             ExpiresAt = expiresAt;
+        }
+
+        public void SetRadiusCredentials(string rdUsername, string rdPassword, int rdUserId)
+        {
+            RdUsername = rdUsername;
+            RdPassword = rdPassword;
+            RdUserId = rdUserId;
         }
 
         public void Expire() => Status = UserPackageStatus.Expired;

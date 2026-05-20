@@ -128,6 +128,16 @@ namespace AuraConnect.API.Controllers.Portal
             return Ok();
         }
 
+        [HttpGet("packages/{userPackageId}/credentials")]
+        [ProducesResponseType(typeof(PackageCredentialsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPackageCredentials(string userPackageId, CancellationToken cancellationToken)
+        {
+            var result = await _walletService.GetPackageCredentialsAsync(userPackageId, GetProfileId(), cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+
         [HttpPost("purchase/{packageId}")]
         [ProducesResponseType(typeof(UserPackageResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

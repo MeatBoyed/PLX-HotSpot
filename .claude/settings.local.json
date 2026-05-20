@@ -22,7 +22,8 @@
       "PowerShell(wsl -e docker ps --format \"table {{.Names}}\\\\t{{.Status}}\" 2>&1)",
       "PowerShell(wsl -e docker ps -a --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\" 2>&1)",
       "PowerShell(wsl -e docker start auraconnect-postgres-1 2>&1)",
-      "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)"
+      "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)",
+      "WebFetch(domain:radiusdesk.com)"
     ]
   }
 }

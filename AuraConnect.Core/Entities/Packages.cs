@@ -16,6 +16,34 @@ namespace AuraConnect.Core.Entities
         public string RadiusProfile { get; private set; } = string.Empty;
         public int? RadiusProfileId { get; private set; }
 
+        // Duration
+        public int DurationDays { get; private set; } = 0; // 0 = unlimited
+
+        // Data limits
+        public bool DataLimitEnabled { get; private set; }
+        public int? DataAmount { get; private set; }
+        public string? DataUnit { get; private set; }   // gb | mb | kb
+        public string? DataReset { get; private set; }  // daily | weekly | monthly | never
+        public string? DataCap { get; private set; }    // hard | soft
+
+        // Time limits
+        public bool TimeLimitEnabled { get; private set; }
+        public int? TimeAmount { get; private set; }
+        public string? TimeUnit { get; private set; }   // hour | min
+        public string? TimeReset { get; private set; }
+        public string? TimeCap { get; private set; }    // hard | soft
+
+        // Speed limits
+        public bool SpeedLimitEnabled { get; private set; }
+        public int? SpeedUploadAmount { get; private set; }
+        public string? SpeedUploadUnit { get; private set; }    // mbps | kbps
+        public int? SpeedDownloadAmount { get; private set; }
+        public string? SpeedDownloadUnit { get; private set; }
+
+        // Session limits
+        public bool SessionLimitEnabled { get; private set; }
+        public int? SessionLimit { get; private set; }
+
         // Status
         public bool IsActive { get; private set; } = true;
         public int SortOrder { get; private set; }
@@ -94,6 +122,31 @@ namespace AuraConnect.Core.Entities
         public void SetSortOrder(int order)
         {
             SortOrder = order;
+            UpdateTimestamp();
+        }
+
+        public void SetDurationDays(int days)
+        {
+            if (days < 0) throw new ArgumentException("Duration cannot be negative");
+            DurationDays = days;
+            UpdateTimestamp();
+        }
+
+        public void SetLimits(
+            bool dataLimitEnabled, int? dataAmount, string? dataUnit, string? dataReset, string? dataCap,
+            bool timeLimitEnabled, int? timeAmount, string? timeUnit, string? timeReset, string? timeCap,
+            bool speedLimitEnabled, int? speedUploadAmount, string? speedUploadUnit, int? speedDownloadAmount, string? speedDownloadUnit,
+            bool sessionLimitEnabled, int? sessionLimit)
+        {
+            DataLimitEnabled = dataLimitEnabled;
+            DataAmount = dataAmount; DataUnit = dataUnit; DataReset = dataReset; DataCap = dataCap;
+            TimeLimitEnabled = timeLimitEnabled;
+            TimeAmount = timeAmount; TimeUnit = timeUnit; TimeReset = timeReset; TimeCap = timeCap;
+            SpeedLimitEnabled = speedLimitEnabled;
+            SpeedUploadAmount = speedUploadAmount; SpeedUploadUnit = speedUploadUnit;
+            SpeedDownloadAmount = speedDownloadAmount; SpeedDownloadUnit = speedDownloadUnit;
+            SessionLimitEnabled = sessionLimitEnabled;
+            SessionLimit = sessionLimit;
             UpdateTimestamp();
         }
 
