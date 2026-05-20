@@ -2825,11 +2825,10 @@ export interface components {
         };
         BrandingImageType: number;
         CreatePackageRequest: {
-            name?: string;
+            name?: null | string;
             description?: null | string;
             /** Format: double */
             price?: number | string;
-            radiusProfile?: string;
             /** Format: int32 */
             sortOrder?: number | string;
             /** Format: int32 */
@@ -3191,7 +3190,8 @@ export interface components {
             description?: null | string;
             /** Format: double */
             price?: null | number | string;
-            radiusProfile?: null | string;
+            /** Format: int32 */
+            radiusProfileId?: null | number | string;
             isActive?: null | boolean;
             /** Format: int32 */
             sortOrder?: null | number | string;

@@ -40,7 +40,6 @@ export interface CreatePackageInput {
   name: string
   description?: string | null
   price: number
-  radiusProfile: string
   sortOrder?: number
   durationDays?: number
   dataLimitEnabled?: boolean
@@ -66,7 +65,7 @@ export interface UpdatePackageInput {
   name?: string | null
   description?: string | null
   price?: number | null
-  radiusProfile?: string | null
+  radiusProfileId?: number | null
   isActive?: boolean | null
   sortOrder?: number | null
   durationDays?: number | null

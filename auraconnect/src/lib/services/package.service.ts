@@ -54,7 +54,6 @@ export const packageService = {
       name: input.name,
       description: input.description ?? null,
       price: input.price,
-      radiusProfile: input.radiusProfile,
       sortOrder: input.sortOrder,
       durationDays: input.durationDays,
       dataLimitEnabled: input.dataLimitEnabled,
