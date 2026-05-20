@@ -6,14 +6,14 @@ namespace AuraConnect.Infrastructure.Services
 {
     public class RadiusProvisioningService : IRadiusProvisioningService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
         private readonly ILogger<RadiusProvisioningService> _logger;
 
         private static readonly string DateFormat = "MM/dd/yyyy";
 
-        public RadiusProvisioningService(IHttpClientFactory httpClientFactory, ILogger<RadiusProvisioningService> logger)
+        public RadiusProvisioningService(HttpClient httpClient, ILogger<RadiusProvisioningService> logger)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
             _logger = logger;
         }
 
@@ -158,10 +158,9 @@ namespace AuraConnect.Infrastructure.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient("RadiusDesk");
                 var url = $"{baseUrl.TrimEnd('/')}/{path}";
                 using var content = new FormUrlEncodedContent(fields);
-                using var response = await client.PostAsync(url, content, ct);
+                using var response = await _httpClient.PostAsync(url, content, ct);
 
                 if (!response.IsSuccessStatusCode)
                 {
