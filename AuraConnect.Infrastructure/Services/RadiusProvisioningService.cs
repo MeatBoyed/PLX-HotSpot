@@ -159,16 +159,18 @@ namespace AuraConnect.Infrastructure.Services
             try
             {
                 var url = $"{baseUrl.TrimEnd('/')}/{path}";
+                _logger.LogDebug("RD POST {Url}", url);
                 using var content = new FormUrlEncodedContent(fields);
                 using var response = await _httpClient.PostAsync(url, content, ct);
 
+                var body = await response.Content.ReadAsStringAsync(ct);
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("RD HTTP {Status} for {Path}", (int)response.StatusCode, path);
+                    _logger.LogWarning("RD HTTP {Status} for {Url} — body: {Body}", (int)response.StatusCode, url, body);
                     return null;
                 }
 
-                var body = await response.Content.ReadAsStringAsync(ct);
                 return JsonDocument.Parse(body);
             }
             catch (Exception ex)
