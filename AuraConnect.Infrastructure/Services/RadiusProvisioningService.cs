@@ -226,18 +226,31 @@ namespace AuraConnect.Infrastructure.Services
             var json = await GetAsync(url, ct);
             if (json == null) return null;
 
-            if (!json.RootElement.TryGetProperty("data", out var data)) return null;
+            if (!json.RootElement.TryGetProperty("data", out var data))
+            {
+                _logger.LogWarning("RD profiles/index.json response has no 'data' property. Keys: {Keys}",
+                    string.Join(", ", json.RootElement.EnumerateObject().Select(p => p.Name)));
+                return null;
+            }
+
+            _logger.LogDebug("RD profiles/index.json returned {Count} profiles", data.GetArrayLength());
 
             foreach (var profile in data.EnumerateArray())
             {
-                if (profile.TryGetProperty("name", out var nameProp) &&
-                    nameProp.GetString()?.Equals(profileName, StringComparison.OrdinalIgnoreCase) == true &&
+                var rdName = profile.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : null;
+                _logger.LogDebug("RD profile entry: name={Name} id={Id}",
+                    rdName,
+                    profile.TryGetProperty("id", out var dbgId) ? dbgId.GetInt32() : -1);
+
+                if (rdName?.Equals(profileName, StringComparison.OrdinalIgnoreCase) == true &&
                     profile.TryGetProperty("id", out var idProp))
                 {
                     return idProp.GetInt32();
                 }
             }
 
+            _logger.LogWarning("RD profile '{Name}' not found in index response ({Count} profiles listed)",
+                profileName, data.GetArrayLength());
             return null;
         }
 
