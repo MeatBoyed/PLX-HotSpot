@@ -226,9 +226,9 @@ namespace AuraConnect.Infrastructure.Services
             var json = await GetAsync(url, ct);
             if (json == null) return null;
 
-            if (!json.RootElement.TryGetProperty("data", out var data))
+            if (!json.RootElement.TryGetProperty("items", out var data))
             {
-                _logger.LogWarning("RD profiles/index.json response has no 'data' property. Keys: {Keys}",
+                _logger.LogWarning("RD profiles/index.json response has no 'items' property. Keys: {Keys}",
                     string.Join(", ", json.RootElement.EnumerateObject().Select(p => p.Name)));
                 return null;
             }
