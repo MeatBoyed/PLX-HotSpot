@@ -1,5 +1,6 @@
 using AuraConnect.Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Text.Json;
 
 namespace AuraConnect.Infrastructure.Services
@@ -40,6 +41,42 @@ namespace AuraConnect.Infrastructure.Services
                 _logger.LogInformation("RD Profile created: id={Id} name={Name}", profileId, request.Name);
 
             return new(true, profileId, null);
+        }
+
+        public async Task<bool> DeleteProfileAsync(RdSiteConfig config, int rdProfileId, CancellationToken ct = default)
+        {
+            try
+            {
+                var url = $"{config.BaseUrl.TrimEnd('/')}/cake4/rd_cake/profiles/delete.json?token={Uri.EscapeDataString(config.ApiToken)}";
+                if (!string.IsNullOrEmpty(config.CloudId))
+                    url += $"&cloud_id={Uri.EscapeDataString(config.CloudId)}";
+
+                _logger.LogDebug("RD DELETE profile id={Id}", rdProfileId);
+                var jsonBody = $"[{{\"id\":{rdProfileId}}}]";
+                using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+                using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+                request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+                using var response = await _httpClient.SendAsync(request, ct);
+
+                var body = await response.Content.ReadAsStringAsync(ct);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("RD HTTP {Status} for profile delete — body: {Body}", (int)response.StatusCode, body);
+                    return false;
+                }
+
+                var json = JsonDocument.Parse(body);
+                var ok = IsSuccess(json);
+                if (ok) _logger.LogInformation("RD Profile deleted: id={Id}", rdProfileId);
+                else _logger.LogWarning("RD DeleteProfile failed for id={Id}: {Error}", rdProfileId, GetError(json));
+                return ok;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "RD delete profile failed for id={Id}", rdProfileId);
+                return false;
+            }
         }
 
         public async Task<bool> UpdateProfileAsync(RdSiteConfig config, int rdProfileId, RdProfileRequest request, CancellationToken ct = default)

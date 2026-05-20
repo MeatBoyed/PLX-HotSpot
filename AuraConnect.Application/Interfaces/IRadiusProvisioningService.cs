@@ -36,6 +36,7 @@ namespace AuraConnect.Application.Interfaces
     {
         Task<RdCreateProfileResult> CreateProfileAsync(RdSiteConfig config, RdProfileRequest request, CancellationToken ct = default);
         Task<bool> UpdateProfileAsync(RdSiteConfig config, int rdProfileId, RdProfileRequest request, CancellationToken ct = default);
+        Task<bool> DeleteProfileAsync(RdSiteConfig config, int rdProfileId, CancellationToken ct = default);
         Task<RdProvisionResult> ProvisionUserAsync(RdSiteConfig config, RdProvisionRequest request, CancellationToken ct = default);
         Task<bool> UpdateUserAsync(RdSiteConfig config, RdUpdateUserRequest request, CancellationToken ct = default);
     }

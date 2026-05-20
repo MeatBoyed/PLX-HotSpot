@@ -169,6 +169,18 @@ namespace AuraConnect.Infrastructure.Services
             if (package.SiteId != siteId)
                 throw new InvalidOperationException("Package not found");
 
+            if (package.RadiusProfileId is > 0)
+            {
+                var radiusConfig = await _radiusConfigRepository.GetBySiteIdAsync(siteId, cancellationToken);
+                if (IsRdConfigured(radiusConfig))
+                {
+                    var rdConfig = BuildRdConfig(radiusConfig!);
+                    var deleted = await _radiusProvisioning.DeleteProfileAsync(rdConfig, package.RadiusProfileId!.Value, cancellationToken);
+                    if (!deleted)
+                        _logger.LogWarning("RD profile delete failed for PackageId={PackageId} RadiusProfileId={RadiusProfileId} — orphan may exist in RadiusDesk", packageId, package.RadiusProfileId);
+                }
+            }
+
             package.Deactivate();
             await _packageRepository.UpdateAsync(package, cancellationToken);
             await _packageRepository.SaveChangesAsync(cancellationToken);
