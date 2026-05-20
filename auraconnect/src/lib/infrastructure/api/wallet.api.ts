@@ -5,6 +5,7 @@ type WalletBalanceResponse = components['schemas']['WalletBalanceResponse']
 type WalletTransactionResponse = components['schemas']['WalletTransactionResponse']
 type PagedTransactions = components['schemas']['PagedResultOfWalletTransactionResponse']
 type UserPackageResponse = components['schemas']['UserPackageResponse']
+type PackageCredentialsResponse = components['schemas']['PackageCredentialsResponse']
 
 export interface TransactionListParams {
   page?: number
@@ -55,5 +56,34 @@ export const walletApi = {
     })
     if (!response.ok) throw new Error(`Failed to fetch packages for ${profileId}: ${response.status}`)
     return (data as unknown as UserPackageResponse[]) ?? []
+  },
+
+  async getUserPackageCredentials(userPackageId: string): Promise<PackageCredentialsResponse> {
+    const { data, response } = await apiClient.GET('/api/admin/user-packages/{userPackageId}/credentials', {
+      params: { path: { userPackageId } },
+    })
+    if (response.status === 404) throw new Error('User package not found')
+    if (!response.ok) throw new Error(`Failed to fetch credentials: ${response.status}`)
+    return data as unknown as PackageCredentialsResponse
+  },
+
+  async disableUserPackage(userPackageId: string): Promise<void> {
+    const { response } = await apiClient.POST('/api/admin/user-packages/{userPackageId}/disable', {
+      params: { path: { userPackageId } },
+    })
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      throw new Error(`Failed to disable user package: ${text || response.status}`)
+    }
+  },
+
+  async enableUserPackage(userPackageId: string): Promise<void> {
+    const { response } = await apiClient.POST('/api/admin/user-packages/{userPackageId}/enable', {
+      params: { path: { userPackageId } },
+    })
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      throw new Error(`Failed to enable user package: ${text || response.status}`)
+    }
   },
 }

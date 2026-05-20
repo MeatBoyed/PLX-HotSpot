@@ -3,19 +3,21 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Wallet, Package, Activity, UserX, UserCheck, MapPin, Building2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Wallet, Package, Activity, UserX, UserCheck, MapPin, Building2, AlertTriangle, KeyRound, PowerOff, Power, Eye, EyeOff, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TransactionTable } from '@/components/transactions/TransactionTable'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
-import { updateProfileStatusAction, softDeleteProfileAction, hardDeleteProfileAction } from '@/lib/actions/hotspot-users.actions'
+import { updateProfileStatusAction, softDeleteProfileAction, hardDeleteProfileAction, getUserPackageCredentialsAction, disableUserPackageAction, enableUserPackageAction } from '@/lib/actions/hotspot-users.actions'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { HotspotUserDetail, UserPackage } from '@/lib/types/hotspot-user.types'
 import type { Transaction } from '@/lib/types/transaction.types'
+import type { PackageCredentials } from '@/lib/types/package.types'
 
 interface Props {
   user: HotspotUserDetail
@@ -36,6 +38,11 @@ export function HotspotUserDetailClient({ user: initialUser, packages, transacti
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false)
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [credentialsPackageId, setCredentialsPackageId] = useState<string | null>(null)
+  const [credentials, setCredentials] = useState<PackageCredentials | null>(null)
+  const [credentialsLoading, setCredentialsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [togglingPackageId, setTogglingPackageId] = useState<string | null>(null)
 
   const isSuspended = user.status.toLowerCase() === 'suspended'
 
@@ -74,6 +81,41 @@ export function HotspotUserDetailClient({ user: initialUser, packages, transacti
       toast.error('Failed to update user status')
     } finally {
       setUpdating(false)
+    }
+  }
+
+  const handleViewCredentials = async (userPackageId: string) => {
+    setCredentialsPackageId(userPackageId)
+    setCredentials(null)
+    setShowPassword(false)
+    setCredentialsLoading(true)
+    try {
+      const creds = await getUserPackageCredentialsAction(userPackageId)
+      setCredentials(creds)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to fetch credentials')
+      setCredentialsPackageId(null)
+    } finally {
+      setCredentialsLoading(false)
+    }
+  }
+
+  const handleTogglePackage = async (pkg: UserPackage) => {
+    const isActive = pkg.status.toLowerCase() === 'active'
+    setTogglingPackageId(pkg.id)
+    try {
+      if (isActive) {
+        await disableUserPackageAction(pkg.id)
+        toast.success('Package disabled in RadiusDesk')
+      } else {
+        await enableUserPackageAction(pkg.id)
+        toast.success('Package enabled in RadiusDesk')
+      }
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update package')
+    } finally {
+      setTogglingPackageId(null)
     }
   }
 
@@ -220,28 +262,55 @@ export function HotspotUserDetailClient({ user: initialUser, packages, transacti
                   <TableHead>Status</TableHead>
                   <TableHead>Purchased</TableHead>
                   <TableHead>Expires</TableHead>
+                  <TableHead className="w-24" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell className="text-sm font-medium">{pkg.packageName}</TableCell>
-                    <TableCell className="text-sm tabular-nums">
-                      {formatCurrency(pkg.amountPaid, pkg.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={pkg.status.toLowerCase() === 'active' ? 'outline' : 'secondary'}>
-                        {pkg.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {formatDateTime(pkg.purchasedAt)}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {pkg.expiresAt ? formatDateTime(pkg.expiresAt) : '—'}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {packages.map((pkg) => {
+                  const isActive = pkg.status.toLowerCase() === 'active'
+                  const toggling = togglingPackageId === pkg.id
+                  return (
+                    <TableRow key={pkg.id}>
+                      <TableCell className="text-sm font-medium">{pkg.packageName}</TableCell>
+                      <TableCell className="text-sm tabular-nums">
+                        {formatCurrency(pkg.amountPaid, pkg.currency)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={isActive ? 'outline' : 'secondary'}>
+                          {pkg.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {formatDateTime(pkg.purchasedAt)}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {pkg.expiresAt ? formatDateTime(pkg.expiresAt) : '—'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="icon" variant="ghost" className="h-7 w-7"
+                            title="View RADIUS credentials"
+                            onClick={() => handleViewCredentials(pkg.id)}
+                          >
+                            <KeyRound className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon" variant="ghost" className="h-7 w-7"
+                            title={isActive ? 'Disable in RadiusDesk' : 'Enable in RadiusDesk'}
+                            disabled={toggling}
+                            onClick={() => handleTogglePackage(pkg)}
+                          >
+                            {isActive
+                              ? <PowerOff className="h-3.5 w-3.5 text-destructive" />
+                              : <Power className="h-3.5 w-3.5 text-green-600" />
+                            }
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -316,6 +385,55 @@ export function HotspotUserDetailClient({ user: initialUser, packages, transacti
         loading={deleting}
         onConfirm={handleHardDelete}
       />
+
+      {/* RADIUS Credentials Dialog */}
+      <Dialog open={!!credentialsPackageId} onOpenChange={(o) => { if (!o) { setCredentialsPackageId(null); setCredentials(null) } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4" /> RADIUS Credentials
+            </DialogTitle>
+          </DialogHeader>
+          {credentialsLoading ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Loading credentials…</p>
+          ) : credentials ? (
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Username</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 rounded bg-muted px-2 py-1 text-xs font-mono break-all">{credentials.rdUsername}</code>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0"
+                    onClick={() => { navigator.clipboard.writeText(credentials.rdUsername); toast.success('Copied') }}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Password</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 rounded bg-muted px-2 py-1 text-xs font-mono break-all">
+                    {showPassword ? credentials.rdPassword : '••••••••••••'}
+                  </code>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0"
+                    onClick={() => setShowPassword((s) => !s)}>
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0"
+                    onClick={() => { navigator.clipboard.writeText(credentials.rdPassword); toast.success('Copied') }}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+              {credentials.gatewayUrl && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Gateway URL</p>
+                  <code className="block rounded bg-muted px-2 py-1 text-xs font-mono break-all">{credentials.gatewayUrl}</code>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

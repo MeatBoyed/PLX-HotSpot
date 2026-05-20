@@ -239,7 +239,56 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateMeRequest"];
+                    "text/json": components["schemas"]["UpdateMeRequest"];
+                    "application/*+json": components["schemas"]["UpdateMeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MeResponse"];
+                        "application/json": components["schemas"]["MeResponse"];
+                        "text/json": components["schemas"]["MeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/portal/{tenantId}/gateway": {
@@ -795,6 +844,67 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/portal/wallet/packages/{userPackageId}/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userPackageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["PackageCredentialsResponse"];
+                        "application/json": components["schemas"]["PackageCredentialsResponse"];
+                        "text/json": components["schemas"]["PackageCredentialsResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1571,6 +1681,170 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/admin/user-packages/{userPackageId}/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userPackageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["PackageCredentialsResponse"];
+                        "application/json": components["schemas"]["PackageCredentialsResponse"];
+                        "text/json": components["schemas"]["PackageCredentialsResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/user-packages/{userPackageId}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userPackageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/user-packages/{userPackageId}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userPackageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/admin/wallet/transactions": {
@@ -2557,9 +2831,31 @@ export interface components {
             price?: number | string;
             radiusProfile?: string;
             /** Format: int32 */
-            radiusProfileId?: null | number | string;
-            /** Format: int32 */
             sortOrder?: number | string;
+            /** Format: int32 */
+            durationDays?: number | string;
+            dataLimitEnabled?: boolean;
+            /** Format: int32 */
+            dataAmount?: null | number | string;
+            dataUnit?: null | string;
+            dataReset?: null | string;
+            dataCap?: null | string;
+            timeLimitEnabled?: boolean;
+            /** Format: int32 */
+            timeAmount?: null | number | string;
+            timeUnit?: null | string;
+            timeReset?: null | string;
+            timeCap?: null | string;
+            speedLimitEnabled?: boolean;
+            /** Format: int32 */
+            speedUploadAmount?: null | number | string;
+            speedUploadUnit?: null | string;
+            /** Format: int32 */
+            speedDownloadAmount?: null | number | string;
+            speedDownloadUnit?: null | string;
+            sessionLimitEnabled?: boolean;
+            /** Format: int32 */
+            sessionLimit?: null | number | string;
         };
         CreateSiteRequest: {
             ssid?: string;
@@ -2589,6 +2885,22 @@ export interface components {
             tenantId?: null | string;
             ssid?: null | string;
         };
+        MeResponse: {
+            profileId?: string;
+            firstName?: string;
+            lastName?: string;
+            displayName?: string;
+            email?: string;
+            phoneNumber?: null | string;
+            /** Format: double */
+            balance?: number | string;
+            status?: string;
+        };
+        PackageCredentialsResponse: {
+            rdUsername?: string;
+            rdPassword?: string;
+            gatewayUrl?: null | string;
+        };
         PackageResponse: {
             id?: string;
             siteId?: string;
@@ -2602,10 +2914,34 @@ export interface components {
             isActive?: boolean;
             /** Format: int32 */
             sortOrder?: number | string;
+            /** Format: int32 */
+            durationDays?: number | string;
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            dataLimitEnabled?: boolean;
+            /** Format: int32 */
+            dataAmount?: null | number | string;
+            dataUnit?: null | string;
+            dataReset?: null | string;
+            dataCap?: null | string;
+            timeLimitEnabled?: boolean;
+            /** Format: int32 */
+            timeAmount?: null | number | string;
+            timeUnit?: null | string;
+            timeReset?: null | string;
+            timeCap?: null | string;
+            speedLimitEnabled?: boolean;
+            /** Format: int32 */
+            speedUploadAmount?: null | number | string;
+            speedUploadUnit?: null | string;
+            /** Format: int32 */
+            speedDownloadAmount?: null | number | string;
+            speedDownloadUnit?: null | string;
+            sessionLimitEnabled?: boolean;
+            /** Format: int32 */
+            sessionLimit?: null | number | string;
         };
         PagedResultOfAdminProfileListItem: {
             items?: components["schemas"]["AdminProfileListItem"][];
@@ -2686,6 +3022,27 @@ export interface components {
             isFree?: boolean;
             /** Format: int32 */
             sortOrder?: number | string;
+            /** Format: int32 */
+            durationDays?: number | string;
+            dataLimitEnabled?: boolean;
+            /** Format: int32 */
+            dataAmount?: null | number | string;
+            dataUnit?: null | string;
+            dataReset?: null | string;
+            timeLimitEnabled?: boolean;
+            /** Format: int32 */
+            timeAmount?: null | number | string;
+            timeUnit?: null | string;
+            speedLimitEnabled?: boolean;
+            /** Format: int32 */
+            speedDownloadAmount?: null | number | string;
+            speedDownloadUnit?: null | string;
+            /** Format: int32 */
+            speedUploadAmount?: null | number | string;
+            speedUploadUnit?: null | string;
+            sessionLimitEnabled?: boolean;
+            /** Format: int32 */
+            sessionLimit?: null | number | string;
         };
         PortalSiteResponse: {
             ssid?: string;
@@ -2823,17 +3180,45 @@ export interface components {
             faviconUrl?: null | string;
             splashBgUrl?: null | string;
         };
+        UpdateMeRequest: {
+            firstName?: null | string;
+            lastName?: null | string;
+            phoneNumber?: null | string;
+            email?: null | string;
+        };
         UpdatePackageRequest: {
             name?: null | string;
             description?: null | string;
             /** Format: double */
             price?: null | number | string;
             radiusProfile?: null | string;
-            /** Format: int32 */
-            radiusProfileId?: null | number | string;
             isActive?: null | boolean;
             /** Format: int32 */
             sortOrder?: null | number | string;
+            /** Format: int32 */
+            durationDays?: null | number | string;
+            dataLimitEnabled?: null | boolean;
+            /** Format: int32 */
+            dataAmount?: null | number | string;
+            dataUnit?: null | string;
+            dataReset?: null | string;
+            dataCap?: null | string;
+            timeLimitEnabled?: null | boolean;
+            /** Format: int32 */
+            timeAmount?: null | number | string;
+            timeUnit?: null | string;
+            timeReset?: null | string;
+            timeCap?: null | string;
+            speedLimitEnabled?: null | boolean;
+            /** Format: int32 */
+            speedUploadAmount?: null | number | string;
+            speedUploadUnit?: null | string;
+            /** Format: int32 */
+            speedDownloadAmount?: null | number | string;
+            speedDownloadUnit?: null | string;
+            sessionLimitEnabled?: null | boolean;
+            /** Format: int32 */
+            sessionLimit?: null | number | string;
         };
         UpdatePayFastSettingsRequest: {
             merchantId?: string;

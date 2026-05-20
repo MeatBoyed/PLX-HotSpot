@@ -1,6 +1,8 @@
 'use server'
 
 import { hotspotUserService } from '@/lib/services/hotspot-user.service'
+import { walletApi } from '@/lib/infrastructure/api/wallet.api'
+import type { PackageCredentials } from '@/lib/types/package.types'
 
 export async function updateProfileStatusAction(profileId: string, status: string) {
   return hotspotUserService.updateStatus(profileId, status)
@@ -21,4 +23,21 @@ export async function softDeleteProfileAction(profileId: string) {
 
 export async function hardDeleteProfileAction(profileId: string) {
   return hotspotUserService.hardDelete(profileId)
+}
+
+export async function getUserPackageCredentialsAction(userPackageId: string): Promise<PackageCredentials> {
+  const data = await walletApi.getUserPackageCredentials(userPackageId)
+  return {
+    rdUsername: data.rdUsername ?? '',
+    rdPassword: data.rdPassword ?? '',
+    gatewayUrl: data.gatewayUrl ?? null,
+  }
+}
+
+export async function disableUserPackageAction(userPackageId: string) {
+  return walletApi.disableUserPackage(userPackageId)
+}
+
+export async function enableUserPackageAction(userPackageId: string) {
+  return walletApi.enableUserPackage(userPackageId)
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Trash2, ToggleLeft, ToggleRight, Pencil } from 'lucide-react'
+import { Trash2, ToggleLeft, ToggleRight, Pencil, Clock, Database, Zap, Timer, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,13 @@ interface PackageCardProps {
 }
 
 export function PackageCard({ pkg, onEdit, onDelete, onToggle, selected, onSelect }: PackageCardProps) {
+  const limits = [
+    pkg.dataLimitEnabled && pkg.dataAmount != null && `${pkg.dataAmount}${pkg.dataUnit ?? ''}`,
+    pkg.timeLimitEnabled && pkg.timeAmount != null && `${pkg.timeAmount}${pkg.timeUnit ?? ''}`,
+    pkg.speedLimitEnabled && pkg.speedDownloadAmount != null && `↓${pkg.speedDownloadAmount}${pkg.speedDownloadUnit ?? ''}`,
+    pkg.sessionLimitEnabled && pkg.sessionLimit != null && `${pkg.sessionLimit} sessions`,
+  ].filter(Boolean) as string[]
+
   return (
     <Card className={pkg.isActive ? '' : 'opacity-60'}>
       <CardContent className="p-4">
@@ -51,11 +58,45 @@ export function PackageCard({ pkg, onEdit, onDelete, onToggle, selected, onSelec
             <span className="text-muted-foreground">Sort: </span>
             <span className="font-medium">#{pkg.sortOrder}</span>
           </div>
+          {pkg.durationDays > 0 && (
+            <div className="col-span-2 flex items-center gap-1">
+              <Clock className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Duration: </span>
+              <span className="font-medium">{pkg.durationDays} day{pkg.durationDays !== 1 ? 's' : ''}</span>
+            </div>
+          )}
           <div className="col-span-2">
             <span className="text-muted-foreground">RADIUS: </span>
             <span className="font-medium font-mono truncate">{pkg.radiusProfile}</span>
           </div>
         </div>
+
+        {limits.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {pkg.dataLimitEnabled && pkg.dataAmount != null && (
+              <Badge variant="outline" className="text-xs gap-1 font-normal">
+                <Database className="h-2.5 w-2.5" />{pkg.dataAmount}{pkg.dataUnit ?? ''}
+              </Badge>
+            )}
+            {pkg.timeLimitEnabled && pkg.timeAmount != null && (
+              <Badge variant="outline" className="text-xs gap-1 font-normal">
+                <Timer className="h-2.5 w-2.5" />{pkg.timeAmount}{pkg.timeUnit ?? ''}
+              </Badge>
+            )}
+            {pkg.speedLimitEnabled && (pkg.speedDownloadAmount != null || pkg.speedUploadAmount != null) && (
+              <Badge variant="outline" className="text-xs gap-1 font-normal">
+                <Zap className="h-2.5 w-2.5" />
+                {pkg.speedDownloadAmount != null && `↓${pkg.speedDownloadAmount}${pkg.speedDownloadUnit ?? ''}`}
+                {pkg.speedUploadAmount != null && ` ↑${pkg.speedUploadAmount}${pkg.speedUploadUnit ?? ''}`}
+              </Badge>
+            )}
+            {pkg.sessionLimitEnabled && pkg.sessionLimit != null && (
+              <Badge variant="outline" className="text-xs gap-1 font-normal">
+                <Users className="h-2.5 w-2.5" />{pkg.sessionLimit} sessions
+              </Badge>
+            )}
+          </div>
+        )}
 
         <div className="flex gap-1 mt-3 justify-end">
           <Button
