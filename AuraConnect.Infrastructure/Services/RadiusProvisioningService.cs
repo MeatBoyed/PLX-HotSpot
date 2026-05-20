@@ -9,7 +9,7 @@ namespace AuraConnect.Infrastructure.Services
         private readonly HttpClient _httpClient;
         private readonly ILogger<RadiusProvisioningService> _logger;
 
-        private static readonly string DateFormat = "MM/dd/yyyy";
+        private const string DateFormat = "MM/dd/yyyy";
 
         public RadiusProvisioningService(HttpClient httpClient, ILogger<RadiusProvisioningService> logger)
         {
@@ -17,10 +17,12 @@ namespace AuraConnect.Infrastructure.Services
             _logger = logger;
         }
 
+        // ── Profile management ───────────────────────────────────────────────────
+
         public async Task<RdCreateProfileResult> CreateProfileAsync(RdSiteConfig config, RdProfileRequest request, CancellationToken ct = default)
         {
             var fields = BuildProfileFields(request, config.ApiToken, config.CloudId);
-            var json = await PostAsync(config.BaseUrl, "cake3/rd_cake/profiles/add.json", fields, ct);
+            var json = await PostAsync(config.BaseUrl, "cake4/rd_cake/profiles/simple_add.json", fields, ct);
             if (json == null) return new(false, null, "No response from RadiusDesk");
 
             if (!IsSuccess(json))
@@ -30,26 +32,27 @@ namespace AuraConnect.Infrastructure.Services
                 return new(false, null, err);
             }
 
-            var id = json.RootElement.GetProperty("data").GetProperty("id").GetInt32();
-            _logger.LogInformation("RD Profile created: id={Id} name={Name}", id, request.Name);
-            return new(true, id, null);
+            // simple_add.json returns {"success":true} with no data.id — ID must be looked up separately
+            _logger.LogInformation("RD Profile created: name={Name}", request.Name);
+            return new(true, null, null);
         }
 
         public async Task<bool> UpdateProfileAsync(RdSiteConfig config, int rdProfileId, RdProfileRequest request, CancellationToken ct = default)
         {
             var fields = BuildProfileFields(request, config.ApiToken, config.CloudId);
             fields.Add(new("id", rdProfileId.ToString()));
-            var json = await PostAsync(config.BaseUrl, "cake3/rd_cake/profiles/edit.json", fields, ct);
+            var json = await PostAsync(config.BaseUrl, "cake4/rd_cake/profiles/simple_edit.json", fields, ct);
             var ok = json != null && IsSuccess(json);
             if (!ok) _logger.LogWarning("RD UpdateProfile failed for id={Id}", rdProfileId);
             return ok;
         }
 
+        // ── Permanent user provisioning ──────────────────────────────────────────
+
         public async Task<RdProvisionResult> ProvisionUserAsync(RdSiteConfig config, RdProvisionRequest request, CancellationToken ct = default)
         {
             var fields = new List<KeyValuePair<string, string>>
             {
-                new("user_id",    "0"),
                 new("username",   request.Username),
                 new("password",   request.Password),
                 new("realm_id",   config.RealmId),
@@ -68,7 +71,7 @@ namespace AuraConnect.Infrastructure.Services
             if (!string.IsNullOrEmpty(config.CloudId))
                 fields.Add(new("cloud_id", config.CloudId));
 
-            var json = await PostAsync(config.BaseUrl, "cake3/rd_cake/permanent-users/add.json", fields, ct);
+            var json = await PostAsync(config.BaseUrl, "cake4/rd_cake/permanent-users/add.json", fields, ct);
             if (json == null) return new(false, null, null, "No response from RadiusDesk");
 
             if (!IsSuccess(json))
@@ -87,10 +90,30 @@ namespace AuraConnect.Infrastructure.Services
 
         public async Task<bool> UpdateUserAsync(RdSiteConfig config, RdUpdateUserRequest request, CancellationToken ct = default)
         {
+            // Enable/disable uses a dedicated endpoint with rb=enable/disable
+            if (request.Active.HasValue)
+            {
+                var enableFields = new List<KeyValuePair<string, string>>
+                {
+                    new("id",    request.RdUserId.ToString()),
+                    new("rb",    request.Active.Value ? "enable" : "disable"),
+                    new("token", config.ApiToken),
+                };
+                if (!string.IsNullOrEmpty(config.CloudId))
+                    enableFields.Add(new("cloud_id", config.CloudId));
+
+                var json = await PostAsync(config.BaseUrl, "cake4/rd_cake/permanent-users/enable-disable.json", enableFields, ct);
+                var ok = json != null && IsSuccess(json);
+                if (!ok) _logger.LogWarning("RD {Action} failed for RdUserId={RdUserId}", request.Active.Value ? "Enable" : "Disable", request.RdUserId);
+                return ok;
+            }
+
+            // Profile/expiry update uses edit-basic-info
             var fields = new List<KeyValuePair<string, string>>
             {
-                new("id",    request.RdUserId.ToString()),
-                new("token", config.ApiToken),
+                new("id",       request.RdUserId.ToString()),
+                new("realm_id", config.RealmId),
+                new("token",    config.ApiToken),
             };
 
             if (!string.IsNullOrEmpty(config.CloudId))
@@ -99,13 +122,11 @@ namespace AuraConnect.Infrastructure.Services
                 fields.Add(new("profile_id", request.ProfileId.Value.ToString()));
             if (request.ToDate.HasValue)
                 fields.Add(new("to_date", request.ToDate.Value.ToString(DateFormat)));
-            if (request.Active.HasValue)
-                fields.Add(new("active", request.Active.Value ? "1" : "0"));
 
-            var json = await PostAsync(config.BaseUrl, "cake3/rd_cake/permanent-users/edit.json", fields, ct);
-            var ok = json != null && IsSuccess(json);
-            if (!ok) _logger.LogWarning("RD UpdateUser failed for RdUserId={RdUserId}", request.RdUserId);
-            return ok;
+            var editJson = await PostAsync(config.BaseUrl, "cake4/rd_cake/permanent-users/edit-basic-info.json", fields, ct);
+            var editOk = editJson != null && IsSuccess(editJson);
+            if (!editOk) _logger.LogWarning("RD UpdateUser (edit-basic-info) failed for RdUserId={RdUserId}", request.RdUserId);
+            return editOk;
         }
 
         // ── Helpers ─────────────────────────────────────────────────────────────
@@ -116,9 +137,9 @@ namespace AuraConnect.Infrastructure.Services
             {
                 new("name",  req.Name),
                 new("token", token),
-                new("data_limit_enabled",  req.DataLimitEnabled  ? "true" : "false"),
-                new("time_limit_enabled",  req.TimeLimitEnabled  ? "true" : "false"),
-                new("speed_limit_enabled", req.SpeedLimitEnabled ? "true" : "false"),
+                new("data_limit_enabled",    req.DataLimitEnabled    ? "true" : "false"),
+                new("time_limit_enabled",    req.TimeLimitEnabled    ? "true" : "false"),
+                new("speed_limit_enabled",   req.SpeedLimitEnabled   ? "true" : "false"),
                 new("session_limit_enabled", req.SessionLimitEnabled ? "true" : "false"),
             };
 

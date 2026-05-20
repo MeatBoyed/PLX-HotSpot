@@ -25,7 +25,9 @@
       "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)",
       "WebFetch(domain:radiusdesk.com)",
       "Bash(Select-String -Pattern \"error|warning NU1510|warning ASPDEPR|succeeded|failed\")",
-      "Bash(Select-Object -First 30)"
+      "Bash(Select-Object -First 30)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

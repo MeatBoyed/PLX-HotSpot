@@ -10,21 +10,15 @@ namespace AuraConnect.Infrastructure.Services
     {
         private readonly IPackageRepository _packageRepository;
         private readonly ISiteRepository _siteRepository;
-        private readonly IRadiusConfigRepository _radiusConfigRepository;
-        private readonly IRadiusProvisioningService _radiusProvisioning;
         private readonly ILogger<PackageService> _logger;
 
         public PackageService(
             IPackageRepository packageRepository,
             ISiteRepository siteRepository,
-            IRadiusConfigRepository radiusConfigRepository,
-            IRadiusProvisioningService radiusProvisioning,
             ILogger<PackageService> logger)
         {
             _packageRepository = packageRepository;
             _siteRepository = siteRepository;
-            _radiusConfigRepository = radiusConfigRepository;
-            _radiusProvisioning = radiusProvisioning;
             _logger = logger;
         }
 
@@ -47,20 +41,13 @@ namespace AuraConnect.Infrastructure.Services
 
         public async Task<PackageResponse> CreateAsync(string siteId, CreatePackageRequest request, CancellationToken cancellationToken = default)
         {
-            _ = await _siteRepository.GetByIdAsync(siteId, cancellationToken)
-                ?? throw new InvalidOperationException("Site not found");
-
-            var radiusConfig = await _radiusConfigRepository.GetBySiteIdAsync(siteId, cancellationToken);
-            var rdConfig = BuildRdSiteConfig(radiusConfig);
-
-            if (rdConfig == null)
-                throw new InvalidOperationException(
-                    "This site's RADIUS configuration is incomplete. Set RadiusDesk URL, API token, Realm ID and Cloud ID before creating packages.");
-
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new ArgumentException("Package name is required");
             if (string.IsNullOrWhiteSpace(request.RadiusProfile))
                 throw new ArgumentException("RadiusProfile is required");
+
+            _ = await _siteRepository.GetByIdAsync(siteId, cancellationToken)
+                ?? throw new InvalidOperationException("Site not found");
 
             var package = new Package(siteId, request.Name, request.RadiusProfile, request.Price);
             if (request.Description != null) package.SetDescription(request.Description);
@@ -72,16 +59,13 @@ namespace AuraConnect.Infrastructure.Services
                 request.SpeedLimitEnabled, request.SpeedUploadAmount, request.SpeedUploadUnit, request.SpeedDownloadAmount, request.SpeedDownloadUnit,
                 request.SessionLimitEnabled, request.SessionLimit);
 
-            var profileResult = await _radiusProvisioning.CreateProfileAsync(rdConfig, BuildRdProfileRequest(package), cancellationToken);
-            if (!profileResult.Success)
-                throw new InvalidOperationException($"Failed to create RadiusDesk profile: {profileResult.Error}");
-
-            package.SetRadiusProfileId(profileResult.RdProfileId);
+            if (request.RadiusProfileId.HasValue)
+                package.SetRadiusProfileId(request.RadiusProfileId.Value);
 
             await _packageRepository.AddAsync(package, cancellationToken);
             await _packageRepository.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Package {PackageId} created with RD profile id={RdProfileId}", package.Id, profileResult.RdProfileId);
+            _logger.LogInformation("Package {PackageId} created (RadiusProfileId={RadiusProfileId})", package.Id, package.RadiusProfileId);
             return MapToResponse(package);
         }
 
@@ -97,6 +81,7 @@ namespace AuraConnect.Infrastructure.Services
             if (request.Description != null) package.SetDescription(request.Description);
             if (request.Price.HasValue) package.SetPrice(request.Price.Value);
             if (!string.IsNullOrWhiteSpace(request.RadiusProfile)) package.SetRadiusProfile(request.RadiusProfile);
+            if (request.RadiusProfileId.HasValue) package.SetRadiusProfileId(request.RadiusProfileId.Value);
             if (request.SortOrder.HasValue) package.SetSortOrder(request.SortOrder.Value);
             if (request.DurationDays.HasValue) package.SetDurationDays(request.DurationDays.Value);
 
@@ -125,17 +110,6 @@ namespace AuraConnect.Infrastructure.Services
                     request.SpeedDownloadAmount ?? package.SpeedDownloadAmount, request.SpeedDownloadUnit ?? package.SpeedDownloadUnit,
                     request.SessionLimitEnabled ?? package.SessionLimitEnabled,
                     request.SessionLimit ?? package.SessionLimit);
-
-                if (package.RadiusProfileId.HasValue && package.RadiusProfileId > 0)
-                {
-                    var radiusConfig = await _radiusConfigRepository.GetBySiteIdAsync(siteId, cancellationToken);
-                    var rdConfig = BuildRdSiteConfig(radiusConfig);
-                    if (rdConfig != null)
-                    {
-                        var ok = await _radiusProvisioning.UpdateProfileAsync(rdConfig, package.RadiusProfileId.Value, BuildRdProfileRequest(package), cancellationToken);
-                        if (!ok) throw new InvalidOperationException("Failed to update RadiusDesk profile. Package not saved.");
-                    }
-                }
             }
 
             await _packageRepository.UpdateAsync(package, cancellationToken);
@@ -167,25 +141,7 @@ namespace AuraConnect.Infrastructure.Services
             return packages.Select(MapToPortalResponse);
         }
 
-        // ── Helpers ─────────────────────────────────────────────────────────────
-
-        private static RdSiteConfig? BuildRdSiteConfig(RadiusConfig? config)
-        {
-            if (config == null ||
-                string.IsNullOrWhiteSpace(config.RadiusDeskUrl) ||
-                string.IsNullOrWhiteSpace(config.RadiusDeskApiToken) ||
-                string.IsNullOrWhiteSpace(config.RadiusDeskRealmId))
-                return null;
-
-            return new RdSiteConfig(config.RadiusDeskUrl, config.RadiusDeskApiToken, config.RadiusDeskRealmId, config.RadiusDeskCloudId);
-        }
-
-        private static RdProfileRequest BuildRdProfileRequest(Package p) => new(
-            p.RadiusProfile,
-            p.DataLimitEnabled, p.DataAmount, p.DataUnit, p.DataReset, p.DataCap,
-            p.TimeLimitEnabled, p.TimeAmount, p.TimeUnit, p.TimeReset, p.TimeCap,
-            p.SpeedLimitEnabled, p.SpeedUploadAmount, p.SpeedUploadUnit, p.SpeedDownloadAmount, p.SpeedDownloadUnit,
-            p.SessionLimitEnabled, p.SessionLimit);
+        // ── Mappers ─────────────────────────────────────────────────────────────
 
         private static PackageResponse MapToResponse(Package p) => new()
         {
