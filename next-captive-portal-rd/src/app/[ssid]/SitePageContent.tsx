@@ -5,7 +5,9 @@ import { useAuth } from "@/components/auth/AuthContext";
 import { imageUrl } from "@/lib/image-url";
 import AdSection from "@/components/ad-section";
 import AuthMethodsCard from '@/components/home-page/AuthMethodsCard';
-import type { GatewayConfig } from '@/lib/types';
+import PackageConnectCard from '@/components/home-page/PackageConnectCard';
+import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
+import type { GatewayConfig, ActivePackage } from '@/lib/types';
 
 function ProfileBadge() {
   const { user, logout } = useAuth();
@@ -65,6 +67,8 @@ function ProfileBadge() {
 
 export default function SitePageContent({ gatewayConfig }: { gatewayConfig: GatewayConfig }) {
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const [activePackage, setActivePackage] = useState<ActivePackage | null>(null);
 
   useEffect(() => {
     try {
@@ -75,6 +79,13 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
       }
     } catch { /* sessionStorage unavailable */ }
   }, []);
+
+  useEffect(() => {
+    if (!user) { setActivePackage(null); return; }
+    platformWalletApi.getActivePackage()
+      .then(setActivePackage)
+      .catch(() => {});
+  }, [user]);
 
   return (
     <div
@@ -141,6 +152,13 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
         </div>
 
         <div className="flex flex-col gap-3">
+          {activePackage && activePackage.status === 'Active' && (
+            <PackageConnectCard
+              userPackageId={activePackage.id}
+              packageName={activePackage.packageName}
+              gatewayConfig={gatewayConfig}
+            />
+          )}
           <AuthMethodsCard gatewayConfig={gatewayConfig} />
         </div>
 

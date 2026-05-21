@@ -4,6 +4,12 @@ export interface GatewayConfig {
   freePassword: string;
 }
 
+export interface PackageCredentials {
+  rdUsername: string;
+  rdPassword: string;
+  gatewayUrl: string | null;
+}
+
 export interface AuthProfile {
   profileId: string;
   email: string;

@@ -32,6 +32,21 @@ export interface PortalPackage {
   currency: string
   isFree: boolean
   sortOrder: number
+  durationDays: number
+  dataLimitEnabled: boolean
+  dataAmount?: number | null
+  dataUnit?: string | null
+  dataReset?: string | null
+  timeLimitEnabled: boolean
+  timeAmount?: number | null
+  timeUnit?: string | null
+  speedLimitEnabled: boolean
+  speedDownloadAmount?: number | null
+  speedDownloadUnit?: string | null
+  speedUploadAmount?: number | null
+  speedUploadUnit?: string | null
+  sessionLimitEnabled: boolean
+  sessionLimit?: number | null
 }
 
 export interface ApiPortalSubVenue {

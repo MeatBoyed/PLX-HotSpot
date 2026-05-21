@@ -1,5 +1,5 @@
 import { platformRequest } from './client';
-import type { WalletBalance, WalletTransaction, ActivePackage } from '@/lib/types';
+import type { WalletBalance, WalletTransaction, ActivePackage, PackageCredentials } from '@/lib/types';
 
 // ── API response shapes (match OpenAPI spec) ──────────────────────────────
 
@@ -112,4 +112,7 @@ export const platformWalletApi = {
     });
     return toActivePackage(r);
   },
+
+  getCredentials: (userPackageId: string): Promise<PackageCredentials> =>
+    platformRequest<PackageCredentials>(`/portal/wallet/packages/${userPackageId}/credentials`),
 };

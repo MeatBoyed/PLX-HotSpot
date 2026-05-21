@@ -7,6 +7,16 @@ import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 import type { PortalPackage } from '@/infrastructure/api/types';
 import type { WalletBalance } from '@/lib/types';
 
+function LimitRow({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-xs font-semibold text-gray-700">{value}</span>
+    </div>
+  );
+}
+
 export default function ConfirmPackagePage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -61,8 +71,9 @@ export default function ConfirmPackagePage() {
     );
   }
 
-  const remaining = balance ? balance.balance - pkg.price : null;
-  const canAfford = remaining !== null && remaining >= 0;
+  const price = Number(pkg.price);
+  const remaining = balance ? balance.balance - price : null;
+  const canAfford = pkg.isFree || (remaining !== null && remaining >= 0);
 
   return (
     <div className="min-h-screen bg-gray-50 w-full max-w-md">
@@ -77,29 +88,47 @@ export default function ConfirmPackagePage() {
       </div>
 
       <div className="px-5 pt-5 pb-24 flex flex-col gap-4">
+        {/* Package summary */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-lg font-bold text-gray-900 mb-1">{pkg.name}</p>
+          <div className="flex items-start justify-between mb-1">
+            <p className="text-lg font-bold text-gray-900">{pkg.name}</p>
+            {pkg.isFree
+              ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600">FREE</span>
+              : <p className="text-2xl font-bold text-blue-600">R{price.toFixed(2)}</p>
+            }
+          </div>
           {pkg.description && <p className="text-xs text-gray-400 mb-3">{pkg.description}</p>}
-          <p className="text-3xl font-bold text-blue-600">R{pkg.price.toFixed(2)}</p>
+
+          {/* Limit details */}
+          <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-gray-50">
+            <LimitRow label="Duration" value={pkg.durationDays ? `${pkg.durationDays} days` : null} />
+            <LimitRow label="Data" value={pkg.dataLimitEnabled && pkg.dataAmount ? `${pkg.dataAmount} ${pkg.dataUnit ?? ''}`.trim() : null} />
+            <LimitRow label="Speed ↓" value={pkg.speedLimitEnabled && pkg.speedDownloadAmount ? `${pkg.speedDownloadAmount} ${pkg.speedDownloadUnit ?? ''}`.trim() : null} />
+            <LimitRow label="Speed ↑" value={pkg.speedLimitEnabled && pkg.speedUploadAmount ? `${pkg.speedUploadAmount} ${pkg.speedUploadUnit ?? ''}`.trim() : null} />
+            <LimitRow label="Session time" value={pkg.timeLimitEnabled && pkg.timeAmount ? `${pkg.timeAmount} ${pkg.timeUnit ?? ''}`.trim() : null} />
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-400">Current balance</span>
-            <span className="text-sm font-semibold text-gray-800">R{balance?.balance.toFixed(2) ?? '—'}</span>
+        {/* Balance breakdown — only for paid packages */}
+        {!pkg.isFree && (
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-400">Current balance</span>
+              <span className="text-sm font-semibold text-gray-800">R{balance?.balance.toFixed(2) ?? '—'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-400">Package cost</span>
+              <span className="text-sm font-semibold text-red-500">-R{price.toFixed(2)}</span>
+            </div>
+            <div className="h-px bg-gray-100" />
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Remaining</span>
+              <span className={`text-sm font-bold ${canAfford ? 'text-green-600' : 'text-red-500'}`}>
+                R{remaining !== null ? remaining.toFixed(2) : '—'}
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-400">Package cost</span>
-            <span className="text-sm font-semibold text-red-500">-R{pkg.price.toFixed(2)}</span>
-          </div>
-          <div className="h-px bg-gray-100" />
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Remaining</span>
-            <span className={`text-sm font-bold ${canAfford ? 'text-green-600' : 'text-red-500'}`}>
-              R{remaining !== null ? remaining.toFixed(2) : '—'}
-            </span>
-          </div>
-        </div>
+        )}
 
         {error && <p className="text-xs text-center text-red-500">{error}</p>}
 
@@ -108,7 +137,7 @@ export default function ConfirmPackagePage() {
           disabled={purchasing || !canAfford}
           className="w-full py-4 rounded-2xl font-bold text-base bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-colors"
         >
-          {purchasing ? 'Processing…' : 'Confirm Purchase'}
+          {purchasing ? 'Processing…' : pkg.isFree ? 'Activate Package' : 'Confirm Purchase'}
         </button>
 
         <Link href={`/${ssid}/packages`}
