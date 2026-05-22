@@ -8,6 +8,7 @@ import WalletBalanceCard from '@/components/wallet/WalletBalanceCard';
 import ActivePackageCard from '@/components/wallet/ActivePackageCard';
 import TransactionList from '@/components/wallet/TransactionList';
 import type { WalletBalance, WalletTransaction, ActivePackage } from '@/lib/types';
+import PoweredByFooter from '@/components/PoweredByFooter';
 
 export default function WalletPage() {
   const { user, loading: authLoading } = useAuth();
@@ -75,6 +76,7 @@ export default function WalletPage() {
             <TransactionList transactions={transactions.slice(0, 5)} ssid={ssid} />
           </div>
         </div>
+        <PoweredByFooter />
       </div>
     </div>
   );

@@ -68,6 +68,7 @@ function toTransaction(r: WalletTransactionResponse): WalletTransaction {
 function toActivePackage(r: UserPackageResponse): ActivePackage {
   return {
     id: r.id,
+    packageId: r.packageId,
     packageName: r.packageName,
     purchasedAt: r.purchasedAt,
     expiresAt: r.expiresAt,

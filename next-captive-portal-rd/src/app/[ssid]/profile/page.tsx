@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
+import PoweredByFooter from '@/components/PoweredByFooter';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuth();
@@ -150,6 +151,7 @@ export default function ProfilePage() {
             Sign Out
           </button>
         )}
+        <PoweredByFooter />
       </div>
     </div>
   );

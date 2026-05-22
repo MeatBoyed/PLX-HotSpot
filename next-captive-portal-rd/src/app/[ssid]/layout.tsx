@@ -37,15 +37,18 @@ export default async function SiteLayout({
     const { ssid } = await params;
     let branding = undefined;
     try {
-        // Fetch branding and gateway in parallel — gateway warms the server cache so
-        // the page component's gatewayService.get() call is an instant cache hit.
+        console.log(`[layout] fetching branding ssid="${ssid}" API_URL="${process.env.API_URL}" TENANT_ID="${process.env.TENANT_ID}"`);
         const [b] = await Promise.all([
             brandingService.get(ssid),
-            gatewayService.get(ssid).catch(() => undefined),
+            gatewayService.get(ssid).catch((e: unknown) => {
+                console.error(`[layout] gateway fetch failed ssid="${ssid}":`, e instanceof Error ? e.message : e);
+                return undefined;
+            }),
         ]);
         branding = b;
-    } catch {
-        // Fall back to default theme — branding/gateway errors are non-fatal
+        console.log(`[layout] branding OK ssid="${ssid}" name="${b?.name}"`);
+    } catch (e: unknown) {
+        console.error(`[layout] branding fetch FAILED ssid="${ssid}":`, e instanceof Error ? e.message : e);
     }
 
     const tenantId = env.TENANT_ID;

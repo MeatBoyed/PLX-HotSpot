@@ -27,7 +27,7 @@ export default function PackageConnectCard({ userPackageId, packageName, gateway
     formRef.current?.submit();
   }
 
-  const action = creds?.gatewayUrl ?? gatewayConfig.loginUrl;
+  const action = creds?.gatewayUrl ?? gatewayConfig.loginUrl + "/login";
 
   return (
     <div
@@ -61,7 +61,7 @@ export default function PackageConnectCard({ userPackageId, packageName, gateway
             <input type="hidden" name="password" value={creds.rdPassword} />
             <button
               type="submit"
-              className="w-full rounded-xl font-bold py-3 text-sm transition-opacity hover:opacity-90"
+              className="hover:pointer w-full rounded-xl font-bold py-3 text-sm transition-opacity hover:opacity-90"
               style={{ backgroundColor: theme.buttonPrimary, color: theme.buttonPrimaryText }}
             >
               Connect Now

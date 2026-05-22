@@ -102,6 +102,7 @@ export interface WalletTransaction {
 
 export interface ActivePackage {
   id: string;
+  packageId: string;
   packageName: string;
   purchasedAt: string;
   expiresAt: string | null;

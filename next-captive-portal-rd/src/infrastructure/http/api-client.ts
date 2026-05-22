@@ -39,6 +39,8 @@ export class ApiClient {
         const url = this.buildUrl(endpoint, ssid);
         const headers = this.buildHeaders(customHeaders, ssid);
 
+        const urlString = url.toString();
+        console.log(`[api-client] ${options.method ?? 'GET'} ${urlString}`);
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
@@ -50,6 +52,7 @@ export class ApiClient {
             });
 
             clearTimeout(timeoutId);
+            console.log(`[api-client] ${options.method ?? 'GET'} ${urlString} → ${response.status}`);
 
             // Handle non-200 responses
             if (!response.ok) {
@@ -60,7 +63,11 @@ export class ApiClient {
             const data = await response.json();
             return data as T;
         } catch (error) {
-            if (error instanceof ApiError) throw error;
+            if (error instanceof ApiError) {
+                console.error(`[api-client] ${options.method ?? 'GET'} ${urlString} → ApiError ${error.status}: ${error.message}`);
+                throw error;
+            }
+            console.error(`[api-client] ${options.method ?? 'GET'} ${urlString} → network error:`, error instanceof Error ? error.message : error);
             return this.handleNetworkError(error);
         }
     }
