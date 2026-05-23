@@ -63,7 +63,7 @@ export default async function RootPage() {
         </div>
       </div>
 
-      <PoweredByFooter />
+      {/* <PoweredByFooter /> */}
     </div>
   );
 }

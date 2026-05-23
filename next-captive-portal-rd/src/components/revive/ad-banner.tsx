@@ -20,7 +20,7 @@ const AdBanner = () => {
     }
   }, [src]);
 
-  // if (!src || !theme.adsReviveId || !theme.adsZoneId) return null;
+  if (!src || !theme.adsReviveId || !theme.adsZoneId) return null;
 
   return (
     <ins

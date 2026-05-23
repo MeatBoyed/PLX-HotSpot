@@ -129,9 +129,8 @@ function PackagesSection({
           return (
             <div
               key={pkg.id}
-              className={`rounded-2xl p-4 flex items-center gap-3 ${
-                isOwned ? 'bg-white/70' : canAfford || !showBalance ? 'bg-white/90' : 'bg-white/50'
-              }`}
+              className={`rounded-2xl p-4 flex items-center gap-3 ${isOwned ? 'bg-white' : canAfford || !showBalance ? 'bg-white/90' : 'bg-white/50'
+                }`}
               style={{ backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)' }}
             >
               <div className="flex-1 min-w-0">
@@ -149,7 +148,7 @@ function PackagesSection({
 
               <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                 {!pkg.isFree && (
-                  <span className={`text-base font-bold ${isOwned ? 'text-gray-400' : 'text-blue-600'}`}>
+                  <span className={`text-base font-bold ${isOwned ? 'text-gray-500' : 'text-blue-600'}`}>
                     R{price.toFixed(2)}
                   </span>
                 )}
@@ -286,6 +285,7 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
         </div>
 
         <div className="flex flex-col gap-3">
+          <AuthMethodsCard gatewayConfig={gatewayConfig} />
           {activePackage && activePackage.status === 'Active' && (
             <PackageConnectCard
               userPackageId={activePackage.id}
@@ -293,7 +293,6 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
               gatewayConfig={gatewayConfig}
             />
           )}
-          <AuthMethodsCard gatewayConfig={gatewayConfig} />
         </div>
 
         <div className="flex items-center justify-center gap-1 mt-4">

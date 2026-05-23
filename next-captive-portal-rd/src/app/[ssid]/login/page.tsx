@@ -25,7 +25,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <img src="/AuraConnect.png" alt="AuraConnect" className="w-auto" draggable={false} />
+          <img src="/AuraConnect.png" alt="AuraConnect" className="w-auto h-52" draggable={false} />
         </div>
 
         {/* Card */}
@@ -41,13 +41,13 @@ export default function LoginPage() {
           />
 
           {/* Social auth placeholder — ready for future providers */}
-          <div className="mt-5">
+          {/* <div className="mt-5">
             <div className="relative flex items-center gap-3">
               <div className="flex-1 h-px bg-gray-100" />
               <span className="text-xs text-gray-400 font-medium">or continue with</span>
               <div className="flex-1 h-px bg-gray-100" />
             </div>
-          </div>
+          </div> */}
         </div>
 
         <p className="mt-5 text-xs text-center text-gray-400">
@@ -56,7 +56,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <PoweredByFooter />
     </div>
   );
 }

@@ -31,9 +31,9 @@ export default function PackageConnectCard({ userPackageId, packageName, gateway
 
   return (
     <div
-      className="rounded-2xl overflow-hidden shadow-lg p-4"
+      className="rounded-2xl overflow-hidden shadow-lg p-4 bg-gray-100"
       style={{
-        background: 'rgba(255,255,255,0.85)',
+        // background: 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(255,255,255,0.6)',
       }}
