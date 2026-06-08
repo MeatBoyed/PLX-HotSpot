@@ -62,7 +62,7 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
               <Pencil className="h-4 w-4 mr-2" /> Edit Tenant
             </Button>
             <AddSiteButton tenantId={tenantId} />
-            <DeleteTenantButton tenantId={tenantId} tenantName={tenant.name} />
+            <DeleteTenantButton tenantId={tenantId} tenantName={tenant.name} siteCount={sites.length} />
           </>
         }
       />
