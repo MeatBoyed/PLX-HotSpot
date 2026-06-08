@@ -17,24 +17,32 @@ function formatCause(err: unknown, depth = 0): string {
   return `${indent}${String(err)}`
 }
 
+function formatValue(v: unknown): string {
+  if (v instanceof Error) return formatCause(v, 1)
+  if (typeof v === 'string') {
+    // pretty-print JSON strings (e.g. ASP.NET ProblemDetails bodies)
+    try { return JSON.stringify(JSON.parse(v), null, 2) } catch { return v }
+  }
+  if (typeof v === 'object' && v !== null) return JSON.stringify(v, null, 2)
+  return String(v)
+}
+
+function formatMeta(meta: Record<string, unknown>): string {
+  return Object.entries(meta)
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => `  ${k}: ${formatValue(v)}`)
+    .join('\n')
+}
+
 function write(level: LogLevel, context: string, message: string, meta?: Record<string, unknown>) {
   const prefix = `[${ts()}] [${level.toUpperCase()}] [${context}]`
+  const metaStr = meta ? '\n' + formatMeta(meta) : ''
   if (level === 'error') {
-    const parts = [`${prefix} ${message}`]
-    if (meta) {
-      for (const [k, v] of Object.entries(meta)) {
-        if (v instanceof Error) {
-          parts.push(`  ${k}:\n${formatCause(v, 2)}`)
-        } else if (v !== undefined) {
-          parts.push(`  ${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
-        }
-      }
-    }
-    console.error(parts.join('\n'))
+    console.error(`${prefix} ${message}${metaStr}`)
   } else if (level === 'warn') {
-    console.warn(`${prefix} ${message}`, meta ? JSON.stringify(meta) : '')
+    console.warn(`${prefix} ${message}${metaStr}`)
   } else if (isDev || level === 'info') {
-    console.log(`${prefix} ${message}`, meta ? JSON.stringify(meta) : '')
+    console.log(`${prefix} ${message}${metaStr}`)
   }
 }
 

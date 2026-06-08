@@ -8,6 +8,7 @@ export interface Site {
   domain?: string | null
   sortOrder?: number
   status: SiteStatus
+  marketingOptIn: boolean
   createdAt: string
   updatedAt: string
 }
@@ -25,4 +26,5 @@ export interface UpdateSiteInput {
   ssid?: string
   domain?: string | null
   sortOrder?: number
+  marketingOptIn?: boolean | null
 }

@@ -17,12 +17,19 @@ apiClient.use({
     logger.debug('api', `→ ${request.method} ${schemaPath}`, { url: request.url })
   },
 
-  onResponse({ request, response, schemaPath }) {
+  async onResponse({ request, response, schemaPath }) {
     if (!response.ok) {
+      let body: string | undefined
+      try {
+        body = await response.clone().text()
+      } catch {
+        // non-text body — skip
+      }
       logger.warn('api', `← ${response.status} ${request.method} ${schemaPath}`, {
         url: request.url,
         status: response.status,
         statusText: response.statusText,
+        body,
       })
     }
   },

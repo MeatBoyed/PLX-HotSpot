@@ -33,16 +33,21 @@ export const sitesApi = {
     return data as unknown as ApiSite
   },
 
-  async update(siteId: string, body: UpdateBody): Promise<ApiSite> {
-    const { data, response } = await apiClient.PUT('/api/admin/sites/{siteId}', {
+  async update(siteId: string, body: UpdateBody): Promise<void> {
+    // PUT /api/admin/sites/{siteId} returns 200 with no body (content?: never in schema).
+    const { error, response } = await apiClient.PUT('/api/admin/sites/{siteId}', {
       params: { path: { siteId } },
       body,
     })
     if (!response.ok) {
-      const text = await response.text().catch(() => '')
-      throw new Error(`Failed to update site ${siteId}: ${response.status} — ${text}`)
+      // openapi-fetch already consumed the response body — read the parsed error object
+      const detail =
+        (error as Record<string, unknown> | undefined)?.error ??
+        (error as Record<string, unknown> | undefined)?.detail ??
+        (error as Record<string, unknown> | undefined)?.message ??
+        response.status
+      throw new Error(`Failed to update site ${siteId}: ${detail}`)
     }
-    return data as unknown as ApiSite
   },
 
   async updateStatus(siteId: string, body: UpdateStatusBody): Promise<void> {

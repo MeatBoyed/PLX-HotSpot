@@ -21,6 +21,7 @@ export function SiteConfigurationTabs({ tenantId, siteId }: SiteConfigurationTab
 
   const tabs: Tab[] = [
     { label: 'Overview', href: base, segment: '' },
+    { label: 'Settings', href: `${base}/settings`, segment: 'settings' },
     { label: 'Branding', href: `${base}/branding`, segment: 'branding' },
     { label: 'Auth Methods', href: `${base}/auth-methods`, segment: 'auth-methods' },
     { label: 'Ads', href: `${base}/ads`, segment: 'ads' },

@@ -19,6 +19,7 @@ function toSite(r: ApiSite): Site {
     domain: r.domain,
     sortOrder: r.sortOrder ?? undefined,
     status: STATUS_MAP[r.status] ?? 'active',
+    marketingOptIn: r.marketingOptIn ?? false,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }
@@ -50,14 +51,18 @@ export const siteService = {
     return toSite(result)
   },
 
-  async update(id: string, input: UpdateSiteInput): Promise<Site> {
-    const result = await sitesApi.update(id, {
-      name: input.name,
-      ssid: input.ssid,
-      domain: input.domain ?? null,
-      sortOrder: input.sortOrder,
-    })
-    return toSite(result)
+  async update(id: string, input: UpdateSiteInput): Promise<void> {
+    // Only include keys that were explicitly provided — avoids overwriting
+    // unchanged fields (e.g. domain → null) with a partial update call.
+    const body: Parameters<typeof sitesApi.update>[1] = {}
+    if (input.name !== undefined)           body.name           = input.name
+    if (input.ssid !== undefined)           body.ssid           = input.ssid
+    if ('domain' in input)                  body.domain         = input.domain ?? null
+    if (input.sortOrder !== undefined)      body.sortOrder      = input.sortOrder
+    if (input.marketingOptIn !== undefined) body.marketingOptIn = input.marketingOptIn
+
+    // PUT endpoint returns 200 with no body — just await; no toSite() needed.
+    await sitesApi.update(id, body)
   },
 
   async updateStatus(id: string, status: number): Promise<void> {
