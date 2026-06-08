@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { Wifi, Users, Database, TrendingUp } from 'lucide-react'
+import { Wifi, Users, Database, TrendingUp, ExternalLink } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { MetricCard } from '@/components/dashboard/MetricCard'
 import { ConnectionsChart } from '@/components/dashboard/ConnectionsChart'
@@ -12,6 +12,7 @@ import { SiteStatusToggle } from './SiteStatusToggle'
 import { DeleteSiteButton } from './DeleteSiteButton'
 import { tenantService } from '@/lib/services/tenant.service'
 import { siteService } from '@/lib/services/site.service'
+import { radiusService } from '@/lib/services/radius.service'
 import { dashboardService } from '@/lib/services/dashboard.service'
 import { formatDataSize } from '@/lib/utils/formatters'
 
@@ -20,14 +21,48 @@ interface Props {
 }
 
 async function SiteOverviewContent({ tenantId, siteId }: { tenantId: string; siteId: string }) {
-  const [tenant, site, metrics, connectionData] = await Promise.all([
+  const [tenant, site, radiusConfig, metrics, connectionData] = await Promise.all([
     tenantService.getById(tenantId),
     siteService.getById(siteId),
+    radiusService.getBySiteId(siteId).catch(() => null),
     dashboardService.getSiteMetrics(siteId),
     dashboardService.getConnectionData(siteId),
   ])
 
   if (!tenant || !site) notFound()
+
+  const portalUrl  = site.domain ? `https://${site.domain}` : null
+  const gatewayUrl = radiusConfig?.gatewayUrl ?? null
+
+  const siteLinks = (portalUrl || gatewayUrl) ? (
+    <span className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+      <span className="text-sm text-muted-foreground font-mono">{site.ssid}</span>
+      {portalUrl && (
+        <a
+          href={portalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-mono"
+        >
+          {portalUrl}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      )}
+      {gatewayUrl && (
+        <a
+          href={gatewayUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline font-mono"
+        >
+          {gatewayUrl}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      )}
+    </span>
+  ) : (
+    <span className="text-sm text-muted-foreground font-mono">{site.ssid}</span>
+  )
 
   return (
     <>
@@ -42,7 +77,7 @@ async function SiteOverviewContent({ tenantId, siteId }: { tenantId: string; sit
 
       <PageHeader
         title={site.name}
-        description={site.ssid}
+        description={siteLinks}
         actions={
           <div className="flex items-center gap-2">
             <StatusBadge status={site.status} />
