@@ -34,7 +34,7 @@ export function SiteSettingsClient({ site }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
 
-  const { register, handleSubmit, control, watch, formState: { errors, isDirty } } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, setValue, formState: { errors, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: site.name,
@@ -45,6 +45,7 @@ export function SiteSettingsClient({ site }: Props) {
     },
   })
 
+  const ssid = watch('ssid')
   const marketingOptIn = watch('marketingOptIn')
 
   const onSubmit = async (values: FormValues) => {
@@ -91,14 +92,25 @@ export function SiteSettingsClient({ site }: Props) {
             {/* SSID */}
             <div className="space-y-2">
               <Label>SSID *</Label>
-              <Input {...register('ssid')} placeholder="e.g. Venue-Guest" className="font-mono" />
+              <Input {...register('ssid')} placeholder="e.g. venue-guest" className="font-mono" />
               {errors.ssid && <p className="text-xs text-destructive">{errors.ssid.message}</p>}
               <p className="text-xs text-muted-foreground">The Wi-Fi network name broadcast by this hotspot</p>
             </div>
 
             {/* Domain */}
             <div className="space-y-2">
-              <Label>Domain</Label>
+              <div className="flex items-center justify-between">
+                <Label>Domain</Label>
+                {ssid.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => setValue('domain', `${ssid.trim().toLowerCase()}.auraconnect.co.za`, { shouldDirty: true })}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Auto-fill from SSID
+                  </button>
+                )}
+              </div>
               <Input {...register('domain')} placeholder="e.g. portal.venue.co.za" className="font-mono" />
               <p className="text-xs text-muted-foreground">Optional custom domain for the captive portal</p>
             </div>

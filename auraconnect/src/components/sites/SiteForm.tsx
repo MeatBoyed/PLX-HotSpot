@@ -25,7 +25,7 @@ interface SiteFormProps {
 }
 
 export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: defaultValues?.name ?? '',
@@ -34,6 +34,8 @@ export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFor
       sortOrder: defaultValues?.sortOrder ?? undefined,
     },
   })
+
+  const ssid = watch('ssid')
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -50,9 +52,20 @@ export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFor
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="domain">
-          Domain <span className="text-muted-foreground font-normal">(optional)</span>
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="domain">
+            Domain <span className="text-muted-foreground font-normal">(optional)</span>
+          </Label>
+          {ssid.trim() && (
+            <button
+              type="button"
+              onClick={() => setValue('domain', `${ssid.trim().toLowerCase()}.auraconnect.co.za`)}
+              className="text-xs text-primary hover:underline"
+            >
+              Auto-fill from SSID
+            </button>
+          )}
+        </div>
         <Input id="domain" {...register('domain')} placeholder="portal.venue.co.za" className="font-mono" />
         {errors.domain && <p className="text-xs text-destructive">{errors.domain.message}</p>}
       </div>

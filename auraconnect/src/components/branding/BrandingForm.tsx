@@ -64,9 +64,10 @@ interface BrandingFormProps {
   siteId: string
   config: BrandingConfig
   onSave: (values: UpdateBrandingInput) => Promise<void>
+  defaultBranding?: UpdateBrandingInput
 }
 
-export function BrandingForm({ siteId, config, onSave }: BrandingFormProps) {
+export function BrandingForm({ siteId, config, onSave, defaultBranding }: BrandingFormProps) {
   const [loading, setLoading] = useState(false)
   const { register, handleSubmit, control, watch, reset, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -170,10 +171,19 @@ export function BrandingForm({ siteId, config, onSave }: BrandingFormProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="flex gap-2 mt-6">
+          <div className="flex gap-2 mt-6 flex-wrap">
             <Button type="submit" disabled={loading}>
               {loading ? 'Saving…' : 'Save Branding'}
             </Button>
+            {defaultBranding && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => reset({ ...defaultBranding }, { keepDefaultValues: true })}
+              >
+                Fill with Auraconnect defaults
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"

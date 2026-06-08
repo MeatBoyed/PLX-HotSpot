@@ -9,15 +9,21 @@ import { tenantService } from '@/lib/services/tenant.service'
 import { siteService } from '@/lib/services/site.service'
 import { brandingService } from '@/lib/services/branding.service'
 
+// Reference site whose branding is used as the "Auraconnect defaults" preset.
+const AURACONNECT_DEFAULT_SITE_ID = '9e043a3b3016466aa8573b7d60297c23'
+
 interface Props {
   params: Promise<{ tenantId: string; siteId: string }>
 }
 
 async function BrandingContent({ tenantId, siteId }: { tenantId: string; siteId: string }) {
-  const [tenant, site, branding] = await Promise.all([
+  const [tenant, site, branding, defaultBranding] = await Promise.all([
     tenantService.getById(tenantId),
     siteService.getById(siteId),
     brandingService.getBySiteId(siteId),
+    siteId !== AURACONNECT_DEFAULT_SITE_ID
+      ? brandingService.getBySiteId(AURACONNECT_DEFAULT_SITE_ID).catch(() => null)
+      : Promise.resolve(null),
   ])
 
   if (!tenant || !site) notFound()
@@ -35,7 +41,7 @@ async function BrandingContent({ tenantId, siteId }: { tenantId: string; siteId:
       />
       <PageHeader title="Branding" description="Customise the captive portal appearance" />
       <SiteConfigurationTabs tenantId={tenantId} siteId={siteId} />
-      <BrandingFormClient siteId={siteId} config={branding} />
+      <BrandingFormClient siteId={siteId} config={branding} defaultBranding={defaultBranding} />
     </>
   )
 }

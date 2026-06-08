@@ -35,7 +35,7 @@ async function RadiusContent({ tenantId, siteId }: { tenantId: string; siteId: s
       />
       <PageHeader title="RADIUS Configuration" description="Authentication server settings" />
       <SiteConfigurationTabs tenantId={tenantId} siteId={siteId} />
-      <RadiusFormClient siteId={siteId} config={radiusConfig} />
+      <RadiusFormClient siteId={siteId} config={radiusConfig} ssid={site.ssid} />
     </>
   )
 }

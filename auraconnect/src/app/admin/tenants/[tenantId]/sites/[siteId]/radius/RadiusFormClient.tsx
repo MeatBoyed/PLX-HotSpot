@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,9 +35,9 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-export function RadiusFormClient({ siteId, config }: { siteId: string; config: RadiusConfig }) {
+export function RadiusFormClient({ siteId, config, ssid }: { siteId: string; config: RadiusConfig; ssid: string }) {
   const [loading, setLoading] = useState(false)
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { ...config },
   })
@@ -66,7 +67,18 @@ export function RadiusFormClient({ siteId, config }: { siteId: string; config: R
         </CardHeader>
         <CardContent className="p-5 pt-0 space-y-4">
           <div className="space-y-2">
-            <Label>Gateway URL</Label>
+            <div className="flex items-center justify-between">
+              <Label>Gateway URL</Label>
+              {ssid && (
+                <button
+                  type="button"
+                  onClick={() => setValue('gatewayUrl', `https://${ssid.toLowerCase()}-gateway.auraconnect.co.za`)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Auto-fill from SSID
+                </button>
+              )}
+            </div>
             <Input
               {...register('gatewayUrl')}
               placeholder="https://gateway.example.com"
@@ -80,13 +92,39 @@ export function RadiusFormClient({ siteId, config }: { siteId: string; config: R
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Free Username</Label>
+              <div className="flex items-center justify-between">
+                <Label>Free Username</Label>
+                {ssid && (
+                  <button
+                    type="button"
+                    onClick={() => setValue('freeUsername', `${ssid.toLowerCase()}_trial`)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Auto-fill
+                  </button>
+                )}
+              </div>
               <Input {...register('freeUsername')} placeholder="free" className="font-mono text-sm" />
             </div>
             <div className="space-y-2">
-              <Label>Free Password</Label>
-              <Input type="password" {...register('freePassword')} placeholder="••••••••" className="font-mono text-sm" />
+              <div className="flex items-center justify-between">
+                <Label>Free Password</Label>
+                {ssid && (
+                  <button
+                    type="button"
+                    onClick={() => setValue('freePassword', `${ssid.toLowerCase()}_trial`)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Auto-fill
+                  </button>
+                )}
+              </div>
+              <Input {...register('freePassword')} placeholder="••••••••" className="font-mono text-sm" />
             </div>
+          </div>
+          <div className="flex gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <p>A user with these credentials must exist in RadiusDesk for free/trial access to work. Create it under <strong>Users</strong> in the RadiusDesk admin before saving.</p>
           </div>
         </CardContent>
       </Card>
