@@ -303,7 +303,9 @@ export default function SitePageContent({ gatewayConfig }: { gatewayConfig: Gate
           <span className="text-xs ml-2 font-medium opacity-60" style={{ color: theme.textSecondary }}>Strong signal</span>
         </div>
 
-        <PackagesSection ssid={ssid} user={!!user} balance={balance} activePackage={activePackage} />
+        {!theme.authMethods?.includes('free') && (
+          <PackagesSection ssid={ssid} user={!!user} balance={balance} activePackage={activePackage} />
+        )}
 
         <AdSection />
         <PoweredByFooter />

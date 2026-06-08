@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 import WalletBalanceCard from '@/components/wallet/WalletBalanceCard';
 import ActivePackageCard from '@/components/wallet/ActivePackageCard';
@@ -12,9 +13,11 @@ import PoweredByFooter from '@/components/PoweredByFooter';
 
 export default function WalletPage() {
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const params = useParams();
   const ssid = params.ssid as string;
+  const isFreeAuth = theme.authMethods?.includes('free');
 
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
@@ -22,7 +25,7 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) router.replace(`/${ssid}/login`);
+    if (!authLoading && !user) router.replace(isFreeAuth ? `/${ssid}/` : `/${ssid}/login`);
   }, [user, authLoading, router, ssid]);
 
   useEffect(() => {

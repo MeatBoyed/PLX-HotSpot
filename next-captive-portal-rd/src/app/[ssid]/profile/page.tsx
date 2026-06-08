@@ -1,14 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 import PoweredByFooter from '@/components/PoweredByFooter';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const params = useParams();
   const ssid = params.ssid as string;
+
+  useEffect(() => {
+    if (theme.authMethods?.includes('free')) router.replace(`/${ssid}/`);
+  }, [theme.authMethods, ssid, router]);
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);

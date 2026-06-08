@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 import type { PortalPackage } from '@/infrastructure/api/types';
 import type { WalletBalance } from '@/lib/types';
@@ -35,6 +36,7 @@ function PackageLimitChips({ pkg }: { pkg: PortalPackage }) {
 
 export default function PackagesPage() {
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const params = useParams();
   const ssid = params.ssid as string;
@@ -44,8 +46,11 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) router.replace(`/${ssid}/login`);
-  }, [user, authLoading, router, ssid]);
+    if (authLoading) return;
+    const isFreeAuth = theme.authMethods?.includes('free');
+    if (isFreeAuth) { router.replace(`/${ssid}/`); return; }
+    if (!user) router.replace(`/${ssid}/login`);
+  }, [user, authLoading, theme.authMethods, router, ssid]);
 
   useEffect(() => {
     if (!user) return;

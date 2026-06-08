@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/components/auth/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 
 const PRESETS = [10, 20, 50, 100, 200];
@@ -9,6 +11,15 @@ const PRESETS = [10, 20, 50, 100, 200];
 export default function TopUpPage() {
   const params = useParams();
   const ssid = params.ssid as string;
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (authLoading) return;
+    const isFreeAuth = theme.authMethods?.includes('free');
+    if (isFreeAuth || !user) router.replace(isFreeAuth ? `/${ssid}/` : `/${ssid}/login`);
+  }, [authLoading, user, theme.authMethods, ssid, router]);
 
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState('');

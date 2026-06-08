@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 import { platformWalletApi } from '@/infrastructure/api/platform/wallet.api';
 import type { PortalPackage } from '@/infrastructure/api/types';
 import type { WalletBalance } from '@/lib/types';
@@ -18,7 +19,8 @@ function LimitRow({ label, value }: { label: string; value: string | null | unde
 }
 
 export default function ConfirmPackagePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const params = useParams();
   const ssid = params.ssid as string;
@@ -29,6 +31,13 @@ export default function ConfirmPackagePage() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    const isFreeAuth = theme.authMethods?.includes('free');
+    if (isFreeAuth) { router.replace(`/${ssid}/`); return; }
+    if (!user) { router.replace(`/${ssid}/login`); return; }
+  }, [authLoading, user, theme.authMethods, ssid, router]);
 
   useEffect(() => {
     if (!user) return;

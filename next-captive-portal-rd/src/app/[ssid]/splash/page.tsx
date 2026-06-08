@@ -16,7 +16,8 @@ export default function SplashPage() {
     const handleAccept = (e: React.FormEvent) => {
         e.preventDefault();
         if (!checked) return;
-        if (user) {
+        const freeAccessEnabled = theme.authMethods?.includes('free');
+        if (user || freeAccessEnabled) {
             router.push(`/${ssid}/`);
         } else {
             router.push(`/${ssid}/login`);
