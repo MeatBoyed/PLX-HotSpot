@@ -154,7 +154,7 @@ export function BrandingForm({ siteId, config, onSave, defaultBranding }: Brandi
                   label={label}
                   currentUrl={watch(name)}
                   onUploaded={(url) => setValue(name, url)}
-                  maxSizeMb={5}
+                  maxSizeMb={10}
                 />
               ))}
             </TabsContent>
