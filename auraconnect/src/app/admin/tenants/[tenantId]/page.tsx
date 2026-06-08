@@ -17,6 +17,7 @@ import { hotspotUserService } from '@/lib/services/hotspot-user.service'
 import { transactionService } from '@/lib/services/transaction.service'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
 import { AddSiteButton } from './AddSiteButton'
+import { DeleteTenantButton } from './DeleteTenantButton'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -61,6 +62,7 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
               <Pencil className="h-4 w-4 mr-2" /> Edit Tenant
             </Button>
             <AddSiteButton tenantId={tenantId} />
+            <DeleteTenantButton tenantId={tenantId} tenantName={tenant.name} />
           </>
         }
       />
