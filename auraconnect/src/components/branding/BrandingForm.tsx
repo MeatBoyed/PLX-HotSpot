@@ -139,12 +139,12 @@ export function BrandingForm({ siteId, config, onSave, defaultBranding }: Brandi
             <TabsContent value="images" className="space-y-6">
               {(
                 [
-                  { name: 'logoUrl' as const, label: 'Logo', imageType: BrandingImageType.Logo },
-                  { name: 'logoWhiteUrl' as const, label: 'Logo (White)', imageType: BrandingImageType.LogoWhite },
-                  { name: 'faviconUrl' as const, label: 'Favicon', imageType: BrandingImageType.Favicon },
+                  { name: 'logoUrl' as const,         label: 'Logo',                    imageType: BrandingImageType.Logo          },
+                  { name: 'logoWhiteUrl' as const,     label: 'Logo (White)',             imageType: BrandingImageType.LogoWhite     },
+                  { name: 'faviconUrl' as const,       label: 'Favicon',                 imageType: BrandingImageType.Favicon       },
                   { name: 'connectCardBgUrl' as const, label: 'Connect Card Background', imageType: BrandingImageType.ConnectCardBg },
-                  { name: 'bannerOverlayUrl' as const, label: 'Banner Overlay', imageType: BrandingImageType.BannerOverlay },
-                  { name: 'splashBgUrl' as const, label: 'Splash Background', imageType: BrandingImageType.SplashBg },
+                  { name: 'bannerOverlayUrl' as const, label: 'Banner Overlay',          imageType: BrandingImageType.BannerOverlay },
+                  { name: 'splashBgUrl' as const,      label: 'Splash Background',       imageType: BrandingImageType.SplashBg      },
                 ] as const
               ).map(({ name, label, imageType }) => (
                 <ImageUploadField
@@ -154,6 +154,7 @@ export function BrandingForm({ siteId, config, onSave, defaultBranding }: Brandi
                   label={label}
                   currentUrl={watch(name)}
                   onUploaded={(url) => setValue(name, url)}
+                  maxSizeMb={5}
                 />
               ))}
             </TabsContent>

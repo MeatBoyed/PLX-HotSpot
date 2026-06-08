@@ -15,17 +15,25 @@ interface ImageUploadFieldProps {
   label: string
   currentUrl?: string | null
   onUploaded: (url: string) => void
+  maxSizeMb?: number
 }
 
-export function ImageUploadField({ siteId, imageType, label, currentUrl, onUploaded }: ImageUploadFieldProps) {
+export function ImageUploadField({ siteId, imageType, label, currentUrl, onUploaded, maxSizeMb }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [sizeError, setSizeError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    setSizeError(null)
+    if (maxSizeMb !== undefined && file.size > maxSizeMb * 1024 * 1024) {
+      setSizeError(`File is ${(file.size / 1024 / 1024).toFixed(1)} MB — must be under ${maxSizeMb} MB`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPendingFile(file)
     setPreviewUrl(URL.createObjectURL(file))
@@ -35,6 +43,7 @@ export function ImageUploadField({ siteId, imageType, label, currentUrl, onUploa
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPendingFile(null)
     setPreviewUrl(null)
+    setSizeError(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -97,6 +106,13 @@ export function ImageUploadField({ siteId, imageType, label, currentUrl, onUploa
           </div>
         )}
       </div>
+
+      {sizeError && (
+        <p className="text-xs text-destructive">{sizeError}</p>
+      )}
+      {maxSizeMb !== undefined && !sizeError && (
+        <p className="text-[10px] text-muted-foreground">Max {maxSizeMb >= 1 ? `${maxSizeMb} MB` : `${maxSizeMb * 1024} KB`}</p>
+      )}
 
       <div className="flex gap-2">
         <input
