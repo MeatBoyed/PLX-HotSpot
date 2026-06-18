@@ -31,3 +31,18 @@ services:
     env_file:
       - .env
       - ./env/mabopane.env
+  
+  deneboom:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/deneboom.env
+    image: auraconnect-deneboom:latest
+    ports:
+      - "4002:3000"
+    env_file:
+      - .env
+      - ./env/deneboom.env
