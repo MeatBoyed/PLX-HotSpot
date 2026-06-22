@@ -3,6 +3,7 @@ using System;
 using AuraConnect.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuraConnect.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519201705_AddPayFastIpnFields")]
+    partial class AddPayFastIpnFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -486,41 +489,10 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<int?>("DataAmount")
-                        .HasColumnType("integer")
-                        .HasColumnName("data_amount");
-
-                    b.Property<string>("DataCap")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("data_cap");
-
-                    b.Property<bool>("DataLimitEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("data_limit_enabled");
-
-                    b.Property<string>("DataReset")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("data_reset");
-
-                    b.Property<string>("DataUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("data_unit");
-
                     b.Property<string>("Description")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("description");
-
-                    b.Property<int>("DurationDays")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("duration_days");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -548,16 +520,6 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("radius_profile_id");
 
-                    b.Property<int?>("SessionLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("session_limit");
-
-                    b.Property<bool>("SessionLimitEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("session_limit_enabled");
-
                     b.Property<string>("SiteId")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -569,55 +531,6 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("sort_order");
-
-                    b.Property<int?>("SpeedDownloadAmount")
-                        .HasColumnType("integer")
-                        .HasColumnName("speed_download_amount");
-
-                    b.Property<string>("SpeedDownloadUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("speed_download_unit");
-
-                    b.Property<bool>("SpeedLimitEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("speed_limit_enabled");
-
-                    b.Property<int?>("SpeedUploadAmount")
-                        .HasColumnType("integer")
-                        .HasColumnName("speed_upload_amount");
-
-                    b.Property<string>("SpeedUploadUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("speed_upload_unit");
-
-                    b.Property<int?>("TimeAmount")
-                        .HasColumnType("integer")
-                        .HasColumnName("time_amount");
-
-                    b.Property<string>("TimeCap")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("time_cap");
-
-                    b.Property<bool>("TimeLimitEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("time_limit_enabled");
-
-                    b.Property<string>("TimeReset")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("time_reset");
-
-                    b.Property<string>("TimeUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("time_unit");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -645,21 +558,6 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("MikroTikApiHost")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("mikrotik_api_host");
-
-                    b.Property<string>("MikroTikPassword")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("mikrotik_password");
-
-                    b.Property<string>("MikroTikUsername")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("mikrotik_username");
 
                     b.Property<string>("PayFastMerchantId")
                         .HasMaxLength(255)
@@ -1008,20 +906,6 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("purchased_at");
 
-                    b.Property<string>("RdPassword")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("rd_password");
-
-                    b.Property<int?>("RdUserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("rd_user_id");
-
-                    b.Property<string>("RdUsername")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("rd_username");
-
                     b.Property<string>("SiteId")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -1101,10 +985,6 @@ namespace AuraConnect.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 

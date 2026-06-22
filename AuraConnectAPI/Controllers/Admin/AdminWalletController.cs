@@ -28,6 +28,15 @@ namespace AuraConnect.API.Controllers.Admin
             return Ok(result);
         }
 
+        [HttpGet("transactions/{transactionId}")]
+        [ProducesResponseType(typeof(WalletTransactionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTransaction(string transactionId, CancellationToken cancellationToken)
+        {
+            var result = await _walletService.GetTransactionByIdAsync(transactionId, profileId: null, cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+
         [HttpGet("profiles/{profileId}")]
         [ProducesResponseType(typeof(WalletBalanceResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

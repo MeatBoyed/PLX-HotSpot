@@ -1,0 +1,51 @@
+services:
+  # ── AuraConnect ────────────────────────────────────────────────────────────
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "0.0.0.0:5299:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=auraconnect_test;Username=local_dev;Password=KQP2Hqg16gqp5u
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: auraconnect_test
+      POSTGRES_USER: local_dev
+      POSTGRES_PASSWORD: KQP2Hqg16gqp5u
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U local_dev -d auraconnect_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@auraconnect.co.za
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:

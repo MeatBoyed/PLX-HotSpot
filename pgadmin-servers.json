@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "AuraConnect DB",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "auraconnect_test",
+      "Username": "local_dev",
+      "SSLMode": "prefer"
+    }
+  }
+}

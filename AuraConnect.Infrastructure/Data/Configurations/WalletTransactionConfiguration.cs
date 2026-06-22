@@ -18,6 +18,10 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.Property(w => w.Reference).IsRequired().HasMaxLength(255).HasColumnName("reference");
             builder.Property(w => w.Status).IsRequired().HasMaxLength(50).HasColumnName("status");
             builder.Property(w => w.CreatedAt).HasColumnName("created_at");
+            builder.Property(w => w.UpdatedAt).HasColumnName("updated_at");
+            builder.Property(w => w.PayFastPaymentId).HasMaxLength(100).HasColumnName("payfast_payment_id");
+            builder.Property(w => w.AmountFee).HasColumnType("decimal(18,2)").HasColumnName("amount_fee");
+            builder.Property(w => w.AmountNet).HasColumnType("decimal(18,2)").HasColumnName("amount_net");
 
             builder.HasOne(w => w.Profile)
                 .WithMany()

@@ -10,6 +10,10 @@ namespace AuraConnect.Core.Entities
         public string Reference { get; private set; }
         public string Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
+        public string? PayFastPaymentId { get; private set; }
+        public decimal? AmountFee { get; private set; }
+        public decimal? AmountNet { get; private set; }
 
         public virtual Profile Profile { get; private set; } = null!;
 
@@ -25,10 +29,22 @@ namespace AuraConnect.Core.Entities
             Reference = reference;
             Status = "Pending";
             CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
         }
 
-        public void Complete() => Status = "Completed";
+        public void Complete(string? payFastPaymentId = null, decimal? amountFee = null, decimal? amountNet = null)
+        {
+            Status = "Completed";
+            PayFastPaymentId = payFastPaymentId;
+            AmountFee = amountFee;
+            AmountNet = amountNet;
+            UpdatedAt = DateTime.UtcNow;
+        }
 
-        public void Fail() => Status = "Failed";
+        public void Fail()
+        {
+            Status = "Failed";
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

@@ -25,6 +25,19 @@ namespace AuraConnect.Infrastructure.Repositories
             => await _context.UserPackages.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.ProfileId == profileId && u.SiteId == siteId && u.Status == UserPackageStatus.Active, cancellationToken);
 
+        public async Task<UserPackage?> GetLatestByProfileAndSiteAsync(string profileId, string siteId, CancellationToken cancellationToken = default)
+            => await _context.UserPackages
+                .Where(u => u.ProfileId == profileId && u.SiteId == siteId
+                         && u.RdUsername != null && u.Status != UserPackageStatus.Cancelled)
+                .OrderByDescending(u => u.PurchasedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        public async Task UpdateAsync(UserPackage userPackage, CancellationToken cancellationToken = default)
+        {
+            _context.UserPackages.Update(userPackage);
+            await Task.CompletedTask;
+        }
+
         public async Task AddAsync(UserPackage userPackage, CancellationToken cancellationToken = default)
             => await _context.UserPackages.AddAsync(userPackage, cancellationToken);
 

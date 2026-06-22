@@ -1,4 +1,5 @@
 using AuraConnect.Application.DTOs.Auth;
+using AuraConnect.Application.DTOs.Portal;
 using AuraConnect.Application.Interfaces;
 using AuraConnect.Core.Entities;
 using AuraConnect.Core.Interfaces.Repositories;
@@ -109,6 +110,59 @@ namespace AuraConnect.Infrastructure.Services
 
             return await BuildResponseAsync(user, profile, cancellationToken);
         }
+
+        public async Task<MeResponse> UpdateMeAsync(ClaimsPrincipal principal, UpdateMeRequest request, CancellationToken cancellationToken = default)
+        {
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User not found");
+
+            var user = await _userManager.FindByIdAsync(userId)
+                ?? throw new InvalidOperationException("User not found");
+
+            var profile = await _profileRepository.GetByIdentityUserIdAsync(user.Id, cancellationToken)
+                ?? throw new InvalidOperationException("Profile not found");
+
+            if (!string.IsNullOrWhiteSpace(request.Email) &&
+                !string.Equals(request.Email, user.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var existing = await _userManager.FindByEmailAsync(request.Email);
+                if (existing != null)
+                    throw new InvalidOperationException("An account with this email address already exists");
+
+                var emailResult = await _userManager.SetEmailAsync(user, request.Email);
+                if (!emailResult.Succeeded)
+                    throw new InvalidOperationException(string.Join("; ", emailResult.Errors.Select(e => e.Description)));
+
+                await _userManager.SetUserNameAsync(user, request.Email);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.FirstName))
+                profile.SetFirstName(request.FirstName);
+
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+                profile.SetLastName(request.LastName);
+
+            if (request.PhoneNumber != null)
+                profile.SetPhoneNumber(request.PhoneNumber.Trim() == string.Empty ? null : request.PhoneNumber.Trim());
+
+            await _profileRepository.UpdateAsync(profile, cancellationToken);
+            await _profileRepository.SaveChangesAsync(cancellationToken);
+
+            var updatedUser = await _userManager.FindByIdAsync(userId) ?? user;
+            return BuildMeResponse(updatedUser, profile);
+        }
+
+        private static MeResponse BuildMeResponse(ApplicationUser user, Profile profile) => new()
+        {
+            ProfileId = profile.Id,
+            FirstName = profile.FirstName,
+            LastName = profile.LastName,
+            DisplayName = profile.DisplayName,
+            Email = user.Email!,
+            PhoneNumber = profile.PhoneNumber,
+            Balance = profile.Balance,
+            Status = profile.Status.ToString()
+        };
 
         private async Task CreateOrUpdateMembershipAsync(string profileId, string tenantId, string ssid, CancellationToken cancellationToken)
         {

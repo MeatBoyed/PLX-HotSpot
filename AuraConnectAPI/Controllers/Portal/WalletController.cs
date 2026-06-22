@@ -44,6 +44,16 @@ namespace AuraConnect.API.Controllers.Portal
             return Ok(result);
         }
 
+        [HttpGet("transactions/{transactionId}")]
+        [ProducesResponseType(typeof(WalletTransactionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTransaction(string transactionId, CancellationToken cancellationToken)
+        {
+            var result = await _walletService.GetTransactionByIdAsync(transactionId, GetProfileId(), cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+
         [HttpGet("packages")]
         [ProducesResponseType(typeof(IEnumerable<UserPackageResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -66,21 +76,15 @@ namespace AuraConnect.API.Controllers.Portal
                 return BadRequest(new { error = "return_url must be a publicly accessible FQDN (no localhost)" });
             if (!string.IsNullOrEmpty(request.CancelUrl) && !IsFqdn(request.CancelUrl))
                 return BadRequest(new { error = "cancel_url must be a publicly accessible FQDN (no localhost)" });
-            if (!string.IsNullOrEmpty(request.NotifyUrl) && !IsFqdn(request.NotifyUrl))
-                return BadRequest(new { error = "notify_url must be a publicly accessible FQDN (no localhost)" });
 
-            // Use caller-supplied notify_url if provided; fall back to auto-built only when API itself is publicly accessible
-            string? notifyUrl = request.NotifyUrl;
-            if (string.IsNullOrEmpty(notifyUrl))
-            {
-                var autoNotify = $"{Request.Scheme}://{Request.Host}/portal/wallet/topup/notify";
-                notifyUrl = IsFqdn(autoNotify) ? autoNotify : null;
-            }
+            // notify_url is always the API's own IPN endpoint — never client-supplied
+            var autoNotify = $"{Request.Scheme}://{Request.Host}/portal/wallet/topup/notify";
+            string? notifyUrl = IsFqdn(autoNotify) ? autoNotify : null;
 
             try
             {
                 var result = await _walletService.InitiateTopUpAsync(
-                    GetProfileId(), request.Amount, notifyUrl, request.ReturnUrl, request.CancelUrl, cancellationToken);
+                    GetProfileId(), request.Amount, request.SiteId, notifyUrl, request.ReturnUrl, request.CancelUrl, cancellationToken);
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
@@ -122,6 +126,16 @@ namespace AuraConnect.API.Controllers.Portal
             }
 
             return Ok();
+        }
+
+        [HttpGet("packages/{userPackageId}/credentials")]
+        [ProducesResponseType(typeof(PackageCredentialsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPackageCredentials(string userPackageId, CancellationToken cancellationToken)
+        {
+            var result = await _walletService.GetPackageCredentialsAsync(userPackageId, GetProfileId(), cancellationToken);
+            return result is null ? NotFound() : Ok(result);
         }
 
         [HttpPost("purchase/{packageId}")]
