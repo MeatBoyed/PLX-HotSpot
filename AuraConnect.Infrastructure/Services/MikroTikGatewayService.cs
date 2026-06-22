@@ -17,6 +17,7 @@ namespace AuraConnect.Infrastructure.Services
 
         private static readonly string[] RouterOsDateFormats =
         [
+            "yyyy-MM-dd HH:mm:ss",
             "MMM/dd/yyyy HH:mm:ss",
             "MMM/dd/yyyy"
         ];

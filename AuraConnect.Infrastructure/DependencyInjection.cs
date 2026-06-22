@@ -29,7 +29,11 @@ namespace AuraConnect.Infrastructure
             {
                 // Single internal core router with a self-signed certificate (confirmed by the
                 // existing Python diagnostic tool's verify=false) — not a public-facing endpoint.
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
+                // RouterOS's TLS stack resets the connection on a TLS 1.3 ClientHello instead of
+                // negotiating down (confirmed via curl: SSL_ERROR_SYSCALL right after the Client
+                // Hello) — pin to TLS 1.2, which it handles fine.
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls12
             });
 
             return services;

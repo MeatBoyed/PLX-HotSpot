@@ -35,7 +35,9 @@
       "Bash(Select-Object -First 30)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(xargs -n1 basename)"
+      "Bash(xargs -n1 basename)",
+      "Bash(curl -vk --max-time 8 https://gateway.pluxnet.co.za/rest/ip/hotspot/profile)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 10 https://api.auraconnect.co.za/api/admin/platform/settings)"
     ]
   }
 }

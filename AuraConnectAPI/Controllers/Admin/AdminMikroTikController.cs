@@ -9,10 +9,12 @@ namespace AuraConnect.API.Controllers.Admin
     public class AdminMikroTikController : ControllerBase
     {
         private readonly IMikroTikGatewayService _mikroTikGatewayService;
+        private readonly ILogger<AdminMikroTikController> _logger;
 
-        public AdminMikroTikController(IMikroTikGatewayService mikroTikGatewayService)
+        public AdminMikroTikController(IMikroTikGatewayService mikroTikGatewayService, ILogger<AdminMikroTikController> logger)
         {
             _mikroTikGatewayService = mikroTikGatewayService;
+            _logger = logger;
         }
 
         // GET /api/admin/sites/{siteId}/mikrotik/status
@@ -33,7 +35,8 @@ namespace AuraConnect.API.Controllers.Admin
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
-                return StatusCode(StatusCodes.Status502BadGateway, new { error = "Could not reach the MikroTik device.", detail = ex.Message });
+                _logger.LogWarning(ex, "MikroTik gateway status check failed for site {SiteId}", siteId);
+                return StatusCode(StatusCodes.Status502BadGateway, new { error = "Could not reach the MikroTik device.", detail = ex.InnerException?.Message ?? ex.Message });
             }
         }
 
@@ -55,7 +58,8 @@ namespace AuraConnect.API.Controllers.Admin
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
-                return StatusCode(StatusCodes.Status502BadGateway, new { error = "Could not reach the MikroTik device.", detail = ex.Message });
+                _logger.LogWarning(ex, "MikroTik network status check failed for site {SiteId}", siteId);
+                return StatusCode(StatusCodes.Status502BadGateway, new { error = "Could not reach the MikroTik device.", detail = ex.InnerException?.Message ?? ex.Message });
             }
         }
     }
