@@ -994,6 +994,120 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/sites/{siteId}/mikrotik/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    siteId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MikroTikGatewayStatusResponse"];
+                        "application/json": components["schemas"]["MikroTikGatewayStatusResponse"];
+                        "text/json": components["schemas"]["MikroTikGatewayStatusResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Bad Gateway */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/sites/{siteId}/mikrotik/network": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    siteId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MikroTikNetworkStatusResponse"];
+                        "application/json": components["schemas"]["MikroTikNetworkStatusResponse"];
+                        "text/json": components["schemas"]["MikroTikNetworkStatusResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Bad Gateway */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/sites/{siteId}/packages": {
         parameters: {
             query?: never;
@@ -1276,6 +1390,45 @@ export interface paths {
                     "application/json": components["schemas"]["UpdatePayFastSettingsRequest"];
                     "text/json": components["schemas"]["UpdatePayFastSettingsRequest"];
                     "application/*+json": components["schemas"]["UpdatePayFastSettingsRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/admin/platform/settings/mikrotik": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateMikroTikSettingsRequest"];
+                    "text/json": components["schemas"]["UpdateMikroTikSettingsRequest"];
+                    "application/*+json": components["schemas"]["UpdateMikroTikSettingsRequest"];
                 };
             };
             responses: {
@@ -2895,6 +3048,98 @@ export interface components {
             balance?: number | string;
             status?: string;
         };
+        MikroTikCertificateInfo: {
+            name?: string;
+            commonName?: null | string;
+            isExpired?: boolean;
+            /** Format: date-time */
+            expiryDate?: null | string;
+            expiryDateRaw?: null | string;
+            /** Format: int32 */
+            daysUntilExpiry?: null | number | string;
+            subjectAlternativeNames?: string[];
+        };
+        MikroTikDhcpNetworkInfo: {
+            address?: string;
+            gateway?: null | string;
+            dnsServer?: null | string;
+            gatewayMatchesAddress?: boolean;
+        };
+        MikroTikDhcpServerInfo: {
+            name?: string;
+            leaseTime?: null | string;
+            addressPool?: null | string;
+            disabled?: boolean;
+            addressPoolMatchesServer?: boolean;
+        };
+        MikroTikFirewallEntry: {
+            list?: string;
+            address?: string;
+            /** Format: date-time */
+            creationTime?: null | string;
+        };
+        MikroTikFirewallInfo: {
+            expectedList?: string;
+            isListed?: boolean;
+            matchingEntries?: components["schemas"]["MikroTikFirewallEntry"][];
+        };
+        /** @enum {unknown} */
+        MikroTikGatewayHealthStatus: "GatewayUrlNotConfigured" | "ProfileNotFound" | "ServerNotFound" | "CertificateNotFound" | "CertificateExpired" | "RadiusNotEnabled" | "Healthy";
+        MikroTikGatewayStatusResponse: {
+            siteId?: string;
+            gatewayUrl?: null | string;
+            status?: components["schemas"]["MikroTikGatewayHealthStatus"];
+            profile?: null | components["schemas"]["MikroTikProfileInfo"];
+            certificate?: null | components["schemas"]["MikroTikCertificateInfo"];
+            server?: null | components["schemas"]["MikroTikServerInfo"];
+            /** Format: date-time */
+            checkedAt?: string;
+        };
+        MikroTikIpAddressInfo: {
+            address?: string;
+            network?: string;
+        };
+        /** @enum {unknown} */
+        MikroTikNetworkHealthStatus: "GatewayUrlNotConfigured" | "ProfileNotFound" | "ServerNotFound" | "IpAddressNotFound" | "PoolNotFound" | "DhcpServerNotFound" | "DhcpServerPoolMismatch" | "DhcpNetworkNotFound" | "DhcpGatewayMismatch" | "NotInFirewallList" | "Healthy";
+        MikroTikNetworkStatusResponse: {
+            siteId?: string;
+            status?: components["schemas"]["MikroTikNetworkHealthStatus"];
+            interface?: null | string;
+            ipAddress?: null | components["schemas"]["MikroTikIpAddressInfo"];
+            pool?: null | components["schemas"]["MikroTikPoolInfo"];
+            dhcpServer?: null | components["schemas"]["MikroTikDhcpServerInfo"];
+            dhcpNetwork?: null | components["schemas"]["MikroTikDhcpNetworkInfo"];
+            firewall?: null | components["schemas"]["MikroTikFirewallInfo"];
+            /** Format: date-time */
+            checkedAt?: string;
+        };
+        MikroTikPoolInfo: {
+            name?: string;
+            ranges?: null | string;
+            /** Format: int32 */
+            total?: null | number | string;
+            /** Format: int32 */
+            used?: null | number | string;
+            /** Format: int32 */
+            available?: null | number | string;
+        };
+        MikroTikProfileInfo: {
+            name?: string;
+            dnsName?: null | string;
+            hotspotAddress?: null | string;
+            htmlDirectory?: null | string;
+            htmlDirectoryOverride?: null | string;
+            useRadius?: boolean;
+            radiusAccounting?: boolean;
+            radiusInterimUpdate?: null | string;
+            sslCertificateName?: null | string;
+        };
+        MikroTikServerInfo: {
+            name?: string;
+            interface?: null | string;
+            addressPool?: null | string;
+            idleTimeout?: null | string;
+        };
         PackageCredentialsResponse: {
             rdUsername?: string;
             rdPassword?: string;
@@ -3184,6 +3429,11 @@ export interface components {
             lastName?: null | string;
             phoneNumber?: null | string;
             email?: null | string;
+        };
+        UpdateMikroTikSettingsRequest: {
+            apiHost?: string;
+            username?: string;
+            password?: string;
         };
         UpdatePackageRequest: {
             name?: null | string;

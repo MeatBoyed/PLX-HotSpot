@@ -2,6 +2,7 @@ import { apiClient } from './client'
 import type { components } from './schema'
 
 type UpdatePayFastBody = components['schemas']['UpdatePayFastSettingsRequest']
+type UpdateMikroTikBody = components['schemas']['UpdateMikroTikSettingsRequest']
 
 export interface PlatformSettings {
   isPayFastConfigured: boolean
@@ -9,6 +10,10 @@ export interface PlatformSettings {
   isPayFastMerchantKeySet: boolean
   isPayFastPassPhraseSet: boolean
   payFastSandboxMode: boolean
+  isMikroTikConfigured: boolean
+  mikroTikApiHost: string | null
+  mikroTikUsername: string | null
+  isMikroTikPasswordSet: boolean
   updatedAt: string | null
 }
 
@@ -23,6 +28,10 @@ export const platformApi = {
       isPayFastMerchantKeySet: data.isPayFastMerchantKeySet ?? false,
       isPayFastPassPhraseSet: data.isPayFastPassPhraseSet ?? false,
       payFastSandboxMode: data.payFastSandboxMode ?? true,
+      isMikroTikConfigured: data.isMikroTikConfigured ?? false,
+      mikroTikApiHost: data.mikroTikApiHost ?? null,
+      mikroTikUsername: data.mikroTikUsername ?? null,
+      isMikroTikPasswordSet: data.isMikroTikPasswordSet ?? false,
       updatedAt: data.updatedAt ?? null,
     }
   },
@@ -32,6 +41,14 @@ export const platformApi = {
     if (!response.ok) {
       const text = await response.text().catch(() => '')
       throw new Error(`Failed to update PayFast settings: ${response.status} — ${text}`)
+    }
+  },
+
+  async updateMikroTikSettings(body: UpdateMikroTikBody): Promise<void> {
+    const { response } = await apiClient.PATCH('/api/admin/platform/settings/mikrotik', { body })
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      throw new Error(`Failed to update MikroTik settings: ${response.status} — ${text}`)
     }
   },
 }

@@ -5,13 +5,15 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { CreditCard, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react'
+import { CreditCard, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
+import { SecretInput } from '@/components/common/SecretInput'
+import { MikroTikSettingsCard } from './MikroTikSettingsCard'
 import { updatePayFastSettingsAction } from '@/lib/actions/platform.actions'
 import type { PlatformSettings } from '@/lib/infrastructure/api/platform.api'
 import { formatDateTime } from '@/lib/utils/formatters'
@@ -27,46 +29,6 @@ type PayFastFormValues = z.infer<typeof payfastSchema>
 
 interface Props {
   settings: PlatformSettings | null
-}
-
-function SecretInput({ label, isSet, placeholder, name, register }: {
-  label: string
-  isSet: boolean
-  placeholder: string
-  name: string
-  register: ReturnType<typeof useForm<PayFastFormValues>>['register']
-}) {
-  const [show, setShow] = useState(false)
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>{label}</Label>
-        {isSet
-          ? <Badge variant="outline" className="text-green-700 border-green-300 gap-1 text-xs"><CheckCircle2 className="h-3 w-3" />Set</Badge>
-          : <Badge variant="secondary" className="gap-1 text-xs"><AlertCircle className="h-3 w-3" />Not set</Badge>
-        }
-      </div>
-      <div className="relative">
-        <Input
-          {...register(name as keyof PayFastFormValues)}
-          type={show ? 'text' : 'password'}
-          placeholder={isSet ? '••••••••••••  (leave blank to keep current)' : placeholder}
-          className="font-mono pr-10"
-        />
-        <button
-          type="button"
-          onClick={() => setShow((s) => !s)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-          tabIndex={-1}
-        >
-          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </button>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {isSet ? 'Enter a new value to replace the existing one' : 'No value currently stored'}
-      </p>
-    </div>
-  )
 }
 
 export function SettingsClient({ settings }: Props) {
@@ -139,7 +101,7 @@ export function SettingsClient({ settings }: Props) {
               <p className="text-xs text-muted-foreground">Your PayFast merchant identifier</p>
             </div>
 
-            <SecretInput
+            <SecretInput<PayFastFormValues>
               label="Merchant Key *"
               isSet={settings?.isPayFastMerchantKeySet ?? false}
               placeholder="46f0cd694581a"
@@ -147,7 +109,7 @@ export function SettingsClient({ settings }: Props) {
               register={register}
             />
 
-            <SecretInput
+            <SecretInput<PayFastFormValues>
               label="Passphrase"
               isSet={settings?.isPayFastPassPhraseSet ?? false}
               placeholder="Optional security passphrase"
@@ -178,6 +140,8 @@ export function SettingsClient({ settings }: Props) {
           </form>
         </CardContent>
       </Card>
+
+      <MikroTikSettingsCard settings={settings} />
     </div>
   )
 }
