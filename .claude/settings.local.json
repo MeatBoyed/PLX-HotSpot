@@ -34,7 +34,8 @@
       "Bash(Select-String -Pattern \"error|warning NU1510|warning ASPDEPR|succeeded|failed\")",
       "Bash(Select-Object -First 30)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(xargs -n1 basename)"
     ]
   }
 }
