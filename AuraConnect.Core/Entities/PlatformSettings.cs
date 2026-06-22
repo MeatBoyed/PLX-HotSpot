@@ -9,6 +9,9 @@ namespace AuraConnect.Core.Entities
         public string? PayFastMerchantKey { get; private set; }
         public string? PayFastPassPhrase { get; private set; }
         public bool PayFastSandboxMode { get; private set; } = true;
+        public string? MikroTikApiHost { get; private set; }
+        public string? MikroTikUsername { get; private set; }
+        public string? MikroTikPassword { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
@@ -26,5 +29,18 @@ namespace AuraConnect.Core.Entities
         }
 
         public bool IsPayFastConfigured => !string.IsNullOrWhiteSpace(PayFastMerchantId) && !string.IsNullOrWhiteSpace(PayFastMerchantKey);
+
+        public void SetMikroTikConfig(string apiHost, string username, string password)
+        {
+            MikroTikApiHost = apiHost;
+            MikroTikUsername = username;
+            MikroTikPassword = password;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public bool IsMikroTikConfigured =>
+            !string.IsNullOrWhiteSpace(MikroTikApiHost) &&
+            !string.IsNullOrWhiteSpace(MikroTikUsername) &&
+            !string.IsNullOrWhiteSpace(MikroTikPassword);
     }
 }

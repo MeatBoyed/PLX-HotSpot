@@ -37,6 +37,18 @@ namespace AuraConnect.Infrastructure.Services
             return MapToResponse(settings);
         }
 
+        public async Task<PlatformSettingsResponse> UpdateMikroTikAsync(UpdateMikroTikSettingsRequest request, CancellationToken cancellationToken = default)
+        {
+            var settings = await _repo.GetAsync(cancellationToken) ?? PlatformSettings.Create();
+            settings.SetMikroTikConfig(request.ApiHost, request.Username, request.Password);
+
+            await _repo.UpsertAsync(settings, cancellationToken);
+            await _repo.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("MikroTik settings updated — apiHost {ApiHost}, username {Username}", request.ApiHost, request.Username);
+            return MapToResponse(settings);
+        }
+
         private static PlatformSettingsResponse MapToResponse(PlatformSettings? s) => new()
         {
             IsPayFastConfigured = s?.IsPayFastConfigured ?? false,
@@ -44,6 +56,10 @@ namespace AuraConnect.Infrastructure.Services
             IsPayFastMerchantKeySet = !string.IsNullOrWhiteSpace(s?.PayFastMerchantKey),
             IsPayFastPassPhraseSet = !string.IsNullOrWhiteSpace(s?.PayFastPassPhrase),
             PayFastSandboxMode = s?.PayFastSandboxMode ?? true,
+            IsMikroTikConfigured = s?.IsMikroTikConfigured ?? false,
+            MikroTikApiHost = s?.MikroTikApiHost,
+            MikroTikUsername = s?.MikroTikUsername,
+            IsMikroTikPasswordSet = !string.IsNullOrWhiteSpace(s?.MikroTikPassword),
             UpdatedAt = s?.UpdatedAt
         };
     }

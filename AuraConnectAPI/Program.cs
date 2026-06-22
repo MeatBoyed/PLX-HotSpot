@@ -125,6 +125,7 @@ try
     builder.Services.AddScoped<IPackageService, PackageService>();
     builder.Services.AddScoped<IPlatformSettingsService, PlatformSettingsService>();
     builder.Services.AddScoped<IRadiusProvisioningService, RadiusProvisioningService>();
+    builder.Services.AddScoped<IMikroTikGatewayService, MikroTikGatewayService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);

@@ -28,5 +28,12 @@ namespace AuraConnect.API.Controllers.Admin
             var result = await _platformSettings.UpdatePayFastAsync(request, cancellationToken);
             return Ok(result);
         }
+
+        [HttpPatch("settings/mikrotik")]
+        public async Task<IActionResult> UpdateMikroTik([FromBody] UpdateMikroTikSettingsRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _platformSettings.UpdateMikroTikAsync(request, cancellationToken);
+            return Ok(result);
+        }
     }
 }

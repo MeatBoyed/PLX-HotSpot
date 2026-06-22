@@ -22,7 +22,13 @@
       "PowerShell(wsl -e docker ps --format \"table {{.Names}}\\\\t{{.Status}}\" 2>&1)",
       "PowerShell(wsl -e docker ps -a --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\" 2>&1)",
       "PowerShell(wsl -e docker start auraconnect-postgres-1 2>&1)",
-      "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)"
+      "PowerShell(wsl -e docker exec auraconnect-postgres-1 pg_isready -U local_dev -d auraconnect_test 2>&1)",
+      "Bash(xargs -I{} basename {})",
+      "Bash(find / -iname \"HttpClientHandler.cs\")",
+      "Bash(dotnet --list-sdks)",
+      "Bash(find / -path \"*Microsoft.NETCore.App*\" -iname \"System.Net.Http.dll\")",
+      "Bash(dotnet tool *)",
+      "Bash(pg_isready -h localhost -p 5432)"
     ]
   }
 }

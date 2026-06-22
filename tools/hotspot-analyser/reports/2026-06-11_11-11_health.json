@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-06-11T11:11:54.864866",
+  "radius": {
+    "status": "DEGRADED",
+    "issues": [
+      "Thread exhaustion: 2 episode(s) today",
+      "SQL ERROR 1242: 1 occurrence(s)",
+      "Unregistered NAS 102.213.201.129 seen 9\u00d7 \u2014 not in nas table",
+      "Unregistered NAS 10.77.0.1 seen 1\u00d7 \u2014 not in nas table"
+    ],
+    "episodes": 2,
+    "sql_errors": 1
+  },
+  "database": {
+    "status": "HEALTHY",
+    "issues": [],
+    "duplicates": []
+  },
+  "sites": [],
+  "rca": [
+    {
+      "level": "CRITICAL",
+      "message": "Thread exhaustion: 2 episode(s) \u2014 auth requests dropped silently",
+      "detail": "Fix SQL bug first. Reduce radius-interim-update from 2m to 10m immediately."
+    },
+    {
+      "level": "WARNING",
+      "message": "Unregistered NAS 102.213.201.129 sending RADIUS traffic (9\u00d7 today)",
+      "detail": "Register in RadiusDesk NAS table or investigate."
+    },
+    {
+      "level": "WARNING",
+      "message": "Unregistered NAS 10.77.0.1 sending RADIUS traffic (1\u00d7 today)",
+      "detail": "Register in RadiusDesk NAS table or investigate."
+    }
+  ],
+  "nginx": {}
+}

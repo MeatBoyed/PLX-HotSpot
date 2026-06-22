@@ -31,6 +31,18 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasColumnName("payfast_sandbox_mode")
                 .HasDefaultValue(true);
 
+            builder.Property(p => p.MikroTikApiHost)
+                .HasColumnName("mikrotik_api_host")
+                .HasMaxLength(255);
+
+            builder.Property(p => p.MikroTikUsername)
+                .HasColumnName("mikrotik_username")
+                .HasMaxLength(255);
+
+            builder.Property(p => p.MikroTikPassword)
+                .HasColumnName("mikrotik_password")
+                .HasMaxLength(255);
+
             builder.Property(p => p.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

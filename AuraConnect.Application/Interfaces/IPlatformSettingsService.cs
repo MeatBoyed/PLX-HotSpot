@@ -6,5 +6,6 @@ namespace AuraConnect.Application.Interfaces
     {
         Task<PlatformSettingsResponse> GetAsync(CancellationToken cancellationToken = default);
         Task<PlatformSettingsResponse> UpdatePayFastAsync(UpdatePayFastSettingsRequest request, CancellationToken cancellationToken = default);
+        Task<PlatformSettingsResponse> UpdateMikroTikAsync(UpdateMikroTikSettingsRequest request, CancellationToken cancellationToken = default);
     }
 }
