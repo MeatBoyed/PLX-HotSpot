@@ -1,8 +1,26 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
-const isPaymentRoute = (pathname: string) => pathname.startsWith('/checkout')
+const isPublicRoute = createRouteMatcher([
+    '/',
+    '/splash',
+    '/welcome',
+    "/api(.*)",
+    "/checkout(.*)",
+    "/dashboard(.*)",
+    '/sign-in(.*)',
+    '/terms-and-conditions(.*)',
+    // Allow "/[subvenue] pages" (but NOT /admin)
+    "/:subvenue((?!admin).*)",
+    // '/sign-up(.*)',
+])
 
+// Routes that require PayFast configuration
+const isPaymentRoute = createRouteMatcher([
+    '/checkout(.*)',
+    '/admin/packages(.*)',
+])
+
+// Check if PayFast is configured (checks if merchant ID and key are set)
 function isPayFastConfigured(): boolean {
     const merchantId = process.env.PAYFAST_MERCHANT_ID
     const merchantKey = process.env.PAYFAST_MERCHANT_KEY

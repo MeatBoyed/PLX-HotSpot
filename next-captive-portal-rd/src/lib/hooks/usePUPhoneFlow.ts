@@ -48,7 +48,7 @@ export function usePUPhoneFlow(ssid: string, gatewayConfig: GatewayConfig) {
                 const stored = localStorage.getItem('pu-phonename-display');
                 if (stored) {
                     setDisplayName(stored);
-                    setPhone("+" + credentials.username.replace(/^jt_/, ''));
+                    setPhone("+" + credentials.username.replace(/^[^_]+_/, ''));
                     setName(credentials.password.replace(/_/g, ' '));
                 }
             } catch { }
