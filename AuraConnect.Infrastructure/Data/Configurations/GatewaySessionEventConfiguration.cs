@@ -25,7 +25,7 @@ namespace AuraConnect.Infrastructure.Data.Configurations
 
             builder.Property(g => g.Mac)
                 .HasColumnName("mac")
-                .HasMaxLength(17);
+                .HasMaxLength(64);
 
             builder.Property(g => g.NasId)
                 .HasColumnName("nas_id")

@@ -39,11 +39,12 @@ namespace AuraConnect.API.Controllers
             try
             {
                 var redirectUrl = await _gatewaySessionService.HandleEntryAsync(request, cancellationToken);
+                _logger.LogInformation("Gateway login responding with {RedirectUrl}", redirectUrl);
                 return RedirectHtml(redirectUrl);
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Gateway login could not resolve a destination for this request");
+                _logger.LogWarning("Gateway login falling back to {FallbackUrl} — {Reason}", FallbackUrl, ex.Message);
                 return RedirectHtml(FallbackUrl);
             }
         }
@@ -63,6 +64,11 @@ namespace AuraConnect.API.Controllers
             };
 
             var redirectUrl = await _gatewaySessionService.RecordLoginResultAsync(request, cancellationToken);
+            if (redirectUrl == null)
+                _logger.LogWarning("Gateway login-result had no correlated event — falling back to {FallbackUrl}", FallbackUrl);
+            else
+                _logger.LogInformation("Gateway login-result responding with {RedirectUrl}", redirectUrl);
+
             return RedirectHtml(redirectUrl ?? FallbackUrl);
         }
 
