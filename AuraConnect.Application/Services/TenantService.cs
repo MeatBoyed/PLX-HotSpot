@@ -28,6 +28,7 @@ namespace AuraConnect.Application.Services
                 Id = tenant.Id,
                 Name = tenant.Name,
                 Slug = tenant.Slug,
+                PortalRoutingMode = tenant.PortalRoutingMode,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             });
@@ -49,6 +50,7 @@ namespace AuraConnect.Application.Services
 
             // 2. Create new Entity (using domain constructor)
             var tenant = new Tenant(request.Name, request.Slug);
+            tenant.SetPortalRoutingMode(request.PortalRoutingMode);
 
             // 3. Save to database via repository
             await _tenantRepository.AddAsync(tenant, cancellationToken);
@@ -60,6 +62,7 @@ namespace AuraConnect.Application.Services
                 Id = tenant.Id,
                 Name = tenant.Name,
                 Slug = tenant.Slug,
+                PortalRoutingMode = tenant.PortalRoutingMode,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };
@@ -81,6 +84,7 @@ namespace AuraConnect.Application.Services
                 Id = tenant.Id,
                 Name = tenant.Name,
                 Slug = tenant.Slug,
+                PortalRoutingMode = tenant.PortalRoutingMode,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };
@@ -105,6 +109,7 @@ namespace AuraConnect.Application.Services
             // 3. Update the entity (using the domain methods we created earlier)
             tenant.SetName(request.Name);
             tenant.SetSlug(request.Slug);
+            tenant.SetPortalRoutingMode(request.PortalRoutingMode);
 
             // 4. Save changes
             await _tenantRepository.UpdateAsync(tenant, cancellationToken);
@@ -116,6 +121,7 @@ namespace AuraConnect.Application.Services
                 Id = tenant.Id,
                 Name = tenant.Name,
                 Slug = tenant.Slug,
+                PortalRoutingMode = tenant.PortalRoutingMode,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };

@@ -1,0 +1,21 @@
+<!--
+  AuraConnect login-result reporter — success path.
+  Replaces the previous version's hardcoded redirect to pluxnet.co.za (a single-tenant
+  leftover) with a POST to the AuraConnect API, which correlates this hit back to the
+  originating /gateway/login event (by MAC, within the last hour) and redirects to that
+  site's actual captive portal instead of a fixed URL.
+
+  Upload to each hotspot profile's html-directory, replacing the existing alogin.html.
+-->
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+  <form name="loginResult" action="https://api.auraconnect.co.za/gateway/login-result" method="post">
+    <input type="hidden" name="mac" value="$(mac-esc)">
+    <input type="hidden" name="nasid" value="$(identity)">
+    <input type="hidden" name="result" value="success">
+  </form>
+  <script>document.loginResult.submit();</script>
+  <p>Login successful. Redirecting...</p>
+</body>
+</html>

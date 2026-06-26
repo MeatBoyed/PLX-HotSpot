@@ -11,7 +11,7 @@ namespace AuraConnect.Application.DTOs.Site
     {
         public string Ssid { get; set; } = string.Empty;      // "joburg-theatre-main"
         public string Name { get; set; } = string.Empty;       // "Main Auditorium"
-        public string? Domain { get; set; }                    // Optional custom domain
+        public string? Domain { get; set; }                    // Captive portal domain — required (drives the gateway redirect)
         public int SortOrder { get; set; } = 0;                // Display order
     }
 }

@@ -24,6 +24,7 @@ namespace AuraConnect.Infrastructure.Data
         public DbSet<UserPackage> UserPackages { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<PlatformSettings> PlatformSettings { get; set; }
+        public DbSet<GatewaySessionEvent> GatewaySessionEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

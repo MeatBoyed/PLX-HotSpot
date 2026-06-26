@@ -1,0 +1,29 @@
+<!--
+  AuraConnect login-result reporter — failure path.
+  Extends the original error.html (which only printed $(error) and a static link back
+  to $(link-login)) with a POST to the AuraConnect API first. This is MikroTik's one
+  generic error template — every failure case in errors.txt (bad voucher, RADIUS
+  timeout, uptime/session limits, missing CHAP response, not just rejected RADIUS
+  logins) funnels through this file, so capturing here covers all of them.
+
+  Upload to each hotspot profile's html-directory, replacing the existing error.html.
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="-1">
+    <title>Internet hotspot - Error</title>
+</head>
+<body>
+    <form name="errorReport" action="https://api.auraconnect.co.za/gateway/login-result" method="post">
+        <input type="hidden" name="mac" value="$(mac-esc)">
+        <input type="hidden" name="nasid" value="$(identity)">
+        <input type="hidden" name="result" value="failed">
+        <input type="hidden" name="error" value="$(error)">
+        <input type="hidden" name="error_orig" value="$(error-orig)">
+    </form>
+    <script>document.errorReport.submit();</script>
+    <p>Login failed: $(error). Redirecting...</p>
+</body>
+</html>

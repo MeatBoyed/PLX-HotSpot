@@ -30,6 +30,11 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
+            builder.Property(t => t.PortalRoutingMode)
+                .HasColumnName("portal_routing_mode")
+                .HasConversion<int>()
+                .HasDefaultValue(PortalRoutingMode.PerSite);
+
             builder.Property(t => t.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

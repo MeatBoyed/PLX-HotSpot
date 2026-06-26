@@ -42,6 +42,9 @@ namespace AuraConnect.API.Controllers.Admin
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { error = "Name is required" });
 
+            if (string.IsNullOrWhiteSpace(request.Domain))
+                return BadRequest(new { error = "Domain is required" });
+
             try
             {
                 var site = await _siteService.CreateSiteAsync(tenantId, request, cancellationToken);

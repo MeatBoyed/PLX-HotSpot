@@ -9,6 +9,7 @@ namespace AuraConnect.Core.Entities
         // Properties
         public string Name { get; private set; } = string.Empty;
         public string Slug { get; private set; } = string.Empty;
+        public PortalRoutingMode PortalRoutingMode { get; private set; } = PortalRoutingMode.PerSite;
 
         // Navigation
         private readonly List<Site> _sites = new();
@@ -44,6 +45,12 @@ namespace AuraConnect.Core.Entities
         public void AddSite(Site site)
         {
             _sites.Add(site);
+        }
+
+        public void SetPortalRoutingMode(PortalRoutingMode mode)
+        {
+            PortalRoutingMode = mode;
+            UpdateTimestamp();
         }
     }
 }

@@ -1,0 +1,23 @@
+<!--
+  AuraConnect gateway entry point.
+  Replaces the static per-site login.html — instead of redirecting straight to a
+  hardcoded captive portal URL, this posts the MikroTik-provided session variables
+  to the AuraConnect API, which resolves the site (via the host embedded in
+  link-login-only) and redirects to that site's actual captive portal.
+
+  Upload to each hotspot profile's html-directory, replacing the existing login.html.
+-->
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+  <form name="gatewayLogin" action="https://api.auraconnect.co.za/gateway/login" method="post">
+    <input type="hidden" name="mac" value="$(mac-esc)">
+    <input type="hidden" name="nasid" value="$(identity)">
+    <input type="hidden" name="link_login_only" value="$(link-login-only)">
+    <input type="hidden" name="link_status" value="$(link-status)">
+    <input type="hidden" name="link_logout" value="$(link-logout)">
+  </form>
+  <script>document.gatewayLogin.submit();</script>
+  <p>Connecting...</p>
+</body>
+</html>

@@ -118,6 +118,7 @@ try
     builder.Services.AddScoped<IUserPackageRepository, UserPackageRepository>();
     builder.Services.AddScoped<IWalletTransactionRepository, WalletTransactionRepository>();
     builder.Services.AddScoped<IPlatformSettingsRepository, PlatformSettingsRepository>();
+    builder.Services.AddScoped<IGatewaySessionEventRepository, GatewaySessionEventRepository>();
 
     // Wallet / payment services
     builder.Services.AddScoped<IPayFastService, PayFastService>();
@@ -135,6 +136,7 @@ try
     builder.Services.AddScoped<IPlatformSettingsService, PlatformSettingsService>();
     builder.Services.AddHttpClient<IRadiusProvisioningService, RadiusProvisioningService>();
     builder.Services.AddScoped<IMikroTikGatewayService, MikroTikGatewayService>();
+    builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);
