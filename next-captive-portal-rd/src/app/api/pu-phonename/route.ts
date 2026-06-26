@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { permanentUserService } from '@/features/purchasing/permanent-user-service';
 import { authService } from '@/application/services';
 import type { ApiPortalPackage } from '@/infrastructure/api';
+import { env } from '@/env';
 
 export async function POST(request: NextRequest) {
   try {
