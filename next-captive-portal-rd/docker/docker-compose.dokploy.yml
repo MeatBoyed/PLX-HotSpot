@@ -16,7 +16,7 @@ x-portal-base: &portal-base
   restart: unless-stopped
 
 # --- Portal services ---
-services:
+services:      
   mabopane:
     <<: *portal-base
     build:
@@ -46,3 +46,18 @@ services:
     env_file:
       - .env
       - ./env/deneboom.env
+
+  dev:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/dev.env
+    image: auraconnect-dev:latest
+    ports:
+      - "4003:3000"
+    env_file:
+      - .env
+      - ./env/dev.env
