@@ -29,7 +29,7 @@ namespace AuraConnect.API.Controllers
 
             var request = new GatewayLoginRequest
             {
-                Mac = form["mac"],
+                Mac = DecodeMac(form),
                 NasId = form["nasid"],
                 LinkLoginOnly = form["link_login_only"],
                 LinkStatus = form["link_status"],
@@ -57,7 +57,7 @@ namespace AuraConnect.API.Controllers
 
             var request = new GatewayLoginResultRequest
             {
-                Mac = form["mac"],
+                Mac = DecodeMac(form),
                 Result = form["result"],
                 Error = form["error"],
                 ErrorOriginal = form["error_orig"]
@@ -74,6 +74,15 @@ namespace AuraConnect.API.Controllers
 
         private static Dictionary<string, string> ToDictionary(IFormCollection form) =>
             form.ToDictionary(f => f.Key, f => f.Value.ToString());
+
+        // $(mac-esc) sends the MAC percent-encoded (e.g. "D2%3AA9..." for "D2:A9...") — decode once
+        // here so storage/correlation always works against the plain MAC, regardless of how any
+        // given template/firmware happens to escape it.
+        private static string? DecodeMac(IFormCollection form)
+        {
+            var raw = form["mac"].ToString();
+            return string.IsNullOrEmpty(raw) ? null : Uri.UnescapeDataString(raw);
+        }
 
         // 200 OK + meta-refresh/JS/manual-link, not a bare 3xx — captive-portal mini-browsers
         // are inconsistent about following redirects after a POST, this is belt-and-suspenders.
