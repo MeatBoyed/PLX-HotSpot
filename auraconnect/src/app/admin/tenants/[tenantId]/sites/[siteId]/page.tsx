@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { Wifi, Users, Database, TrendingUp, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
+import { Wifi, Users, Database, TrendingUp, ExternalLink, ArrowRight } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { MetricCard } from '@/components/dashboard/MetricCard'
 import { ConnectionsChart } from '@/components/dashboard/ConnectionsChart'
@@ -8,12 +9,15 @@ import { SiteConfigurationTabs } from '@/components/sites/SiteConfigurationTabs'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton'
+import { Button } from '@/components/ui/button'
+import { GatewaySessionTable } from '@/components/gateway-sessions/GatewaySessionTable'
 import { SiteStatusToggle } from './SiteStatusToggle'
 import { DeleteSiteButton } from './DeleteSiteButton'
 import { tenantService } from '@/lib/services/tenant.service'
 import { siteService } from '@/lib/services/site.service'
 import { radiusService } from '@/lib/services/radius.service'
 import { dashboardService } from '@/lib/services/dashboard.service'
+import { gatewaySessionService } from '@/lib/services/gateway-session.service'
 import { formatDataSize } from '@/lib/utils/formatters'
 
 interface Props {
@@ -21,12 +25,13 @@ interface Props {
 }
 
 async function SiteOverviewContent({ tenantId, siteId }: { tenantId: string; siteId: string }) {
-  const [tenant, site, radiusConfig, metrics, connectionData] = await Promise.all([
+  const [tenant, site, radiusConfig, metrics, connectionData, recentSessions] = await Promise.all([
     tenantService.getById(tenantId),
     siteService.getById(siteId),
     radiusService.getBySiteId(siteId).catch(() => null),
     dashboardService.getSiteMetrics(siteId),
     dashboardService.getConnectionData(siteId),
+    gatewaySessionService.getAll({ siteId, pageSize: 5 }).catch(() => null),
   ])
 
   if (!tenant || !site) notFound()
@@ -113,8 +118,22 @@ async function SiteOverviewContent({ tenantId, siteId }: { tenantId: string; sit
         />
       </div>
 
-      <div className="max-w-2xl">
-        <ConnectionsChart data={connectionData} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="max-w-2xl">
+          <ConnectionsChart data={connectionData} />
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold">Recent Gateway Sessions</h2>
+            <Link href={`/admin/gateway-sessions?siteId=${siteId}`}>
+              <Button variant="ghost" size="sm" className="text-xs">
+                View all <ArrowRight className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+          <GatewaySessionTable sessions={recentSessions?.items ?? []} showSiteColumn={false} />
+        </div>
       </div>
     </>
   )

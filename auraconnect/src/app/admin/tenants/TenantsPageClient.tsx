@@ -9,7 +9,7 @@ import { TenantForm } from '@/components/tenants/TenantForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createTenantAction, updateTenantAction } from '@/lib/actions/tenants.actions'
-import type { Tenant } from '@/lib/types/tenant.types'
+import type { Tenant, PortalRoutingMode } from '@/lib/types/tenant.types'
 
 interface Props {
   initialTenants: Tenant[]
@@ -21,7 +21,7 @@ export function TenantsPageClient({ initialTenants }: Props) {
   const [editTarget, setEditTarget] = useState<Tenant | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const handleCreate = async (values: { name: string; slug: string }) => {
+  const handleCreate = async (values: { name: string; slug: string; portalRoutingMode: PortalRoutingMode }) => {
     setSaving(true)
     try {
       const tenant = await createTenantAction(values)
@@ -35,7 +35,7 @@ export function TenantsPageClient({ initialTenants }: Props) {
     }
   }
 
-  const handleEdit = async (values: { name: string; slug: string }) => {
+  const handleEdit = async (values: { name: string; slug: string; portalRoutingMode: PortalRoutingMode }) => {
     if (!editTarget) return
     setSaving(true)
     try {

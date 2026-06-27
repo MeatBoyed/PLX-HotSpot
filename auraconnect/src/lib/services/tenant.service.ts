@@ -14,6 +14,7 @@ function toTenant(r: ApiTenant): Tenant {
     name: r.name,
     slug: r.slug,
     status: mapStatus(r.status),
+    portalRoutingMode: r.portalRoutingMode ?? 'PerSite',
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }
@@ -36,7 +37,11 @@ export const tenantService = {
   },
 
   async create(input: CreateTenantInput): Promise<Tenant> {
-    const result = await tenantsApi.create({ name: input.name, slug: input.slug })
+    const result = await tenantsApi.create({
+      name: input.name,
+      slug: input.slug,
+      portalRoutingMode: input.portalRoutingMode,
+    })
     return toTenant(result)
   },
 
@@ -44,6 +49,7 @@ export const tenantService = {
     const result = await tenantsApi.update(id, {
       name: input.name,
       slug: input.slug,
+      portalRoutingMode: input.portalRoutingMode,
     })
     return toTenant(result)
   },

@@ -291,6 +291,84 @@ export interface paths {
         };
         trace?: never;
     };
+    "/gateway/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        form?: components["schemas"]["KeyValuePairOfstringAndStringValues"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/gateway/login-result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        form?: components["schemas"]["KeyValuePairOfstringAndStringValues"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/portal/{tenantId}/gateway": {
         parameters: {
             query?: never;
@@ -988,6 +1066,52 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/gateway-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                    tenantId?: string;
+                    siteId?: string;
+                    mac?: string;
+                    outcome?: components["schemas"]["GatewayLoginOutcome"];
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["PagedResultOfGatewaySessionEventResponse"];
+                        "application/json": components["schemas"]["PagedResultOfGatewaySessionEventResponse"];
+                        "text/json": components["schemas"]["PagedResultOfGatewaySessionEventResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3019,11 +3143,29 @@ export interface components {
         CreateTenantRequest: {
             name?: string;
             slug?: string;
+            portalRoutingMode?: components["schemas"]["PortalRoutingMode"];
         };
         GatewayConfigResponse: {
             loginUrl?: null | string;
             freeUsername?: null | string;
             freePassword?: null | string;
+        };
+        /** @enum {unknown} */
+        GatewayLoginOutcome: "Pending" | "Success" | "Failed";
+        GatewaySessionEventResponse: {
+            id?: string;
+            siteId?: string;
+            mac?: null | string;
+            nasId?: null | string;
+            resolvedHost?: string;
+            redirectUrl?: string;
+            loginOutcome?: components["schemas"]["GatewayLoginOutcome"];
+            loginError?: null | string;
+            loginErrorOriginal?: null | string;
+            /** Format: date-time */
+            loginCompletedAt?: null | string;
+            /** Format: date-time */
+            createdAt?: string;
         };
         /** Format: binary */
         IFormFile: string;
@@ -3200,6 +3342,19 @@ export interface components {
             hasNextPage?: boolean;
             hasPreviousPage?: boolean;
         };
+        PagedResultOfGatewaySessionEventResponse: {
+            items?: components["schemas"]["GatewaySessionEventResponse"][];
+            /** Format: int32 */
+            page?: number | string;
+            /** Format: int32 */
+            pageSize?: number | string;
+            /** Format: int32 */
+            totalCount?: number | string;
+            /** Format: int32 */
+            totalPages?: number | string;
+            hasNextPage?: boolean;
+            hasPreviousPage?: boolean;
+        };
         PagedResultOfWalletTransactionResponse: {
             items?: components["schemas"]["WalletTransactionResponse"][];
             /** Format: int32 */
@@ -3288,6 +3443,8 @@ export interface components {
             /** Format: int32 */
             sessionLimit?: null | number | string;
         };
+        /** @enum {unknown} */
+        PortalRoutingMode: "PerSite" | "TenantShared";
         PortalSiteResponse: {
             ssid?: string;
             displayName?: null | string;
@@ -3508,6 +3665,7 @@ export interface components {
         UpdateTenantRequest: {
             name?: string;
             slug?: string;
+            portalRoutingMode?: components["schemas"]["PortalRoutingMode"];
         };
         UserPackageResponse: {
             id?: string;

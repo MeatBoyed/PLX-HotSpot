@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Wifi,
+  LogIn,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { label: 'Tenants', href: '/admin/tenants', icon: <Building2 className="h-5 w-5" /> },
   { label: 'Hotspot Users', href: '/admin/hotspot-users', icon: <UsersRound className="h-5 w-5" /> },
   { label: 'Transactions', href: '/admin/transactions', icon: <CreditCard className="h-5 w-5" /> },
+  { label: 'Gateway Sessions', href: '/admin/gateway-sessions', icon: <LogIn className="h-5 w-5" /> },
   { label: 'Admin Users', href: '/admin/users', icon: <Users className="h-5 w-5" />, superAdminOnly: true },
   { label: 'Settings', href: '/admin/settings', icon: <Settings className="h-5 w-5" />, superAdminOnly: true },
 ]

@@ -11,7 +11,7 @@ import type { Site } from '@/lib/types/site.types'
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   ssid: z.string().min(1, 'SSID is required'),
-  domain: z.string().optional().nullable(),
+  domain: z.string().min(1, 'Domain is required'),
   sortOrder: z.number().int().optional(),
 })
 
@@ -53,9 +53,7 @@ export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFor
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="domain">
-            Domain <span className="text-muted-foreground font-normal">(optional)</span>
-          </Label>
+          <Label htmlFor="domain">Domain *</Label>
           {ssid.trim() && (
             <button
               type="button"
@@ -68,6 +66,7 @@ export function SiteForm({ defaultValues, onSubmit, onCancel, loading }: SiteFor
         </div>
         <Input id="domain" {...register('domain')} placeholder="portal.venue.co.za" className="font-mono" />
         {errors.domain && <p className="text-xs text-destructive">{errors.domain.message}</p>}
+        <p className="text-xs text-muted-foreground">Required — the MikroTik gateway redirect can&apos;t function without it</p>
       </div>
 
       <div className="space-y-2">

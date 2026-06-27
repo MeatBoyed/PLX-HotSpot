@@ -5,7 +5,7 @@ export interface Site {
   tenantId: string
   name: string
   ssid: string
-  domain?: string | null
+  domain: string
   sortOrder?: number
   status: SiteStatus
   marketingOptIn: boolean
@@ -17,14 +17,14 @@ export interface CreateSiteInput {
   tenantId: string
   name: string
   ssid: string
-  domain?: string | null
+  domain: string
   sortOrder?: number
 }
 
 export interface UpdateSiteInput {
   name?: string
   ssid?: string
-  domain?: string | null
+  domain?: string
   sortOrder?: number
   marketingOptIn?: boolean | null
 }

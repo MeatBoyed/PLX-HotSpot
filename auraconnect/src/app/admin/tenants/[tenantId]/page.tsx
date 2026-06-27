@@ -8,14 +8,15 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { GatewaySessionTable } from '@/components/gateway-sessions/GatewaySessionTable'
 import { tenantService } from '@/lib/services/tenant.service'
 import { siteService } from '@/lib/services/site.service'
 import { dashboardService } from '@/lib/services/dashboard.service'
 import { hotspotUserService } from '@/lib/services/hotspot-user.service'
 import { transactionService } from '@/lib/services/transaction.service'
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/formatters'
+import { gatewaySessionService } from '@/lib/services/gateway-session.service'
+import { formatCurrency, formatDate } from '@/lib/utils/formatters'
 import { AddSiteButton } from './AddSiteButton'
 import { DeleteTenantButton } from './DeleteTenantButton'
 import Link from 'next/link'
@@ -33,18 +34,19 @@ function txBadgeVariant(type: string): 'default' | 'secondary' | 'outline' {
 }
 
 async function TenantContent({ tenantId }: { tenantId: string }) {
-  const [tenant, sites, metrics, pagedUsers, pagedTxns] = await Promise.all([
+  const [tenant, sites, metrics, pagedUsers, pagedTxns, pagedSessions] = await Promise.all([
     tenantService.getById(tenantId),
     siteService.getByTenantId(tenantId),
     dashboardService.getTenantMetrics(tenantId),
     hotspotUserService.getAll({ tenantId, pageSize: 5 }),
     transactionService.getAll({ tenantId, pageSize: 5 }),
+    gatewaySessionService.getAll({ tenantId, pageSize: 5 }).catch(() => null),
   ])
 
   if (!tenant) notFound()
 
-  const recentUsers = pagedUsers.items
   const recentTxns = pagedTxns.items
+  const siteNameById = Object.fromEntries(sites.map((s) => [s.id, s.name]))
   const totalRevenue = pagedTxns.items
     .filter((t) => t.type.toLowerCase() === 'topup' && t.status.toLowerCase() === 'completed')
     .reduce((s, t) => s + t.amount, 0)
@@ -89,54 +91,19 @@ async function TenantContent({ tenantId }: { tenantId: string }) {
         </div>
       </div>
 
-      {/* Recent hotspot users + recent transactions */}
+      {/* Recent gateway sessions + recent transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Users */}
+        {/* Recent Gateway Sessions */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Recent Hotspot Users</h2>
-            <Link href={`/admin/hotspot-users?tenantId=${tenantId}`}>
+            <h2 className="text-base font-semibold">Recent Gateway Sessions</h2>
+            <Link href={`/admin/gateway-sessions?tenantId=${tenantId}`}>
               <Button variant="ghost" size="sm" className="text-xs">
                 View all <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
             </Link>
           </div>
-          <div className="rounded-lg border overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentUsers.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6 text-sm">No users yet</TableCell></TableRow>
-                ) : recentUsers.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell>
-                      <Link href={`/admin/hotspot-users/${u.id}`} className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
-                          <AvatarFallback className="text-xs">{u.firstName[0]}{u.lastName[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{u.firstName} {u.lastName}</p>
-                          <p className="text-xs text-muted-foreground truncate max-w-32">{u.email}</p>
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={u.status.toLowerCase() === 'active' ? 'outline' : 'destructive'} className="text-xs">
-                        {u.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{formatDate(u.createdAt)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <GatewaySessionTable sessions={pagedSessions?.items ?? []} siteNameById={siteNameById} />
         </div>
 
         {/* Recent Transactions */}

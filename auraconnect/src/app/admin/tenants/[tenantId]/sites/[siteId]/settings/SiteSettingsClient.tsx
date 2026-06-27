@@ -19,7 +19,7 @@ import type { Site } from '@/lib/types/site.types'
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   ssid: z.string().min(1, 'SSID is required'),
-  domain: z.string().nullable().optional(),
+  domain: z.string().min(1, 'Domain is required'),
   sortOrder: z.number().min(0),
   marketingOptIn: z.boolean(),
 })
@@ -39,7 +39,7 @@ export function SiteSettingsClient({ site }: Props) {
     defaultValues: {
       name: site.name,
       ssid: site.ssid,
-      domain: site.domain ?? '',
+      domain: site.domain,
       sortOrder: site.sortOrder ?? 0,
       marketingOptIn: site.marketingOptIn,
     },
@@ -54,7 +54,7 @@ export function SiteSettingsClient({ site }: Props) {
       await updateSiteAction(site.id, {
         name: values.name,
         ssid: values.ssid,
-        domain: values.domain || null,
+        domain: values.domain,
         sortOrder: values.sortOrder,
         marketingOptIn: values.marketingOptIn,
       })
@@ -100,7 +100,7 @@ export function SiteSettingsClient({ site }: Props) {
             {/* Domain */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Domain</Label>
+                <Label>Domain *</Label>
                 {ssid.trim() && (
                   <button
                     type="button"
@@ -112,7 +112,8 @@ export function SiteSettingsClient({ site }: Props) {
                 )}
               </div>
               <Input {...register('domain')} placeholder="e.g. portal.venue.co.za" className="font-mono" />
-              <p className="text-xs text-muted-foreground">Optional custom domain for the captive portal</p>
+              {errors.domain && <p className="text-xs text-destructive">{errors.domain.message}</p>}
+              <p className="text-xs text-muted-foreground">Required — the MikroTik gateway redirect can&apos;t function without it</p>
             </div>
 
             {/* Sort Order */}

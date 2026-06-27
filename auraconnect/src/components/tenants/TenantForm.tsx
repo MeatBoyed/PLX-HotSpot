@@ -1,11 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Tenant } from '@/lib/types/tenant.types'
 
 const schema = z.object({
@@ -14,6 +15,7 @@ const schema = z.object({
   description: z.string().optional(),
   contactEmail: z.string().email('Invalid email').optional().or(z.literal('')),
   contactPhone: z.string().optional(),
+  portalRoutingMode: z.enum(['PerSite', 'TenantShared']),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -26,11 +28,12 @@ interface TenantFormProps {
 }
 
 export function TenantForm({ defaultValues, onSubmit, onCancel, loading }: TenantFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: defaultValues?.name ?? '',
       slug: defaultValues?.slug ?? '',
+      portalRoutingMode: defaultValues?.portalRoutingMode ?? 'PerSite',
     },
   })
 
@@ -46,6 +49,31 @@ export function TenantForm({ defaultValues, onSubmit, onCancel, loading }: Tenan
         <Label htmlFor="slug">Slug *</Label>
         <Input id="slug" {...register('slug')} placeholder="joburg-theatre" />
         {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Portal Routing Mode *</Label>
+        <Controller
+          control={control}
+          name="portalRoutingMode"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PerSite">Per Site</SelectItem>
+                <SelectItem value="TenantShared">Tenant Shared</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+        <p className="text-xs text-muted-foreground">
+          <strong>Per Site</strong> — each site has its own dedicated domain (e.g. cosmo.auraconnect.co.za).{' '}
+          <strong>Tenant Shared</strong> — all sites under this tenant share one domain, differentiated by{' '}
+          <span className="font-mono">/{'{ssid}'}/</span> in the path. This is informational for now and does
+          not change redirect behaviour automatically.
+        </p>
       </div>
 
       <div className="flex gap-2 justify-end pt-2">

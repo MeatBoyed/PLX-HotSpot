@@ -17,7 +17,7 @@ export async function updateSiteAction(id: string, input: UpdateSiteInput) {
   const merged: UpdateSiteInput = {
     name:           input.name           ?? site.name,
     ssid:           input.ssid           ?? site.ssid,
-    domain:         'domain'        in input ? (input.domain  ?? null) : (site.domain ?? null),
+    domain:         input.domain         ?? site.domain,
     sortOrder:      input.sortOrder      ?? site.sortOrder ?? 0,
     marketingOptIn: input.marketingOptIn ?? site.marketingOptIn,
   }

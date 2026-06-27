@@ -11,6 +11,7 @@ export interface ApiTenant {
   /** 0 = active | 1 = suspended | 2 = inactive */
   status: number
   siteCount?: number | null
+  portalRoutingMode?: 'PerSite' | 'TenantShared' | null
   createdAt: string
   updatedAt: string
 }

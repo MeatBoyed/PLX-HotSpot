@@ -9,7 +9,7 @@ export const mockSites: Site[] = [
     ssid: 'JoTheatre-Cafe', domain: 'cafe.joburg-theatre.co.za', sortOrder: 2,
     status: 'active', marketingOptIn: false, createdAt: '2024-01-20T08:00:00Z', updatedAt: '2024-11-15T09:30:00Z' },
   { id: 'site_joburg_parking', tenantId: 'tenant_joburg', name: 'Parking Garage',
-    ssid: 'JoTheatre-Parking', domain: null, sortOrder: 3,
+    ssid: 'JoTheatre-Parking', domain: 'parking.joburg-theatre.co.za', sortOrder: 3,
     status: 'suspended', marketingOptIn: false, createdAt: '2024-01-20T08:00:00Z', updatedAt: '2024-10-05T14:00:00Z' },
 
   // Kwamaimai Beach
@@ -17,7 +17,7 @@ export const mockSites: Site[] = [
     ssid: 'Kwamaimai-Beach', domain: 'beach.kwamaimai.co.za', sortOrder: 1,
     status: 'active', marketingOptIn: false, createdAt: '2024-02-15T09:00:00Z', updatedAt: '2024-12-05T11:00:00Z' },
   { id: 'site_kwa_restaurant', tenantId: 'tenant_kwamaimai', name: 'Restaurant',
-    ssid: 'Kwamaimai-Restaurant', domain: null, sortOrder: 2,
+    ssid: 'Kwamaimai-Restaurant', domain: 'restaurant.kwamaimai.co.za', sortOrder: 2,
     status: 'maintenance', marketingOptIn: false, createdAt: '2024-02-15T09:00:00Z', updatedAt: '2024-12-08T08:00:00Z' },
 
   // Sandton City
@@ -36,6 +36,6 @@ export const mockSites: Site[] = [
     ssid: 'PreZoo-Entrance', domain: 'entrance.prezoo.org.za', sortOrder: 1,
     status: 'active', marketingOptIn: false, createdAt: '2024-04-25T11:00:00Z', updatedAt: '2024-11-20T10:00:00Z' },
   { id: 'site_zoo_picnic', tenantId: 'tenant_pta_zoo', name: 'Picnic Grounds',
-    ssid: 'PreZoo-Picnic', domain: null, sortOrder: 2,
+    ssid: 'PreZoo-Picnic', domain: 'picnic.prezoo.org.za', sortOrder: 2,
     status: 'active', marketingOptIn: false, createdAt: '2024-04-25T11:00:00Z', updatedAt: '2024-11-20T10:00:00Z' },
 ]
