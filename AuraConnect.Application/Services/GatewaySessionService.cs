@@ -137,7 +137,7 @@ namespace AuraConnect.Application.Services
             NasId = g.NasId,
             ResolvedHost = g.ResolvedHost,
             RedirectUrl = g.RedirectUrl,
-            LoginOutcome = g.LoginOutcome.ToString(),
+            LoginOutcome = g.LoginOutcome,
             LoginError = g.LoginError,
             LoginErrorOriginal = g.LoginErrorOriginal,
             LoginCompletedAt = g.LoginCompletedAt,
