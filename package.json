@@ -2,11 +2,22 @@
   "name": "next-captive-portal-rd",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate",
+    "db:up": "docker compose -f docker/docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker/docker-compose.dev.yml down",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
     "capabilities:render": "node tools/capabilities-doc/render.mjs",
     "capabilities:check": "node tools/capabilities-doc/render.mjs --check",
     "prebuild:local": "npx openapi-zod-client http://localhost:3000/api/spec -o ./src/lib/hotspotAPI.ts --api-client-name=hotspotAPI --export-schemas=true --export-types=true --base-url=http://localhost:3000 --strict-objects"
@@ -57,7 +68,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "tw-animate-css": "^1.3.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   },
   "overrides": {
     "@types/react": "19.2.14",

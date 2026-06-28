@@ -39,8 +39,12 @@ the bootstrap slice in `docs/projects/`).
 - `npm run lint` — ESLint (`eslint-config-next`).
 - `npm run capabilities:render` / `capabilities:check` — regenerate / drift-check the
   capability scorecards from their JSON source of truth.
-- Tests: a Vitest + Testing Library suite is being bootstrapped; once present,
-  `npm test` is part of the gate.
+- `npm test` — Vitest unit tests (`npm run test:watch` for watch mode). Part of
+  the gate. Component/RTL and e2e are deferred (see the bootstrap slice in
+  `docs/projects/`).
+- Local dev DB: `npm run db:up` (Postgres via `docker/docker-compose.dev.yml`),
+  then `db:migrate` / `db:seed` / `db:reset`. Full setup is in `README.md`
+  ("Local Development"). Node is pinned to `24.18.0` (`.nvmrc`).
 
 ## How we work
 

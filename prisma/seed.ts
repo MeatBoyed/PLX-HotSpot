@@ -65,15 +65,23 @@ const SCHOOLS = [
 ];
 
 async function main() {
-  // Fetch the base IH Harris row
-  const base = await prisma.branding_config.findUnique({
+  // Fetch the base IH Harris row. On a fresh dev database it won't exist yet
+  // (in production it originally came from a data import), so create it from
+  // schema defaults first. ssid + name are the only required columns; every
+  // other branding field has a schema default. Idempotent: skipped once present.
+  let base = await prisma.branding_config.findUnique({
     where: { ssid: BASE_SSID },
   });
 
   if (!base) {
-    throw new Error(
-      `Base row not found: ssid="${BASE_SSID}". Make sure IH Harris exists in the database before running this seed.`
-    );
+    console.log(`Base row ssid="${BASE_SSID}" not found — creating it from schema defaults.`);
+    base = await prisma.branding_config.create({
+      data: {
+        ssid: BASE_SSID,
+        name: "IH Harris Secondary School",
+        heading: "Welcome to IH Harris Secondary School AuraConnect WiFi Platform",
+      },
+    });
   }
 
   console.log(`Base row found: ${base.name} (${base.ssid})`);

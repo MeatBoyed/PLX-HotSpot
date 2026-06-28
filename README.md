@@ -133,25 +133,62 @@ Notes
 
 
 
-## Getting Started
+## Local Development
 
-First, run the development server:
+Stand up a working local environment from a fresh clone using only the commands
+below. The Next app runs on your host; only Postgres runs in Docker.
+
+### Prerequisites
+
+- **Node `24.18.0`** (pinned in `.nvmrc`). With nvm: `nvm install && nvm use`.
+- **Docker** (for the local Postgres) — Docker Desktop or engine + compose v2.
+
+### One-time setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+nvm use                         # match the pinned Node version
+npm install                     # installs deps; postinstall runs `prisma generate`
+cp .env.example .env.local      # dev env bootstrap (works as-is, no edits needed)
+npm run db:up                   # start local Postgres (docker/docker-compose.dev.yml)
+npm run db:migrate              # apply Prisma migrations
+npm run db:seed                 # load dev seed data (IH Harris base + demo schools)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.example` ships working local defaults: `DATABASE_URL` points at the dev
+Postgres (`postgresql://postgres:postgres@localhost:55432/auraconnect`) and the
+Clerk keys are **inert placeholders** so the build works — replace them with a
+real [Clerk](https://dashboard.clerk.com) project's keys to use the admin area.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Run
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev                     # http://localhost:3000 (Turbopack)
+```
+
+### Database commands
+
+| command | what it does |
+|---------|--------------|
+| `npm run db:up`     | start the local Postgres container |
+| `npm run db:down`   | stop it (data volume retained) |
+| `npm run db:migrate`| apply migrations (`prisma migrate dev`) |
+| `npm run db:seed`   | run `prisma/seed.ts` (idempotent) |
+| `npm run db:reset`  | drop, re-migrate, and re-seed (destructive — dev only) |
+
+### Testing
+
+```bash
+npm test                        # Vitest unit tests (CI gate once wired)
+npm run test:watch              # watch mode
+```
+
+### Before declaring a change done
+
+```bash
+npm run lint
+npm run build
+npm test
+```
 
 ## Learn More
 

@@ -1,0 +1,37 @@
+# Local development database ONLY.
+#
+# This is NOT the production stack (see docker-compose.yml and the per-site
+# compose files). It brings up a single vanilla Postgres for local dev; the
+# Next app itself runs on the host via `npm run dev`, not in a container.
+#
+# Usage:
+#   docker compose -f docker/docker-compose.dev.yml up -d
+#   npm run db:migrate && npm run db:seed
+#
+# Connection string (matches .env.example's DATABASE_URL default):
+#   postgresql://postgres:postgres@localhost:55432/auraconnect
+#
+# Host port 55432 -> container 5432 (chosen to avoid the local 54xxx/517x/518x
+# bands; see the slice doc's port-governance note).
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: auraconnect-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auraconnect
+    ports:
+      - "55432:5432"
+    volumes:
+      - auraconnect-dev-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auraconnect"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  auraconnect-dev-db:
