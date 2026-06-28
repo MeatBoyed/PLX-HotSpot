@@ -1,0 +1,111 @@
+{
+  "system_scorecard": {
+    "columns": [
+      {
+        "label": "Sub-aspect",
+        "align": "l",
+        "weight": 16
+      },
+      {
+        "label": "Score",
+        "align": "c",
+        "weight": 7
+      },
+      {
+        "label": "Note",
+        "align": "l",
+        "weight": 46
+      }
+    ],
+    "rows": [
+      [
+        "Seam cleanliness",
+        "\\axis{2}",
+        "`features/` vs `lib/services/` split is arbitrary; `lib/services` is a catch-all"
+      ],
+      [
+        "Cross-set coupling",
+        "\\axis{2}",
+        "RADIUS scattered 3×, SMS split + bypassed, IPN reaches into 3 services"
+      ],
+      [
+        "Names match function",
+        "\\axis{3}",
+        "mostly honest; `purchasing` holds non-purchase auth"
+      ],
+      [
+        "Decomposition correctness",
+        "\\axis{2}",
+        "dead duplicates, no AAA seam, trust boundary not in layout"
+      ],
+      [
+        "**Overall coherence**",
+        "\\axis{2}",
+        "directory-tidy but seam-leaky — the modular split is partly cosmetic; the two concerns that matter most (AAA access, trust boundary) have no seam"
+      ]
+    ]
+  },
+  "journeys": {
+    "columns": [
+      {
+        "label": "Journey",
+        "align": "l"
+      },
+      {
+        "label": "Capability path",
+        "align": "l"
+      },
+      {
+        "label": "Coverage",
+        "align": "l"
+      }
+    ],
+    "rows": [
+      [
+        "J1 Free-tier connect",
+        "C1.2 → C1.4 → (NAS/RADIUS) → C1.5",
+        "mapped (handoff defects per §4)"
+      ],
+      [
+        "J2 Voucher redeem",
+        "voucher UI → C1.3 → C1.4 → (NAS)",
+        "mapped"
+      ],
+      [
+        "J3 Paid purchase → voucher",
+        "C7.4 → C2.3/C2.8 → (PayFast) → C2.8 → C2.5 → C2.1 → C5.1/C5.2 → (J2)",
+        "mapped; **gap at tail** (no voucher lifecycle: expiry/revoke)"
+      ],
+      [
+        "J4 Phone / permanent-user signup",
+        "C3.3 → C4.1/C4.3 → C4.2/C4.4 → C3.1",
+        "mapped"
+      ],
+      [
+        "J5 Email register",
+        "C4.5 → C7.x → C3.1",
+        "mapped"
+      ],
+      [
+        "J6 Ad-funded view",
+        "connect → C10.1 → C10.2 → **(grant)**",
+        "**GAP**: no server-side ad→grant; completion client-side/skippable"
+      ],
+      [
+        "J7 Admin back-office",
+        "C11.2 → C11.3 → {C6.5, C7.3, C8.2, C9.3}",
+        "mapped"
+      ],
+      [
+        "J8 Tenant branding render",
+        "`[subvenue]` → C6.1 → C6.6 (+ C9.1 logos)",
+        "mapped"
+      ],
+      [
+        "J9 Marketing opt-in",
+        "marketing card → C8.1",
+        "mapped"
+      ]
+    ]
+  }
+}

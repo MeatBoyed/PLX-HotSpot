@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "capabilities:render": "node tools/capabilities-doc/render.mjs",
+    "capabilities:check": "node tools/capabilities-doc/render.mjs --check",
     "prebuild:local": "npx openapi-zod-client http://localhost:3000/api/spec -o ./src/lib/hotspotAPI.ts --api-client-name=hotspotAPI --export-schemas=true --export-types=true --base-url=http://localhost:3000 --strict-objects"
   },
   "dependencies": {
