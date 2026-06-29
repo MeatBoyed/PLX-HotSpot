@@ -20,8 +20,6 @@ their slice doc (`docs/projects/`), not here.
 
 ## Index
 
-_No ADRs recorded yet._ Add a row here as each is accepted.
-
 | ADR | Title | Status |
 | --- | --- | --- |
-| — | — | — |
+| [0001](0001-dependency-pinning-policy.md) | Pin all direct dependencies to exact versions | Accepted |

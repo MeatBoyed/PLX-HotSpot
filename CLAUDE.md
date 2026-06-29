@@ -59,9 +59,20 @@ the bootstrap slice in `docs/projects/`).
 - **Re-score with `/update-capabilities`** when code changes move a capability: edit
   the JSON in `docs/capabilities/data/`, run `npm run capabilities:render`, keep the
   narrative in sync. The tables (`scorecards.md`) are generated — never hand-edited.
-- **Vet dependencies** with `/supply-chain-guard` before adding or bumping packages.
-  Keep `package.json` and `package-lock.json` committed together; never delete the
-  lockfile to resolve a conflict.
+- **Vet dependencies** with `/supply-chain-guard` — this is **mandatory** before you
+  add, bump, or remove any npm package, or edit `package.json` / `package-lock.json`.
+  Run the skill first; do not install on the side. Surface unverifiable or suspicious
+  packages instead of installing them.
+- **Pin exact, never widen.** All direct dependencies are pinned to exact versions
+  (no `^`/`~`) per [ADR 0001](docs/adr/0001-dependency-pinning-policy.md), enforced by
+  `.npmrc` (`save-exact=true`). New deps are added exact; do not reintroduce caret
+  ranges. Dependency *updates* are deliberate, guarded changes, not silent drift.
+- **Never delete `package-lock.json`.** Strongly advised against — deleting and
+  regenerating it discards the pinned, integrity-checked tree and is itself a
+  supply-chain risk (it can silently re-resolve transitives). Resolve lockfile
+  conflicts by merging, not by deleting and re-running `npm install`. Always commit
+  `package.json` and `package-lock.json` together and review the lockfile diff —
+  unexpected new transitives or changed `resolved` URLs warrant a pause.
 
 ## Conventions
 

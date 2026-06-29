@@ -49,9 +49,13 @@ dependency.
 ### B. When installing / pinning
 
 1. Use the project's lockfile-respecting install (`npm ci` in CI; `npm install` with
-   the lockfile committed locally). Never delete the lockfile to "fix" a conflict.
-2. Pin to exact or tightly-ranged versions for anything security-sensitive. Keep the
-   `overrides` block intentional, not accidental.
+   the lockfile committed locally). **Never delete `package-lock.json` to "fix" a
+   conflict** — strongly advised against. Deleting it discards the pinned,
+   integrity-checked tree and can silently re-resolve transitives, which is itself a
+   supply-chain risk. Resolve conflicts by merging the lockfile, not regenerating it.
+2. Pin direct dependencies to **exact** versions (no `^`/`~`); this repo enforces that
+   via `.npmrc` (`save-exact=true`) per ADR 0001. Add new deps exact; never reintroduce
+   a caret range. Keep the `overrides` block intentional, not accidental.
 3. Commit `package.json` and `package-lock.json` together; review the lockfile diff —
    unexpected new transitive packages or changed `resolved` URLs warrant a pause.
 
