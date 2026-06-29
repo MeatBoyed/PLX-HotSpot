@@ -10,8 +10,17 @@
 !.yarn/releases
 !.yarn/versions
 
+# direnv (cache; .envrc itself is tracked)
+.direnv/
+
 # testing
 /coverage
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
 # next.js
 /.next/

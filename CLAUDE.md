@@ -34,17 +34,23 @@ the bootstrap slice in `docs/projects/`).
 
 ## Commands
 
-- `npm run dev` — local dev (Turbopack).
+- `make dev` (or `npm run dev`) — one command: brings dev dependencies up
+  (`dev:deps` via the `predev` hook, `compose up -d --wait`) then starts the dev
+  server. Binds `DEV_PORT` (default 3000, set in `.env.local`). `make` / `make help`
+  lists all targets; `make gate` is the CI verb (test + build blocking, lint
+  non-blocking for now).
 - `npm run build` — production build. Run before declaring a change done.
 - `npm run lint` — ESLint (`eslint-config-next`).
 - `npm run capabilities:render` / `capabilities:check` — regenerate / drift-check the
   capability scorecards from their JSON source of truth.
 - `npm test` — Vitest unit tests (`npm run test:watch` for watch mode). Part of
-  the gate. Component/RTL and e2e are deferred (see the bootstrap slice in
-  `docs/projects/`).
-- Local dev DB: `npm run db:up` (Postgres via `docker/docker-compose.dev.yml`),
-  then `db:migrate` / `db:seed` / `db:reset`. Full setup is in `README.md`
-  ("Local Development"). Node is pinned to `24.18.0` (`.nvmrc`).
+  the gate.
+- `npm run test:e2e` — Playwright e2e against a running app (`BASE_URL` overrides the
+  target; see `e2e/README.md`). Component/RTL tests remain deferred.
+- Dev dependencies: `npm run dev:deps` / `dev:down` (Docker via
+  `docker/docker-compose.dev.yml`); DB ops `db:migrate` / `db:seed` / `db:reset`.
+  Full setup is in `README.md` ("Local Development"). Node is pinned to `24.18.0`
+  (`.nvmrc`); direnv (`.envrc`) auto-loads it + `.env.local`.
 
 ## How we work
 

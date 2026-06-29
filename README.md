@@ -136,20 +136,26 @@ Notes
 ## Local Development
 
 Stand up a working local environment from a fresh clone using only the commands
-below. The Next app runs on your host; only Postgres runs in Docker.
+below. The Next app runs on your host; the dev **dependencies** (currently Postgres;
+later Mailpit/Redis/etc.) run in Docker via `docker/docker-compose.dev.yml`.
 
 ### Prerequisites
 
 - **Node `24.18.0`** (pinned in `.nvmrc`). With nvm: `nvm install && nvm use`.
-- **Docker** (for the local Postgres) — Docker Desktop or engine + compose v2.
+- **Docker** (for the dev dependencies) — Docker Desktop or engine + compose v2.
+- **`make`** (used by the `make` verbs below; in every CI image). Optional locally.
+- **direnv** (optional) — auto-activates the pinned Node version and loads `.env.local`
+  on `cd` into the repo. After cloning: `direnv allow`. Uses `use nvm $(cat .nvmrc)`,
+  so your `~/.config/direnv/direnvrc` needs `use nvm` support (the team's standard).
 
 ### One-time setup
 
 ```bash
-nvm use                         # match the pinned Node version
+nvm install && nvm use          # install + match the pinned Node version (.nvmrc)
 npm install                     # installs deps; postinstall runs `prisma generate`
 cp .env.example .env.local      # dev env bootstrap (works as-is, no edits needed)
-npm run db:up                   # start local Postgres (docker/docker-compose.dev.yml)
+direnv allow                    # optional: auto Node + env on folder entry
+npm run dev:deps                # bring dev dependencies up (compose up -d --wait)
 npm run db:migrate              # apply Prisma migrations
 npm run db:seed                 # load dev seed data (IH Harris base + demo schools)
 ```
@@ -159,18 +165,45 @@ Postgres (`postgresql://postgres:postgres@localhost:55432/auraconnect`) and the
 Clerk keys are **inert placeholders** so the build works — replace them with a
 real [Clerk](https://dashboard.clerk.com) project's keys to use the admin area.
 
+> All `.env*` values containing spaces must be **quoted** (e.g.
+> `SITE_DESCRIPTION="PluxNet Fibre HotSpot"`) — direnv's parser is stricter than
+> Next's and silently skips the whole file on an unquoted spaced value.
+
 ### Run
 
+One command brings the dev dependencies up (waiting for health) **and** starts the
+dev server:
+
 ```bash
-npm run dev                     # http://localhost:3000 (Turbopack)
+make dev                        # or: npm run dev  — deps up + Next dev (Turbopack)
 ```
+
+`make dev` / `npm run dev` runs `dev:deps` first via the `predev` hook, so the server
+never races an unhealthy database.
+
+The dev server binds **`DEV_PORT`** (default `3000`, set in `.env.local`, loaded into
+your shell by direnv). Pinning it keeps the port deterministic — Next errors on a
+conflict instead of silently drifting to `3001`. Change it per-machine in `.env.local`.
+
+### Make targets
+
+`make` (or `make help`) lists them. Thin wrappers over the npm scripts, so the same
+verbs work in CI:
+
+| target | what it does |
+|--------|--------------|
+| `make dev`      | dev deps up (`--wait`) + start the dev server |
+| `make dev-down` | stop dev dependency containers (data volume retained) |
+| `make deps`     | bring dev dependencies up only (no server) |
+| `make gate`     | CI gate: `test` + `build` (blocking), `lint` (non-blocking for now) |
+| `make e2e`      | Playwright e2e against a running app (`localhost:$DEV_PORT`) |
 
 ### Database commands
 
 | command | what it does |
 |---------|--------------|
-| `npm run db:up`     | start the local Postgres container |
-| `npm run db:down`   | stop it (data volume retained) |
+| `npm run dev:deps`  | bring dev dependencies up (`compose up -d --wait`) |
+| `npm run dev:down`  | stop them (data volume retained) |
 | `npm run db:migrate`| apply migrations (`prisma migrate dev`) |
 | `npm run db:seed`   | run `prisma/seed.ts` (idempotent) |
 | `npm run db:reset`  | drop, re-migrate, and re-seed (destructive — dev only) |
