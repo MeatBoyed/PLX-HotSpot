@@ -12,6 +12,11 @@ namespace AuraConnect.Core.Entities
         public string? MikroTikApiHost { get; private set; }
         public string? MikroTikUsername { get; private set; }
         public string? MikroTikPassword { get; private set; }
+        public string? RadiusDbHost { get; private set; }
+        public int? RadiusDbPort { get; private set; }
+        public string? RadiusDbName { get; private set; }
+        public string? RadiusDbUsername { get; private set; }
+        public string? RadiusDbPassword { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
@@ -42,5 +47,22 @@ namespace AuraConnect.Core.Entities
             !string.IsNullOrWhiteSpace(MikroTikApiHost) &&
             !string.IsNullOrWhiteSpace(MikroTikUsername) &&
             !string.IsNullOrWhiteSpace(MikroTikPassword);
+
+        public void SetRadiusDbConfig(string host, int port, string databaseName, string username, string password)
+        {
+            RadiusDbHost = host;
+            RadiusDbPort = port;
+            RadiusDbName = databaseName;
+            RadiusDbUsername = username;
+            RadiusDbPassword = password;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public bool IsRadiusDbConfigured =>
+            !string.IsNullOrWhiteSpace(RadiusDbHost) &&
+            RadiusDbPort.HasValue &&
+            !string.IsNullOrWhiteSpace(RadiusDbName) &&
+            !string.IsNullOrWhiteSpace(RadiusDbUsername) &&
+            !string.IsNullOrWhiteSpace(RadiusDbPassword);
     }
 }

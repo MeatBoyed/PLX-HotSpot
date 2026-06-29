@@ -773,6 +773,30 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("payfast_sandbox_mode");
 
+                    b.Property<string>("RadiusDbHost")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("radius_db_host");
+
+                    b.Property<string>("RadiusDbName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("radius_db_name");
+
+                    b.Property<string>("RadiusDbPassword")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("radius_db_password");
+
+                    b.Property<int?>("RadiusDbPort")
+                        .HasColumnType("integer")
+                        .HasColumnName("radius_db_port");
+
+                    b.Property<string>("RadiusDbUsername")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("radius_db_username");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -940,6 +964,13 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
+                    b.PrimitiveCollection<string[]>("RadiusCalledStationIds")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("radius_called_station_ids")
+                        .HasDefaultValueSql("'{}'");
+
                     b.Property<int>("SortOrder")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -957,6 +988,11 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("status");
+
+                    b.Property<string>("SuccessRedirectUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("success_redirect_url");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
@@ -1058,6 +1094,11 @@ namespace AuraConnect.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("slug");
+
+                    b.Property<string>("SuccessRedirectUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("success_redirect_url");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()

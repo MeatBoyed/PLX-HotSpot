@@ -11,6 +11,7 @@ namespace AuraConnect.Core.Interfaces.Repositories
         Task<Site?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
         Task<Site?> GetBySsidAsync(string ssid, CancellationToken cancellationToken = default);
         Task<IEnumerable<Site>> GetByTenantIdAsync(string tenantId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Site>> GetAllAsync(CancellationToken cancellationToken = default);
 
         // With includes (for detailed views)
         Task<Site?> GetSiteWithDetailsAsync(string id, CancellationToken cancellationToken = default);

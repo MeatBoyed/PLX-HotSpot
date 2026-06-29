@@ -13,5 +13,6 @@ namespace AuraConnect.Application.DTOs.Tenant
         public string Name { get; set; } = string.Empty;  // "Joburg Theatre"
         public string Slug { get; set; } = string.Empty;  // "joburg-theatre"
         public PortalRoutingMode PortalRoutingMode { get; set; } = PortalRoutingMode.PerSite;
+        public string? SuccessRedirectUrl { get; set; }  // Default success-login destination for all sites under this tenant; a site's own SuccessRedirectUrl takes precedence
     }
 }

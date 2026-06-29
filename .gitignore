@@ -6,6 +6,10 @@
 # Environment — contains secrets/env overrides, never commit
 .env
 
+# Python virtualenvs (tools/*/env, tools/*/.venv) — never commit, regenerate via requirements.txt
+env/
+.venv/
+
 # User-specific files
 *.rsuser
 *.suo

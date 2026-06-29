@@ -10,6 +10,7 @@ namespace AuraConnect.Core.Entities
         public string Name { get; private set; } = string.Empty;
         public string Slug { get; private set; } = string.Empty;
         public PortalRoutingMode PortalRoutingMode { get; private set; } = PortalRoutingMode.PerSite;
+        public string? SuccessRedirectUrl { get; private set; }
 
         // Navigation
         private readonly List<Site> _sites = new();
@@ -50,6 +51,14 @@ namespace AuraConnect.Core.Entities
         public void SetPortalRoutingMode(PortalRoutingMode mode)
         {
             PortalRoutingMode = mode;
+            UpdateTimestamp();
+        }
+
+        public void SetSuccessRedirectUrl(string? url)
+        {
+            if (url != null && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException("Invalid success redirect URL format");
+            SuccessRedirectUrl = url;
             UpdateTimestamp();
         }
     }

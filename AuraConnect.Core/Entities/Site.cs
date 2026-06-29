@@ -9,10 +9,12 @@ namespace AuraConnect.Core.Entities
         public string Ssid { get; private set; } = string.Empty;
         public string Name { get; private set; } = string.Empty;
         public string? Domain { get; private set; }
+        public string? SuccessRedirectUrl { get; private set; }
         public SiteStatus Status { get; private set; } = SiteStatus.Active;
         public int SortOrder { get; private set; }
         public string[] AuthMethods { get; private set; } = [AuthMethod.Free];
         public bool MarketingOptIn { get; private set; } = false;
+        public string[] RadiusCalledStationIds { get; private set; } = [];
 
         // Navigation
         public virtual Tenant Tenant { get; private set; } = null!;
@@ -61,6 +63,14 @@ namespace AuraConnect.Core.Entities
             UpdateTimestamp();
         }
 
+        public void SetSuccessRedirectUrl(string? url)
+        {
+            if (url != null && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException("Invalid success redirect URL format");
+            SuccessRedirectUrl = url;
+            UpdateTimestamp();
+        }
+
         public void SetStatus(SiteStatus status)
         {
             Status = status;
@@ -83,6 +93,15 @@ namespace AuraConnect.Core.Entities
                 throw new ArgumentException($"Invalid auth methods: {string.Join(", ", invalid)}. Valid values: {string.Join(", ", AuthMethod.All)}");
 
             AuthMethods = methods;
+            UpdateTimestamp();
+        }
+
+        public void SetRadiusCalledStationIds(string[] calledStationIds)
+        {
+            if (calledStationIds == null || calledStationIds.Any(string.IsNullOrWhiteSpace))
+                throw new ArgumentException("Called-station IDs cannot be null or empty entries");
+
+            RadiusCalledStationIds = calledStationIds;
             UpdateTimestamp();
         }
 

@@ -39,7 +39,23 @@
       "Bash(curl -vk --max-time 8 https://gateway.pluxnet.co.za/rest/ip/hotspot/profile)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 10 https://api.auraconnect.co.za/api/admin/platform/settings)",
       "Bash(python3 -c ' *)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Read(//home/charles/.ssh/**)",
+      "Bash(pip install *)",
+      "Bash(python3 -m venv env)",
+      "Bash(./env/bin/pip install *)",
+      "Bash(timeout 60 ./env/bin/python3 sample_data.py)",
+      "Bash(timeout 60 ./env/bin/python3 calledstationid_audit.py)",
+      "Bash(timeout 60 dotnet add AuraConnect.Infrastructure/AuraConnect.Infrastructure.csproj package MySqlConnector)",
+      "Bash(timeout 100 dotnet build AuraConnect.Infrastructure/AuraConnect.Infrastructure.csproj)",
+      "Bash(timeout 100 dotnet build AuraConnect.slnx)",
+      "Bash(grep -iE \"\\\\.env$|/env/|__pycache__|\\\\.pyc$\")",
+      "Bash(grep -E \"^\\\\?\\\\?|\\\\.env$\" /tmp/claude-1000/-home-charles-code-AuraConnect/bba77ad5-8496-47f7-8329-b845fd41e841/scratchpad/git_status_full.txt)",
+      "Bash(git reset *)",
+      "Bash(git check-ignore *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(grep -E \"/env/|\\(^|/\\)\\\\.env$\")"
     ]
   }
 }

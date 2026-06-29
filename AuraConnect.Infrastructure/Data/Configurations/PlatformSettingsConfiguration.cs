@@ -43,6 +43,25 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasColumnName("mikrotik_password")
                 .HasMaxLength(255);
 
+            builder.Property(p => p.RadiusDbHost)
+                .HasColumnName("radius_db_host")
+                .HasMaxLength(255);
+
+            builder.Property(p => p.RadiusDbPort)
+                .HasColumnName("radius_db_port");
+
+            builder.Property(p => p.RadiusDbName)
+                .HasColumnName("radius_db_name")
+                .HasMaxLength(255);
+
+            builder.Property(p => p.RadiusDbUsername)
+                .HasColumnName("radius_db_username")
+                .HasMaxLength(255);
+
+            builder.Property(p => p.RadiusDbPassword)
+                .HasColumnName("radius_db_password")
+                .HasMaxLength(255);
+
             builder.Property(p => p.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

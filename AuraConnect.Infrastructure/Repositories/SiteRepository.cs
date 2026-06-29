@@ -38,6 +38,13 @@ namespace AuraConnect.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<Site>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Sites
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Site?> GetSiteWithDetailsAsync(string id, CancellationToken cancellationToken = default)
         {
             return await _context.Sites

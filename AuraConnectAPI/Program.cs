@@ -137,6 +137,8 @@ try
     builder.Services.AddHttpClient<IRadiusProvisioningService, RadiusProvisioningService>();
     builder.Services.AddScoped<IMikroTikGatewayService, MikroTikGatewayService>();
     builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
+    builder.Services.AddScoped<IRadiusAccountingClient, RadiusAccountingClient>();
+    builder.Services.AddScoped<IUsageReportingService, UsageReportingService>();
     builder.Services.AddSingleton<IPortalCacheService, PortalCacheService>();
 
     builder.Services.AddInfrastructure(builder.Configuration);

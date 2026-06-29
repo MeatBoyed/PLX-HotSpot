@@ -16,6 +16,7 @@ namespace AuraConnect.Infrastructure.Repositories
             var since = DateTime.UtcNow - window;
             return await _context.GatewaySessionEvents
                 .Include(g => g.Site)
+                .ThenInclude(s => s.Tenant)
                 .Where(g => g.Mac == mac && g.CreatedAt >= since)
                 .OrderByDescending(g => g.CreatedAt)
                 .FirstOrDefaultAsync(cancellationToken);

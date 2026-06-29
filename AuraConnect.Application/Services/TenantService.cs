@@ -29,6 +29,7 @@ namespace AuraConnect.Application.Services
                 Name = tenant.Name,
                 Slug = tenant.Slug,
                 PortalRoutingMode = tenant.PortalRoutingMode,
+                SuccessRedirectUrl = tenant.SuccessRedirectUrl,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             });
@@ -51,6 +52,7 @@ namespace AuraConnect.Application.Services
             // 2. Create new Entity (using domain constructor)
             var tenant = new Tenant(request.Name, request.Slug);
             tenant.SetPortalRoutingMode(request.PortalRoutingMode);
+            tenant.SetSuccessRedirectUrl(request.SuccessRedirectUrl);
 
             // 3. Save to database via repository
             await _tenantRepository.AddAsync(tenant, cancellationToken);
@@ -63,6 +65,7 @@ namespace AuraConnect.Application.Services
                 Name = tenant.Name,
                 Slug = tenant.Slug,
                 PortalRoutingMode = tenant.PortalRoutingMode,
+                SuccessRedirectUrl = tenant.SuccessRedirectUrl,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };
@@ -85,6 +88,7 @@ namespace AuraConnect.Application.Services
                 Name = tenant.Name,
                 Slug = tenant.Slug,
                 PortalRoutingMode = tenant.PortalRoutingMode,
+                SuccessRedirectUrl = tenant.SuccessRedirectUrl,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };
@@ -110,6 +114,7 @@ namespace AuraConnect.Application.Services
             tenant.SetName(request.Name);
             tenant.SetSlug(request.Slug);
             tenant.SetPortalRoutingMode(request.PortalRoutingMode);
+            tenant.SetSuccessRedirectUrl(request.SuccessRedirectUrl);
 
             // 4. Save changes
             await _tenantRepository.UpdateAsync(tenant, cancellationToken);
@@ -122,6 +127,7 @@ namespace AuraConnect.Application.Services
                 Name = tenant.Name,
                 Slug = tenant.Slug,
                 PortalRoutingMode = tenant.PortalRoutingMode,
+                SuccessRedirectUrl = tenant.SuccessRedirectUrl,
                 CreatedAt = tenant.CreatedAt,
                 UpdatedAt = tenant.UpdatedAt
             };

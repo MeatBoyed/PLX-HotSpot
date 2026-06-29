@@ -13,6 +13,13 @@ namespace AuraConnect.Application.DTOs.Platform
         public string? MikroTikUsername { get; init; }
         public bool IsMikroTikPasswordSet { get; init; }
 
+        public bool IsRadiusDbConfigured { get; init; }
+        public string? RadiusDbHost { get; init; }
+        public int? RadiusDbPort { get; init; }
+        public string? RadiusDbName { get; init; }
+        public string? RadiusDbUsername { get; init; }
+        public bool IsRadiusDbPasswordSet { get; init; }
+
         public DateTime? UpdatedAt { get; init; }
     }
 }

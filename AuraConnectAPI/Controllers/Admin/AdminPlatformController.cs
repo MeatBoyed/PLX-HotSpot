@@ -35,5 +35,12 @@ namespace AuraConnect.API.Controllers.Admin
             var result = await _platformSettings.UpdateMikroTikAsync(request, cancellationToken);
             return Ok(result);
         }
+
+        [HttpPatch("settings/radius-db")]
+        public async Task<IActionResult> UpdateRadiusDb([FromBody] UpdateRadiusDbSettingsRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _platformSettings.UpdateRadiusDbAsync(request, cancellationToken);
+            return Ok(result);
+        }
     }
 }

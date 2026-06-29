@@ -13,5 +13,6 @@ namespace AuraConnect.Application.DTOs.Tenant
         public string Name { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public PortalRoutingMode PortalRoutingMode { get; set; } = PortalRoutingMode.PerSite;
+        public string? SuccessRedirectUrl { get; set; }
     }
 }

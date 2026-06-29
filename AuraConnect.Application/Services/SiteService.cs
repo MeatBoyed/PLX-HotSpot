@@ -84,6 +84,7 @@ namespace AuraConnect.Application.Services
 
             // 3. Create entity
             var site = new Site(tenantId, request.Ssid, request.Name, request.Domain);
+            site.SetSuccessRedirectUrl(request.SuccessRedirectUrl);
             site.SetSortOrder(request.SortOrder);
 
             // 4. Save
@@ -115,9 +116,11 @@ namespace AuraConnect.Application.Services
             site.SetSsid(request.Ssid);
             site.SetName(request.Name);
             site.SetDomain(request.Domain);
+            site.SetSuccessRedirectUrl(request.SuccessRedirectUrl);
             site.SetSortOrder(request.SortOrder);
             if (request.AuthMethods != null) site.SetAuthMethods(request.AuthMethods);
             if (request.MarketingOptIn.HasValue) site.SetMarketingOptIn(request.MarketingOptIn.Value);
+            if (request.RadiusCalledStationIds != null) site.SetRadiusCalledStationIds(request.RadiusCalledStationIds);
 
             // 4. Save
             await _siteRepository.UpdateAsync(site, cancellationToken);
@@ -201,10 +204,12 @@ namespace AuraConnect.Application.Services
                 Ssid = site.Ssid,
                 Name = site.Name,
                 Domain = site.Domain,
+                SuccessRedirectUrl = site.SuccessRedirectUrl,
                 Status = site.Status,
                 SortOrder = site.SortOrder,
                 AuthMethods = site.AuthMethods,
                 MarketingOptIn = site.MarketingOptIn,
+                RadiusCalledStationIds = site.RadiusCalledStationIds,
                 CreatedAt = site.CreatedAt,
                 UpdatedAt = site.UpdatedAt,
                 PackageCount = site.Packages?.Count ?? 0,

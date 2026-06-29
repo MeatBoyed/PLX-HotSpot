@@ -16,10 +16,12 @@ namespace AuraConnect.Application.DTOs.Site
         public string Ssid { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Domain { get; set; }
+        public string? SuccessRedirectUrl { get; set; }
         public SiteStatus Status { get; set; }
         public int SortOrder { get; set; }
         public string[] AuthMethods { get; set; } = [];
         public bool MarketingOptIn { get; set; }
+        public string[] RadiusCalledStationIds { get; set; } = [];
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

@@ -41,6 +41,10 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasColumnName("domain")
                 .HasMaxLength(255);
 
+            builder.Property(s => s.SuccessRedirectUrl)
+                .HasColumnName("success_redirect_url")
+                .HasMaxLength(2048);
+
             builder.Property(s => s.Status)
                 .HasColumnName("status")
                 .HasConversion<int>()
@@ -53,6 +57,11 @@ namespace AuraConnect.Infrastructure.Data.Configurations
             builder.Property(s => s.AuthMethods)
                 .HasColumnName("auth_methods")
                 .HasColumnType("text[]");
+
+            builder.Property(s => s.RadiusCalledStationIds)
+                .HasColumnName("radius_called_station_ids")
+                .HasColumnType("text[]")
+                .HasDefaultValueSql("'{}'");
 
             builder.Property(s => s.MarketingOptIn)
                 .HasColumnName("marketing_opt_in")

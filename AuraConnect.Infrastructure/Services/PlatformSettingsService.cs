@@ -49,6 +49,19 @@ namespace AuraConnect.Infrastructure.Services
             return MapToResponse(settings);
         }
 
+        public async Task<PlatformSettingsResponse> UpdateRadiusDbAsync(UpdateRadiusDbSettingsRequest request, CancellationToken cancellationToken = default)
+        {
+            var settings = await _repo.GetAsync(cancellationToken) ?? PlatformSettings.Create();
+            settings.SetRadiusDbConfig(request.Host, request.Port, request.DatabaseName, request.Username, request.Password);
+
+            await _repo.UpsertAsync(settings, cancellationToken);
+            await _repo.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("RADIUS DB settings updated — host {Host}, port {Port}, database {Database}, username {Username}",
+                request.Host, request.Port, request.DatabaseName, request.Username);
+            return MapToResponse(settings);
+        }
+
         private static PlatformSettingsResponse MapToResponse(PlatformSettings? s) => new()
         {
             IsPayFastConfigured = s?.IsPayFastConfigured ?? false,
@@ -60,6 +73,12 @@ namespace AuraConnect.Infrastructure.Services
             MikroTikApiHost = s?.MikroTikApiHost,
             MikroTikUsername = s?.MikroTikUsername,
             IsMikroTikPasswordSet = !string.IsNullOrWhiteSpace(s?.MikroTikPassword),
+            IsRadiusDbConfigured = s?.IsRadiusDbConfigured ?? false,
+            RadiusDbHost = s?.RadiusDbHost,
+            RadiusDbPort = s?.RadiusDbPort,
+            RadiusDbName = s?.RadiusDbName,
+            RadiusDbUsername = s?.RadiusDbUsername,
+            IsRadiusDbPasswordSet = !string.IsNullOrWhiteSpace(s?.RadiusDbPassword),
             UpdatedAt = s?.UpdatedAt
         };
     }

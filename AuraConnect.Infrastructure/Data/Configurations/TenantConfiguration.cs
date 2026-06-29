@@ -35,6 +35,10 @@ namespace AuraConnect.Infrastructure.Data.Configurations
                 .HasConversion<int>()
                 .HasDefaultValue(PortalRoutingMode.PerSite);
 
+            builder.Property(t => t.SuccessRedirectUrl)
+                .HasColumnName("success_redirect_url")
+                .HasMaxLength(2048);
+
             builder.Property(t => t.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

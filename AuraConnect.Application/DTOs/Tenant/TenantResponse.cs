@@ -14,6 +14,7 @@ namespace AuraConnect.Application.DTOs.Tenant
         public string Name { get; set; } = string.Empty;    // "Joburg Theatre"
         public string Slug { get; set; } = string.Empty;    // "joburg-theatre"
         public PortalRoutingMode PortalRoutingMode { get; set; }
+        public string? SuccessRedirectUrl { get; set; }
         public DateTime CreatedAt { get; set; }             // When it was created
         public DateTime UpdatedAt { get; set; }             // Last modified
     }

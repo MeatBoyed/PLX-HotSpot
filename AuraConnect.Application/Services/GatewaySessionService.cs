@@ -100,9 +100,20 @@ namespace AuraConnect.Application.Services
                 "Gateway login-result recorded | sessionId={SessionId} mac={Mac} siteId={SiteId} outcome={Outcome} error={Error} errorOriginal={ErrorOriginal}",
                 gatewaySessionEvent.Id, request.Mac, gatewaySessionEvent.SiteId, outcome, request.Error, request.ErrorOriginal);
 
-            var statusUrl = BuildPortalUrl(gatewaySessionEvent.Site, "splash") + $"?status={(outcome == GatewayLoginOutcome.Success ? "success" : "failed")}";
-            if (outcome == GatewayLoginOutcome.Failed && !string.IsNullOrWhiteSpace(request.Error))
-                statusUrl += $"&reason={Uri.EscapeDataString(request.Error)}";
+            string statusUrl;
+            if (outcome == GatewayLoginOutcome.Success)
+            {
+                var site = gatewaySessionEvent.Site;
+                // Site's own override wins, then the tenant-wide default, then the existing splash-page behavior.
+                var baseUrl = site.SuccessRedirectUrl ?? site.Tenant.SuccessRedirectUrl ?? BuildPortalUrl(site, "splash");
+                statusUrl = AppendQueryParam(baseUrl, "status", "success");
+            }
+            else
+            {
+                statusUrl = AppendQueryParam(BuildPortalUrl(gatewaySessionEvent.Site, "splash"), "status", "failed");
+                if (!string.IsNullOrWhiteSpace(request.Error))
+                    statusUrl = AppendQueryParam(statusUrl, "reason", request.Error);
+            }
 
             return statusUrl;
         }
@@ -128,6 +139,10 @@ namespace AuraConnect.Application.Services
 
         private static string BuildPortalUrl(Site site, string path) =>
             $"https://{site.Domain}/{Uri.EscapeDataString(site.Ssid)}/{path}";
+
+        // Admin-supplied override URLs may already carry a query string, so this can't assume "?" is safe.
+        private static string AppendQueryParam(string url, string key, string value) =>
+            url + (url.Contains('?') ? '&' : '?') + $"{key}={Uri.EscapeDataString(value)}";
 
         private static GatewaySessionEventResponse MapToResponse(GatewaySessionEvent g) => new()
         {
