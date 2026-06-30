@@ -20,6 +20,7 @@ function toSite(r: ApiSite): Site {
     sortOrder: r.sortOrder ?? undefined,
     status: STATUS_MAP[r.status] ?? 'active',
     marketingOptIn: r.marketingOptIn ?? false,
+    radiusCalledStationIds: r.radiusCalledStationIds ?? [],
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }
@@ -55,11 +56,12 @@ export const siteService = {
     // Only include keys that were explicitly provided — avoids overwriting
     // unchanged fields with a partial update call.
     const body: Parameters<typeof sitesApi.update>[1] = {}
-    if (input.name !== undefined)           body.name           = input.name
-    if (input.ssid !== undefined)           body.ssid           = input.ssid
-    if (input.domain !== undefined)         body.domain         = input.domain
-    if (input.sortOrder !== undefined)      body.sortOrder      = input.sortOrder
-    if (input.marketingOptIn !== undefined) body.marketingOptIn = input.marketingOptIn
+    if (input.name !== undefined)                    body.name                    = input.name
+    if (input.ssid !== undefined)                    body.ssid                    = input.ssid
+    if (input.domain !== undefined)                  body.domain                  = input.domain
+    if (input.sortOrder !== undefined)               body.sortOrder               = input.sortOrder
+    if (input.marketingOptIn !== undefined)          body.marketingOptIn          = input.marketingOptIn
+    if (input.radiusCalledStationIds !== undefined)  body.radiusCalledStationIds  = input.radiusCalledStationIds
 
     // PUT endpoint returns 200 with no body — just await; no toSite() needed.
     await sitesApi.update(id, body)

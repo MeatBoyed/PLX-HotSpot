@@ -27,6 +27,7 @@ export interface ApiSite {
   status: number
   authMethods?: string[] | null
   marketingOptIn?: boolean | null
+  radiusCalledStationIds?: string[] | null
   createdAt: string
   updatedAt: string
 }

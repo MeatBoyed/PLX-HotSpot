@@ -15,11 +15,12 @@ export async function updateSiteAction(id: string, input: UpdateSiteInput) {
   if (!site) throw new Error('Site not found')
 
   const merged: UpdateSiteInput = {
-    name:           input.name           ?? site.name,
-    ssid:           input.ssid           ?? site.ssid,
-    domain:         input.domain         ?? site.domain,
-    sortOrder:      input.sortOrder      ?? site.sortOrder ?? 0,
-    marketingOptIn: input.marketingOptIn ?? site.marketingOptIn,
+    name:                   input.name                   ?? site.name,
+    ssid:                   input.ssid                   ?? site.ssid,
+    domain:                 input.domain                 ?? site.domain,
+    sortOrder:              input.sortOrder              ?? site.sortOrder ?? 0,
+    marketingOptIn:         input.marketingOptIn         ?? site.marketingOptIn,
+    radiusCalledStationIds: input.radiusCalledStationIds ?? site.radiusCalledStationIds,
   }
 
   logger.info('sites.actions', `updateSiteAction ${id}`, {

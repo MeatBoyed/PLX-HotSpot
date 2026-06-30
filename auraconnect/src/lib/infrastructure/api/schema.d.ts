@@ -608,6 +608,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/portal/usage/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MyUsageResponse"];
+                        "application/json": components["schemas"]["MyUsageResponse"];
+                        "text/json": components["schemas"]["MyUsageResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/portal/wallet/balance": {
         parameters: {
             query?: never;
@@ -1118,6 +1169,229 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/metrics/usage-trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    siteId?: string;
+                    tenantId?: string;
+                    from?: string;
+                    to?: string;
+                    granularity?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics/kpi-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    siteId?: string;
+                    tenantId?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics/site-leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    metric?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics/active-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    siteId?: string;
+                    tenantId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics/login-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    siteId?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics/unattributed-stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/sites/{siteId}/mikrotik/status": {
         parameters: {
             query?: never;
@@ -1553,6 +1827,45 @@ export interface paths {
                     "application/json": components["schemas"]["UpdateMikroTikSettingsRequest"];
                     "text/json": components["schemas"]["UpdateMikroTikSettingsRequest"];
                     "application/*+json": components["schemas"]["UpdateMikroTikSettingsRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/admin/platform/settings/radius-db": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateRadiusDbSettingsRequest"];
+                    "text/json": components["schemas"]["UpdateRadiusDbSettingsRequest"];
+                    "application/*+json": components["schemas"]["UpdateRadiusDbSettingsRequest"];
                 };
             };
             responses: {
@@ -3137,6 +3450,7 @@ export interface components {
             ssid?: string;
             name?: string;
             domain?: null | string;
+            successRedirectUrl?: null | string;
             /** Format: int32 */
             sortOrder?: number | string;
         };
@@ -3144,6 +3458,7 @@ export interface components {
             name?: string;
             slug?: string;
             portalRoutingMode?: components["schemas"]["PortalRoutingMode"];
+            successRedirectUrl?: null | string;
         };
         GatewayConfigResponse: {
             loginUrl?: null | string;
@@ -3281,6 +3596,21 @@ export interface components {
             interface?: null | string;
             addressPool?: null | string;
             idleTimeout?: null | string;
+        };
+        MyUsagePoint: {
+            /** Format: date */
+            date?: string;
+            /** Format: int64 */
+            bytesIn?: number | string;
+            /** Format: int64 */
+            bytesOut?: number | string;
+        };
+        MyUsageResponse: {
+            points?: components["schemas"]["MyUsagePoint"][];
+            /** Format: int64 */
+            packageDataCapBytes?: null | number | string;
+            /** Format: int64 */
+            packageDataUsedBytes?: null | number | string;
         };
         PackageCredentialsResponse: {
             rdUsername?: string;
@@ -3650,14 +3980,24 @@ export interface components {
             radiusDeskRealmId?: null | string;
             radiusDeskCloudId?: null | string;
         };
+        UpdateRadiusDbSettingsRequest: {
+            host?: string;
+            /** Format: int32 */
+            port?: number | string;
+            databaseName?: string;
+            username?: string;
+            password?: string;
+        };
         UpdateSiteRequest: {
             ssid?: string;
             name?: string;
             domain?: null | string;
+            successRedirectUrl?: null | string;
             /** Format: int32 */
             sortOrder?: number | string;
             authMethods?: null | string[];
             marketingOptIn?: null | boolean;
+            radiusCalledStationIds?: null | string[];
         };
         UpdateSiteStatusRequest: {
             status?: components["schemas"]["SiteStatus"];
@@ -3666,6 +4006,7 @@ export interface components {
             name?: string;
             slug?: string;
             portalRoutingMode?: components["schemas"]["PortalRoutingMode"];
+            successRedirectUrl?: null | string;
         };
         UserPackageResponse: {
             id?: string;

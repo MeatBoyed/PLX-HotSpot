@@ -9,6 +9,7 @@ export interface Site {
   sortOrder?: number
   status: SiteStatus
   marketingOptIn: boolean
+  radiusCalledStationIds: string[]
   createdAt: string
   updatedAt: string
 }
@@ -27,4 +28,5 @@ export interface UpdateSiteInput {
   domain?: string
   sortOrder?: number
   marketingOptIn?: boolean | null
+  radiusCalledStationIds?: string[] | null
 }

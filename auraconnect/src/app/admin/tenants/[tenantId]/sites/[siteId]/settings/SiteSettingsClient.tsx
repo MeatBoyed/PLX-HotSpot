@@ -1,18 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Settings2 } from 'lucide-react'
+import { Settings2, X, Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { updateSiteAction } from '@/lib/actions/sites.actions'
 import type { Site } from '@/lib/types/site.types'
 
@@ -22,6 +23,7 @@ const schema = z.object({
   domain: z.string().min(1, 'Domain is required'),
   sortOrder: z.number().min(0),
   marketingOptIn: z.boolean(),
+  radiusCalledStationIds: z.array(z.string()),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -33,6 +35,7 @@ interface Props {
 export function SiteSettingsClient({ site }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const tagInputRef = useRef<HTMLInputElement>(null)
 
   const { register, handleSubmit, control, watch, setValue, formState: { errors, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -42,8 +45,26 @@ export function SiteSettingsClient({ site }: Props) {
       domain: site.domain,
       sortOrder: site.sortOrder ?? 0,
       marketingOptIn: site.marketingOptIn,
+      radiusCalledStationIds: site.radiusCalledStationIds,
     },
   })
+
+  const stationIds = watch('radiusCalledStationIds')
+
+  function addStationId() {
+    const val = tagInputRef.current?.value.trim()
+    if (!val || stationIds.includes(val)) return
+    setValue('radiusCalledStationIds', [...stationIds, val], { shouldDirty: true })
+    if (tagInputRef.current) tagInputRef.current.value = ''
+  }
+
+  function removeStationId(id: string) {
+    setValue('radiusCalledStationIds', stationIds.filter((s) => s !== id), { shouldDirty: true })
+  }
+
+  function onTagKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') { e.preventDefault(); addStationId() }
+  }
 
   const ssid = watch('ssid')
   const marketingOptIn = watch('marketingOptIn')
@@ -57,6 +78,7 @@ export function SiteSettingsClient({ site }: Props) {
         domain: values.domain,
         sortOrder: values.sortOrder,
         marketingOptIn: values.marketingOptIn,
+        radiusCalledStationIds: values.radiusCalledStationIds,
       })
       toast.success('Site settings saved')
       router.refresh()
@@ -114,6 +136,37 @@ export function SiteSettingsClient({ site }: Props) {
               <Input {...register('domain')} placeholder="e.g. portal.venue.co.za" className="font-mono" />
               {errors.domain && <p className="text-xs text-destructive">{errors.domain.message}</p>}
               <p className="text-xs text-muted-foreground">Required — the MikroTik gateway redirect can&apos;t function without it</p>
+            </div>
+
+            {/* RADIUS Called Station IDs */}
+            <div className="space-y-2">
+              <Label>RADIUS Called Station IDs</Label>
+              <div className="flex gap-2">
+                <Input
+                  ref={tagInputRef}
+                  placeholder="e.g. Cosmo Taxi Rank"
+                  className="font-mono"
+                  onKeyDown={onTagKeyDown}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={addStationId}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {stationIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {stationIds.map((id) => (
+                    <Badge key={id} variant="secondary" className="gap-1 font-mono text-xs">
+                      {id}
+                      <button type="button" onClick={() => removeStationId(id)} className="ml-0.5 hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                RADIUS <code className="text-[11px] bg-muted px-1 rounded">calledstationid</code> aliases that identify this site in accounting data. Add one per field and press Enter.
+              </p>
             </div>
 
             {/* Sort Order */}

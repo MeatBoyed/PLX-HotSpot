@@ -3,6 +3,7 @@ import type { components } from './schema'
 
 type UpdatePayFastBody = components['schemas']['UpdatePayFastSettingsRequest']
 type UpdateMikroTikBody = components['schemas']['UpdateMikroTikSettingsRequest']
+type UpdateRadiusDbBody = components['schemas']['UpdateRadiusDbSettingsRequest']
 
 export interface PlatformSettings {
   isPayFastConfigured: boolean
@@ -14,6 +15,12 @@ export interface PlatformSettings {
   mikroTikApiHost: string | null
   mikroTikUsername: string | null
   isMikroTikPasswordSet: boolean
+  isRadiusDbConfigured: boolean
+  radiusDbHost: string | null
+  radiusDbPort: number | null
+  radiusDbName: string | null
+  radiusDbUsername: string | null
+  isRadiusDbPasswordSet: boolean
   updatedAt: string | null
 }
 
@@ -32,6 +39,12 @@ export const platformApi = {
       mikroTikApiHost: data.mikroTikApiHost ?? null,
       mikroTikUsername: data.mikroTikUsername ?? null,
       isMikroTikPasswordSet: data.isMikroTikPasswordSet ?? false,
+      isRadiusDbConfigured: data.isRadiusDbConfigured ?? false,
+      radiusDbHost: data.radiusDbHost ?? null,
+      radiusDbPort: data.radiusDbPort ?? null,
+      radiusDbName: data.radiusDbName ?? null,
+      radiusDbUsername: data.radiusDbUsername ?? null,
+      isRadiusDbPasswordSet: data.isRadiusDbPasswordSet ?? false,
       updatedAt: data.updatedAt ?? null,
     }
   },
@@ -49,6 +62,14 @@ export const platformApi = {
     if (!response.ok) {
       const text = await response.text().catch(() => '')
       throw new Error(`Failed to update MikroTik settings: ${response.status} — ${text}`)
+    }
+  },
+
+  async updateRadiusDbSettings(body: UpdateRadiusDbBody): Promise<void> {
+    const { response } = await apiClient.PATCH('/api/admin/platform/settings/radius-db', { body })
+    if (!response.ok) {
+      const text = await response.text().catch(() => '')
+      throw new Error(`Failed to update RADIUS DB settings: ${response.status} — ${text}`)
     }
   },
 }

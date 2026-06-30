@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { SecretInput } from '@/components/common/SecretInput'
 import { MikroTikSettingsCard } from './MikroTikSettingsCard'
+import { RadiusDbSettingsCard } from './RadiusDbSettingsCard'
 import { updatePayFastSettingsAction } from '@/lib/actions/platform.actions'
 import type { PlatformSettings } from '@/lib/infrastructure/api/platform.api'
 import { formatDateTime } from '@/lib/utils/formatters'
@@ -142,6 +143,7 @@ export function SettingsClient({ settings }: Props) {
       </Card>
 
       <MikroTikSettingsCard settings={settings} />
+      <RadiusDbSettingsCard settings={settings} />
     </div>
   )
 }
