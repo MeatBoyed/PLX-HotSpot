@@ -179,6 +179,13 @@ What we explicitly are not doing this slice, and where it picks up.
   MikroTik emulation tier, seeding fixtures, wiring the API's `RadiusConfig`/
   MikroTik settings to point at local emulators) and shouldn't gate the structural
   move. This restructure only needs to leave room for it in the root compose.
+- **Root dev orchestration — its own follow-up slice (moved 2026-07-01).** The "one
+  command brings up API + Postgres(×2 DB) + all clients" DoD item is promoted out of
+  this slice into a dedicated **dev-orchestration slice** (user call): docker-compose
+  (Postgres 2-DB + `dotnet watch` API) + root `concurrently` dev script + `.env`
+  layout. It also resolves legacy's env-gated build (supplies `DATABASE_URL`) and the
+  legacy compose service. This restructure only needed to leave room for it; the build
+  is substantial enough to warrant its own slice. Design captured in Decisions.
 - **Extracting shared packages** (`packages/api-types`, `ui`, `config`). Structure
   leaves room (`clients/packages/`) but extraction is a follow-up slice.
 - **Migrating live sites off the legacy system.** Not this slice — legacy stays
@@ -550,6 +557,20 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
     root-vs-app scope split + retrospective legacy records.
   - Still to carry from the bootstrap line (later): `docs/capabilities/*` +
     `update-capabilities`/`capability-reference` skills; `plan-slice` skill.
+
+- **Increment 15 — housekeeping (2026-07-01, in progress, uncommitted).** Dev
+  orchestration split to its own slice (see Deferred); remainder used for cleanup:
+  - **Legacy README banner** — loud "⚠️ LEGACY — maintenance track only" block
+    prepended to `clients/legacy/captive-portal-and-admin/README.md` (DoD: legacy
+    loudly marked), linking ADR 0001/0002.
+  - **Removed 4 stale `package-lock.json`** (admin, captive-portal, monitor, legacy) —
+    superseded by the root `yarn.lock` (ADR 0002 follow-on); prevents mixed-tooling
+    confusion.
+  - **Root README rewritten** — was the stale v3 "PLX-HotSpot" Docker blurb; now a
+    monorepo map (layout, `@auraconnect/*` names, Yarn Berry usage, pointer to the
+    dev-orchestration slice, ADR links).
+  - **monitor `react-is`** added via `yarn add` (exact-pinned by policy) to clear the
+    `YN0002` recharts peer warning.
 
 ## Retrospective
 

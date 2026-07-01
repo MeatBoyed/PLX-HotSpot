@@ -1,3 +1,22 @@
+> # ⚠️ LEGACY — maintenance track only
+>
+> This is the **original AuraConnect monolith** (captive portal **+** admin + Prisma +
+> Clerk + direct RadiusDesk/MikroTik/PayFast integrations). It is still deployed to
+> live sites, so it is a **first-class, buildable, deployable** workspace — but it is
+> **frozen for new feature work**.
+>
+> - **Bugfixes / security only.** No new shared-package coupling; it keeps its own
+>   Prisma schema, its own Postgres, and its own dependency tree (isolated via
+>   `nmHoistingLimits: workspaces`, see [ADR 0002](../../../docs/adr/0002-package-manager-and-dependency-policy.md)).
+> - New development happens in the split stack: `clients/current/captive-portal`
+>   (thin portal) + `clients/current/admin` (admin) against the ASP.NET API in `api/`.
+> - Cutover / decommission is a separate initiative — until then, **keep it green.**
+>
+> See [ADR 0001](../../../docs/adr/0001-polyglot-monorepo-layout.md) for how it fits
+> the monorepo.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Runtime vs Build-time environment variables
