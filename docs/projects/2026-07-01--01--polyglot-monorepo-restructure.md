@@ -155,9 +155,16 @@ Confirmed with user at planning:
   resolve full history (back to 2025-10-04, original authors) at
   `clients/portal-legacy/`.
 
-To be recorded as ADRs (cross-cutting — link here once written):
-- ADR: polyglot monorepo layout (`api/` + `clients/`).
-- ADR: npm → yarn workspaces + revised pinning/supply-chain policy.
+Recorded as ADRs (cross-cutting — written I14, 2026-07-01):
+- [ADR 0001](../adr/0001-polyglot-monorepo-layout.md) — polyglot monorepo layout
+  (`api/` + `clients/<era>/<app>`).
+- [ADR 0002](../adr/0002-package-manager-and-dependency-policy.md) — Yarn Berry +
+  exact pinning, install-script gating, per-workspace isolation (fresh slate; the
+  old npm pinning ADR 0001 from the bootstrap line was **not** carried — decided on
+  incomplete info, per user).
+- [ADR 0003](../adr/0003-repository-history-import-method.md) — history import:
+  subtree for `api/`, filter-repo for legacy.
+- Dev-orchestration ADR deferred until the root dev tooling is actually built.
 
 ## Deferred / pushed forward
 
@@ -525,6 +532,24 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
     (no-regression check).
   - **Build tally after I13: 3/4 green** — captive-portal ✅, monitor ✅, admin ✅;
     legacy ❌ env-gated only (needs `DATABASE_URL` at build; structure fine).
+
+- **Increment 14 — docs/ADR setup + fresh-slate ADRs (2026-07-01, done, uncommitted).**
+  DoD "carry the bootstrap DX tooling onto the new line." Fresh slate per user — the
+  bootstrap line's ADR 0001 (npm pinning) was **not** carried (decided on incomplete
+  info). Created:
+  - `docs/adr/{README.md, template.md}` — monorepo-adapted. Numbering scheme with
+    **room for legacy/app records**: root sequence `0001+` for cross-cutting; each app
+    (incl. legacy) owns its own `docs/adr/` sequence, created lazily, path-scoped so
+    back-filling legacy history never renumbers root ADRs. New Status value
+    `Accepted (Retrospective)` for back-documented decisions. Template gains a `Scope:`
+    line.
+  - **ADR 0001** polyglot monorepo layout; **ADR 0002** Yarn Berry + pinning/script-
+    gating/isolation; **ADR 0003** history-import method (subtree/filter-repo). All
+    Accepted, linked from this slice doc's Decisions.
+  - Ported **write-adr skill** to `.claude/skills/write-adr/`, adapted for the
+    root-vs-app scope split + retrospective legacy records.
+  - Still to carry from the bootstrap line (later): `docs/capabilities/*` +
+    `update-capabilities`/`capability-reference` skills; `plan-slice` skill.
 
 ## Retrospective
 
