@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# yarn berry (node-modules linker: keep releases, ignore install state)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# next / build output
+.next/
+out/
+dist/
+build/
+
+# env
+.env
+.env.local
+.env*.local
+
+# misc
+*.log
+.DS_Store

@@ -1,5 +1,5 @@
 {
-  "name": "monitor-auraconnect.co.za",
+  "name": "@auraconnect/monitor",
   "version": "0.1.0",
   "private": true,
   "scripts": {

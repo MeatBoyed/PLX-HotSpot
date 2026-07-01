@@ -197,13 +197,14 @@ Still TBD as the slice progresses.
   `docker compose` for API/infra (see Decisions). Turborepo/Nx deferred — revisit
   only if build-graph caching becomes worth it. API participates via compose, not the
   node task graph.
-- **One root lockfile vs per-app:** yarn workspaces imply one root `yarn.lock` —
-  confirm acceptable given the "commit lock with every change / review the diff"
-  discipline from ADR 0001.
+- ~~**One root lockfile vs per-app:**~~ **RESOLVED (I8, 2026-07-01)** → one root
+  `yarn.lock` (1066 entries) resolves all 4 clients cleanly in 36s. Acceptable;
+  keep the "commit lock with every change / review the diff" discipline.
 - **`.env` / secrets layout** across api + 3 clients + shared dev compose — one root
   `.env`, per-app, or layered?
-- **Legacy dep reconciliation:** legacy is npm/Prisma 7/Clerk-admin; does it install
-  cleanly under the shared yarn root, or does it need workspace `nohoist`/isolation?
+- ~~**Legacy dep reconciliation:**~~ **RESOLVED (I8, 2026-07-01)** → legacy
+  (Prisma 7 / Clerk) installs cleanly under the shared Berry root, **no `nohoist`/
+  isolation needed**. Coexists with the thin stack in one root `node_modules`.
 - **Does `next-captive-portal-rd` keep its name** as `clients/portal`, and does the
   admin app rename from `auraconnect` → `admin` (package `name` field + imports)?
 - **MikroTik emulation tier — DECIDED** (two-tier stub + CHR, one e2e suite against
@@ -403,6 +404,52 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
   - **All code now in one tree:** `api/` + `clients/current/{admin,captive-portal,
     monitor}` + `clients/legacy/captive-portal-and-admin/` + `docs/` + `README.md`.
     Legacy package `name` still `next-captive-portal-rd` (deferred rename).
+
+- **Increment 8 — yarn-root feasibility probe (2026-07-01, BLOCKED, uncommitted).**
+  Scaffolded root `package.json` (Berry `yarn@4.13.0`, `private`, workspaces
+  `clients/current/*` + `clients/legacy/*`), `.yarnrc.yml` (`nodeLinker:
+  node-modules`), root `.gitignore`. Env: node 24.15, **yarn 4.13 (Berry) already on
+  PATH**, all 4 apps npm (`package-lock.json`), all **Next 16** (16.1.6–16.2.7,
+  minimal skew).
+  - **BLOCKER (real, expected): `Duplicate workspace name next-captive-portal-rd`.**
+    Both `clients/current/captive-portal` AND `clients/legacy/captive-portal-and-admin`
+    still carry package `name: "next-captive-portal-rd"` (folders were `git mv`'d,
+    package `name` fields were deliberately left untouched). Yarn workspaces require
+    unique names → `yarn install` won't run until renamed. **This forces the deferred
+    package-name rename — it is no longer optional.** Next increment.
+  - The 4 stale `package-lock.json` files coexist harmlessly for now; their removal
+    belongs to the npm→yarn ADR increment (supersede ADR 0001's "never delete
+    package-lock.json" for the yarn world).
+- **Increment 9 — port supply-chain-guard skill (2026-07-01, done, uncommitted).**
+  Serves DoD "carry the bootstrap DX tooling onto the new line, re-pointed." Copied
+  from `~/lab/auraconnect-bootstrap/.claude/skills/supply-chain-guard/` to the
+  monorepo `.claude/skills/supply-chain-guard/SKILL.md`, **adapted npm→Yarn Berry**:
+  single root `yarn.lock` (not per-app), `yarn install --immutable` (≈ `npm ci`),
+  exact pinning via `.yarnrc.yml` `defaultSemverRangePrefix: ""` (≈ `save-exact`),
+  lifecycle-script gating (`enableScripts: false` + `dependenciesMeta.built`
+  allowlist), `checksumBehavior: throw`, `yarn npm audit`. Scoped to Node clients;
+  noted `api/` NuGet as a separate axis. **Enforcement in `.yarnrc.yml` deferred** to
+  its own increment (needs a build-script allowlist so Prisma/Next still install).
+  Other bootstrap skills to consider porting later: `plan-slice`, `write-adr`,
+  `capability-reference`, `update-capabilities` (in the same source dir).
+
+- **Increment 10 — package-name rename (2026-07-01, done, uncommitted).** Unblocks
+  I8's duplicate-name error. Scoped `@auraconnect/*` names, unique + greppable:
+  `next-captive-portal-rd` → `@auraconnect/captive-portal`; `auraconnect` →
+  `@auraconnect/admin`; `monitor-auraconnect.co.za` → `@auraconnect/monitor`;
+  legacy `next-captive-portal-rd` → `@auraconnect/captive-portal-and-admin-legacy`.
+  `name` field only — no cross-workspace deps referenced the old names, so no import
+  rewrites. `yarn workspaces list` = 4 unique + root. (Closes the deferred rename.)
+- **Increment 8 COMPLETE — yarn-root feasibility: PASS (2026-07-01, uncommitted).**
+  `yarn install` succeeded, 36s, exit 0. **One root `yarn.lock` (1066 entries), no
+  conflicts, no isolation.** Warnings benign: `YN0002` monitor missing `react-is`
+  peer (recharts) — add it; `YN0086` minor peer-meet notices.
+  - **Supply-chain allowlist surface identified** (`YN0007` "must be built"): the
+    only packages running build scripts are `prisma` + `@prisma/engines`, `sharp`,
+    `esbuild`, `@clerk/shared`, `core-js`, `unrs-resolver`. These are the exact
+    entries for a future `enableScripts: false` + `dependenciesMeta.built` allowlist
+    (supply-chain hardening increment). This install ran with scripts enabled
+    (default) — hardening not yet applied.
 
 ## Retrospective
 

@@ -1,0 +1,9 @@
+{
+  "name": "auraconnect-monorepo",
+  "private": true,
+  "packageManager": "yarn@4.13.0",
+  "workspaces": [
+    "clients/current/*",
+    "clients/legacy/*"
+  ]
+}
