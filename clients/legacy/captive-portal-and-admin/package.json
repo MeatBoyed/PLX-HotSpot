@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "generate": "prisma generate",
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "prebuild:local": "npx openapi-zod-client http://localhost:3000/api/spec -o ./src/lib/hotspotAPI.ts --api-client-name=hotspotAPI --export-schemas=true --export-types=true --base-url=http://localhost:3000 --strict-objects"

@@ -472,6 +472,60 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
   - Minor follow-up still open: `YN0002` `@auraconnect/monitor` missing `react-is`
     peer (recharts) — add `react-is` to monitor.
 
+- **Commit `5912ea2` (2026-07-01, not pushed).** I11 hardening, own diff.
+- **Increment 12 — verify apps build (2026-07-01, PARTIAL: 2/4 green).** `next build`
+  per workspace under the hardened monorepo:
+  - ✅ `@auraconnect/captive-portal`, ✅ `@auraconnect/monitor`.
+  - ❌ `@auraconnect/captive-portal-and-admin-legacy`: `Module not found:
+    generated/prisma/client`. Cause: build = bare `next build`, no `prisma generate`;
+    Prisma 7 `prisma-client` generator (`output ../generated/prisma`) only emits when
+    generate runs. **App-local build-step gap, not a monorepo regression.** Fix:
+    add a `prebuild`/explicit `prisma generate` (prisma is script-allowlisted).
+  - ❌ `@auraconnect/admin`: TS error, `zodResolver` overload ambiguous. Admin
+    correctly resolves its own nested **zod 4.4.3** at runtime, but `@hookform/
+    resolvers@5` type-resolves against **both** a root-hoisted **zod 3.25.76**
+    (pulled by captive-portal + legacy, both `zod ^3.25.76`) and admin's zod 4 →
+    ambiguous overloads (`Zod3Type` vs `$ZodType`). **Restructure-induced** (hoist
+    put two zod majors in view; standalone admin saw only zod 4). Needs a hoisting/
+    isolation decision — candidates: `.yarnrc.yml nmHoistingLimits: workspaces`
+    (per-app isolation, honors declared versions, bigger node_modules), or unify all
+    apps on one zod major (breaking migration), or targeted `packageExtensions`.
+    This is a cross-cutting layout decision → belongs in the monorepo-layout ADR.
+  - Baseline gate note: 2 green = no-regression for those; the 2 failures are one
+    app-local gap + one hoist interaction. Neither is a blocker to the *structure*;
+    both are follow-up fixes tracked here.
+- **Docs/ADR structure decisions (2026-07-01, user-confirmed).** Root `docs/` =
+  monorepo-wide with its own `docs/adr/` sequence; per-app ADRs live in each app's
+  `docs/adr/` (**created lazily**, only when the first app-local ADR is written).
+  Split rule = plan-slice "route by reach": cross-cutting → root, single-app → app,
+  unsure → slice doc. **ADR 0001 (dependency-pinning) is rewritten in place** to the
+  Yarn Berry policy (no separate supersession file); new ADR 0002 = polyglot
+  monorepo layout. write-adr skill + docs/adr infra (README, template) to be carried
+  from the bootstrap line.
+
+- **Increment 13 — build fixes (2026-07-01, in progress, uncommitted).**
+  - **Legacy (step 1): CORRECTION.** First reported "exit 0" was wrong — that was a
+    shell wrapper's trailing `echo`, not yarn's code. Reality: `prisma generate`
+    prepended to legacy `build` (Berry doesn't auto-run pre/post scripts, so folded
+    into the command; added reusable `generate` script). That **fixed the Prisma gap**
+    — "Compiled successfully", client emitted at `generated/prisma/client.ts`. But
+    build then **failed** `Failed to collect page data for /api/pu-phonename/send-otp`
+    (no `BUILD_ID`): the route does top-level DB/env access and there's no
+    `DATABASE_URL`. **Env-gated build, not a structural regression** (standalone
+    legacy also needed env). Deferred to the `.env`-layout increment / dummy build env.
+  - **Hoisting (step 2): decision = isolate all** (user-confirmed). `.yarnrc.yml`
+    `nmHoistingLimits: workspaces` — every workspace resolves its own declared
+    external deps, no cross-app hoist. Rationale: legacy stays dep-isolated; current
+    apps keep independent versions until a shared-packages slice aligns them; internal
+    `@auraconnect/*` sharing is unaffected (workspace symlinks). Fixes the admin zod
+    3/4 type ambiguity by removing root-hoisted zod 3 from admin's resolution path.
+    **Result: admin builds ✅** (`INSTALL_EXIT=0`, `ADMIN_BUILD_EXIT=0`, `BUILD_ID`
+    present, 17/17 static pages). `yarn.lock` unchanged (isolation is linker-only).
+    zod 3/4 ambiguity resolved. captive-portal + monitor re-verified under isolation
+    (no-regression check).
+  - **Build tally after I13: 3/4 green** — captive-portal ✅, monitor ✅, admin ✅;
+    legacy ❌ env-gated only (needs `DATABASE_URL` at build; structure fine).
+
 ## Retrospective
 
 (Fill in at wrap-up.) What worked, what we'd do differently, what surprised us.
