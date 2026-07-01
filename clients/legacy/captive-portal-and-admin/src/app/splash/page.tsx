@@ -9,22 +9,22 @@ import type { BrandingConfig } from "@/lib/types";
 export default function SplashPage() {
     const { theme } = useTheme();
     const [checked, setChecked] = useState(false);
-    const [subVenues, setSubVenues] = useState<BrandingConfig[]>([]);
-    const [selectedVenue, setSelectedVenue] = useState<BrandingConfig | null>(null);
-    const [venueError, setVenueError] = useState(false);
+    // const [subVenues, setSubVenues] = useState<BrandingConfig[]>([]);
+    // const [selectedVenue, setSelectedVenue] = useState<BrandingConfig | null>(null);
+    // const [venueError, setVenueError] = useState(false);
 
-    useEffect(() => {
-        if (theme.ssid) getSubVenuesAction(theme.ssid).then(setSubVenues);
-    }, [theme.ssid]);
+    // useEffect(() => {
+    //     if (theme.ssid) getSubVenuesAction(theme.ssid).then(setSubVenues);
+    // }, [theme.ssid]);
 
-    const handleAccept = () => {
-        if (subVenues.length > 0 && !selectedVenue) {
-            setVenueError(true);
-            return;
-        }
-        const route = selectedVenue?.venueRoute || "/";
-        sessionStorage.setItem("post-connect-redirect", route);
-    };
+     const handleAccept = () => {
+         //if (subVenues.length > 0 && !selectedVenue) {
+         //    setVenueError(true);
+         //    return;
+         //}
+         //const route = selectedVenue?.venueRoute || "/";
+         sessionStorage.setItem("post-connect-redirect", "/");
+     };
 
     return (
         <div className="relative w-full h-screen overflow-hidden" style={{ maxWidth: '430px' }}>
@@ -105,7 +105,7 @@ export default function SplashPage() {
                 <form method="POST" action="/">
 
                     {/* Theatre selector — only shown when sub-venues exist */}
-                    {subVenues.length > 0 && (
+                    {/* {subVenues.length > 0 && (
                         <div className="mb-5">
                             <select
                                 value={selectedVenue?.ssid || ""}
@@ -128,7 +128,7 @@ export default function SplashPage() {
                                 </p>
                             )}
                         </div>
-                    )}
+                    )} */}
 
                     {/* Terms checkbox */}
                     <label className="flex items-start gap-3 mb-5 cursor-pointer">
@@ -164,7 +164,7 @@ export default function SplashPage() {
                     {/* Accept button */}
                     <button
                         type="submit"
-                        disabled={!checked || (subVenues.length > 0 && !selectedVenue)}
+                        disabled={!checked}
                         onClick={handleAccept}
                         className="relative w-full rounded-2xl text-base font-bold py-4 flex items-center justify-center gap-3 overflow-hidden transition-all duration-300"
                         style={{
@@ -172,12 +172,12 @@ export default function SplashPage() {
                             color: theme.buttonPrimaryText,
                             backdropFilter: 'blur(8px)',
                             border: '1px solid transparent',
-                            boxShadow: (checked && (subVenues.length === 0 || selectedVenue)) ? `0 8px 32px ${theme.buttonPrimary}66` : 'none',
-                            opacity: (checked && (subVenues.length === 0 || selectedVenue)) ? 1 : 0.45,
-                            cursor: (checked && (subVenues.length === 0 || selectedVenue)) ? 'pointer' : 'not-allowed',
+                            boxShadow: (checked) ? `0 8px 32px ${theme.buttonPrimary}66` : 'none',
+                            opacity: (checked) ? 1 : 0.45,
+                            cursor: (checked) ? 'pointer' : 'not-allowed',
                         }}
                     >
-                        {(checked && (subVenues.length === 0 || selectedVenue)) && (
+                        {(checked) && (
                             <div className="absolute inset-0 opacity-20"
                                 style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)', animation: 'shimmer 2s infinite' }}
                             />
