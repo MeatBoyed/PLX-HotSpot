@@ -1,0 +1,69 @@
+ehthumbs.db
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+
+# Production build
+build/
+dist/
+
+# Local-only environment files (excluded from build context)
+# Portal env files (.env.zandspruit, .env.kwamaimai, etc.) are intentionally NOT excluded —
+# the Dockerfile copies the file named by BUILD_ENV_FILE into the builder stage.
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Shared runtime secret should never be sent to build context
+docker/env/shared.runtime.secret
+docker/env/*.secret
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+
+# Coverage
+coverage
+*.lcov
+.nyc_output
+
+# Tooling caches
+.npm
+.eslintcache
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Scripts not needed in image context
+docker-run.sh
+
