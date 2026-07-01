@@ -1,8 +1,8 @@
 # Slice — Polyglot monorepo restructure (ASP.NET `api/` + yarn-workspace `clients/` on v3)
 
-**Status:** in-progress
+**Status:** done
 **Started:** 2026-07-01
-**Finished:** —
+**Finished:** 2026-07-01
 
 ## Plan reference
 
@@ -572,6 +572,52 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
   - **monitor `react-is`** added via `yarn add` (exact-pinned by policy) to clear the
     `YN0002` recharts peer warning.
 
+- **Increment 16 — port slice skills + wrap (2026-07-01, done, uncommitted).** Carried
+  `plan-slice` (SKILL + template, from the bootstrap copy) and `execute-slice` (SKILL,
+  from the global copy) into `.claude/skills/`. Monorepo now self-contains the DX
+  skill set: `plan-slice`, `execute-slice`, `write-adr`, `supply-chain-guard`. Slice
+  wrapped: Status → done.
+
+## Carried forward to follow-up slices
+
+- **Dev-orchestration slice** — root compose (Postgres ×2 DB + `dotnet watch` API) +
+  `concurrently` client dev + `.env` layout. Absorbs: legacy's env-gated build
+  (`DATABASE_URL`), the legacy compose service, and the `.env`/secrets open question.
+- **Shared-packages slice** — extract `clients/packages/{api-types,ui,config}`;
+  revisit hoisting so current apps share external deps (needs zod-major convergence).
+- **Local AAA emulation slice** — RadiusDesk + MikroTik (stub + CHR), design captured.
+- **Auth-reconciliation slice** — API JWT/Identity vs admin Clerk.
+- **Capabilities re-score** — via `update-capabilities` after the layout lands; the
+  bootstrap `docs/capabilities/*` data is stale for the split stack, deliberately not
+  carried.
+- **Wrap-up step (not mid-slice):** promote this branch to the new `main`; retire the
+  old `main`; remove the 4 clients' npm `package-lock.json` was done, but the
+  `auraconnect-api` remote retire + source-repo decommission is pending.
+
 ## Retrospective
 
-(Fill in at wrap-up.) What worked, what we'd do differently, what surprised us.
+**What worked**
+- Structure-first, no-commit exploration. Holding commits while naming/layout churned
+  kept git history clean through several reversals (the `captive-portal` rename was
+  applied then reverted mid-brainstorm with zero history cost).
+- The history-import spike paid off: subtree for `api/` and filter-repo for legacy both
+  behaved exactly as predicted — filter-repo's `git log <path>` = 208 vs subtree's 1.
+- The yarn feasibility probe caught the real integration risks early: the duplicate
+  workspace name and the zod 3/4 hoisting split both surfaced from one `yarn install`.
+- Supply-chain hardening fell out naturally — the install's "must be built" list *was*
+  the allowlist.
+
+**What we'd do differently**
+- Rename package `name` fields at relocation time, not later — the deferred rename
+  became a hard `yarn install` blocker (duplicate workspace name). Cheap up front.
+- Watch background-command exit codes: a wrapper's trailing `echo` masked a real legacy
+  build failure as "exit 0". Capture the tool's own exit into the log.
+
+**Surprises**
+- `v3`, not `main`, was the live line for the Next apps — and `main`, not the
+  `claude/*` branch, was live for the API. Both required checking before importing.
+- Per-workspace isolation (`nmHoistingLimits: workspaces`) fixed a *TypeScript* error
+  (ambiguous `zodResolver` overload) — a type-resolution symptom of a dependency-hoist
+  cause.
+- Berry gates install scripts by allowlist, not deny-list, and doesn't auto-run
+  pre/post scripts — both shaped how hardening and the legacy Prisma build were wired.
