@@ -1,0 +1,119 @@
+services:
+  # ── AuraConnect ────────────────────────────────────────────────────────────
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "0.0.0.0:5299:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=auraconnect_test;Username=local_dev;Password=KQP2Hqg16gqp5u
+      - AllowedDomainSuffix=.auraconnect.co.za
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: auraconnect_test
+      POSTGRES_USER: local_dev
+      POSTGRES_PASSWORD: KQP2Hqg16gqp5u
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U local_dev -d auraconnect_test" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Blnk Finance ───────────────────────────────────────────────────────────
+
+  # blnk-server:
+  #   image: jerryenebeli/blnk:0.10.2
+  #   restart: on-failure
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command:
+  #     - "blnk migrate up && blnk start"
+  #   ports:
+  #     - "5001:5001"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     typesense:
+  #       condition: service_started
+  #   volumes:
+  #     - ./blnk.json:/blnk.json
+
+  # blnk-worker:
+  #   image: jerryenebeli/blnk:0.10.2
+  #   restart: on-failure
+  #   entrypoint: ["blnk", "workers"]
+  #   depends_on:
+  #     - blnk-server
+  #   volumes:
+  #     - ./blnk.json:/blnk.json
+
+  # redis:
+  #   image: redis:7.2.4
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+
+  # typesense:
+  #   image: typesense/typesense:0.23.1
+  #   restart: unless-stopped
+  #   command: ["--data-dir", "/data", "--api-key=blnk-api-key", "--listen-port", "8108"]
+  #   volumes:
+  #     - typesense_data:/data
+
+  # ── pgAdmin ────────────────────────────────────────────────────────────────
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@auraconnect.co.za
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Seq (structured log UI) ────────────────────────────────────────────────
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  seq_data: # typesense_data:

@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-06-11T11:47:30.375611",
+  "radius": {
+    "status": "DEGRADED",
+    "issues": [
+      "Thread exhaustion: 2 episode(s) today",
+      "SQL ERROR 1242: 1 occurrence(s)",
+      "Dynamic NAS 102.213.201.129 seen 9\u00d7 \u2014 not in RadiusDesk NAS table",
+      "Dynamic NAS 10.77.0.1 seen 1\u00d7 \u2014 not in RadiusDesk NAS table"
+    ],
+    "episodes": 2,
+    "sql_errors": 1,
+    "dynamic_clients": {
+      "102.213.201.129": 9,
+      "10.77.0.1": 1
+    },
+    "truly_unknown_nas": {
+      "102.213.201.129": 9,
+      "10.77.0.1": 1
+    }
+  },
+  "database": {
+    "status": "HEALTHY",
+    "issues": [],
+    "duplicates": []
+  },
+  "sites": [],
+  "rca": [
+    {
+      "level": "CRITICAL",
+      "message": "Thread exhaustion: 2 episode(s) \u2014 auth requests dropped silently",
+      "detail": "Fix SQL bug first. Reduce radius-interim-update from 2m to 10m immediately."
+    },
+    {
+      "level": "WARNING",
+      "message": "Unknown NAS 102.213.201.129 sending RADIUS traffic (9\u00d7 today)",
+      "detail": "Not in RadiusDesk NAS table \u2014 register it or it may stop being accepted."
+    },
+    {
+      "level": "WARNING",
+      "message": "Unknown NAS 10.77.0.1 sending RADIUS traffic (1\u00d7 today)",
+      "detail": "Not in RadiusDesk NAS table \u2014 register it or it may stop being accepted."
+    }
+  ],
+  "nginx": {}
+}

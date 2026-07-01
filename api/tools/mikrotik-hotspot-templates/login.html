@@ -1,0 +1,51 @@
+<!--
+  AuraConnect gateway entry point — handles both the normal entry hit and a failed
+  login retry within the same file, mirroring the existing login-dirk.html pattern
+  ($(if error == '') ... $(else) ...). The no-error branch posts to /gateway/login
+  (first hotspot hit); the error branch posts to /gateway/login-result (a login
+  attempt submitted through this same page failed) so both paths get captured the
+  same way. Includes a noscript + visible "continue" fallback for non-JS clients,
+  same as login-dirk.html.
+
+  Upload to each hotspot profile's html-directory, replacing the existing login.html.
+-->
+$(if error == '')
+<html>
+<head><meta charset="utf-8"><title>Connecting...</title></head>
+<body>
+    <noscript><center><b>JavaScript required. Enable JavaScript to continue.</b></center></noscript>
+    <center>
+    If you are not redirected in a few seconds, click 'continue' below<br>
+    <form name="gatewayLogin" action="https://api.auraconnect.co.za/gateway/login" method="post">
+        <input type="hidden" name="mac" value="$(mac-esc)">
+        <input type="hidden" name="nasid" value="$(identity)">
+        <input type="hidden" name="link_login_only" value="$(link-login-only)">
+        <input type="hidden" name="link_status" value="$(link-status)">
+        <input type="hidden" name="link_logout" value="$(link-logout)">
+        <input type="submit" value="continue">
+    </form>
+    </center>
+    <script>document.gatewayLogin.submit();</script>
+</body>
+</html>
+$(else)
+<html>
+<head><meta charset="utf-8"><title>Login failed</title></head>
+<body>
+    <noscript><center><b>JavaScript required. Enable JavaScript to continue.</b></center></noscript>
+    <center>
+    Login failed: $(error)<br>
+    If you are not redirected in a few seconds, click 'continue' below<br>
+    <form name="gatewayLoginResult" action="https://api.auraconnect.co.za/gateway/login-result" method="post">
+        <input type="hidden" name="mac" value="$(mac-esc)">
+        <input type="hidden" name="nasid" value="$(identity)">
+        <input type="hidden" name="result" value="failed">
+        <input type="hidden" name="error" value="$(error)">
+        <input type="hidden" name="error_orig" value="$(error-orig)">
+        <input type="submit" value="continue">
+    </form>
+    </center>
+    <script>document.gatewayLoginResult.submit();</script>
+</body>
+</html>
+$(endif)

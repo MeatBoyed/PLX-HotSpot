@@ -1,0 +1,2 @@
+CREATE USER blnk WITH PASSWORD 'blnkpassword';
+CREATE DATABASE blnk OWNER blnk;
