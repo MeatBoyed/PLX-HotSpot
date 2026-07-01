@@ -451,6 +451,27 @@ later ones. Promote anything cross-cutting to `docs/adr/`.
     (supply-chain hardening increment). This install ran with scripts enabled
     (default) — hardening not yet applied.
 
+- **Commit `e2da710` (2026-07-01, not pushed).** I8+I9+I10 batched: Berry root +
+  `@auraconnect/*` renames + `yarn.lock` + supply-chain skill. Committed before
+  hardening (user: want a record of what changed) so hardening lands as its own diff.
+- **Increment 11 — supply-chain hardening (2026-07-01, done, verified, uncommitted).**
+  Enforces the ported skill. `.yarnrc.yml`: `enableScripts: false`,
+  `checksumBehavior: throw`, `defaultSemverRangePrefix: ""`. Root `package.json`
+  `dependenciesMeta` allowlist (`built: true`) for the 7 legit builders: `prisma`,
+  `@prisma/engines`, `sharp`, `esbuild`, `@clerk/shared`, `core-js`, `unrs-resolver`.
+  - **Verified by clean reinstall** (`rm -rf node_modules .yarn/install-state.gz` →
+    `yarn install`): exit 0, 37s, YN0007 "must be built" == exactly the 7 allowlisted
+    (nothing legit blocked); `checksumBehavior: throw` didn't trip against committed
+    `yarn.lock`.
+  - **Berry model confirmed:** `enableScripts` is "allowed by default", overridable
+    per-package via `dependenciesMeta.<pkg>.built` → the skill's "enableScripts:false
+    + allowlist" prescription is correct (opt-in allowlist, not opt-out).
+  - Nuance logged: all script-having packages in the current tree are allowlisted, so
+    nothing is blocked *today*; the gate is prospective — a future/compromised dep's
+    postinstall is not in the allowlist → not run.
+  - Minor follow-up still open: `YN0002` `@auraconnect/monitor` missing `react-is`
+    peer (recharts) — add `react-is` to monitor.
+
 ## Retrospective
 
 (Fill in at wrap-up.) What worked, what we'd do differently, what surprised us.

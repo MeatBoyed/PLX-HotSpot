@@ -5,5 +5,28 @@
   "workspaces": [
     "clients/current/*",
     "clients/legacy/*"
-  ]
+  ],
+  "dependenciesMeta": {
+    "@clerk/shared": {
+      "built": true
+    },
+    "@prisma/engines": {
+      "built": true
+    },
+    "core-js": {
+      "built": true
+    },
+    "esbuild": {
+      "built": true
+    },
+    "prisma": {
+      "built": true
+    },
+    "sharp": {
+      "built": true
+    },
+    "unrs-resolver": {
+      "built": true
+    }
+  }
 }

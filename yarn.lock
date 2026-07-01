@@ -4189,6 +4189,21 @@ __metadata:
 "auraconnect-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "auraconnect-monorepo@workspace:."
+  dependenciesMeta:
+    "@clerk/shared":
+      built: true
+    "@prisma/engines":
+      built: true
+    core-js:
+      built: true
+    esbuild:
+      built: true
+    prisma:
+      built: true
+    sharp:
+      built: true
+    unrs-resolver:
+      built: true
   languageName: unknown
   linkType: soft
 
