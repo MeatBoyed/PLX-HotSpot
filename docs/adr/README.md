@@ -45,3 +45,4 @@ This is a polyglot monorepo, so ADRs live at the altitude of the decision:
 | [0001](0001-polyglot-monorepo-layout.md) | Polyglot monorepo layout (`api/` + `clients/<era>/<app>`) | Accepted |
 | [0002](0002-package-manager-and-dependency-policy.md) | Yarn Berry workspaces + exact pinning, script gating, per-workspace isolation | Accepted |
 | [0003](0003-repository-history-import-method.md) | Import external code with history: subtree for `api/`, filter-repo for legacy | Accepted |
+| [0004](0004-dev-orchestration.md) | Local dev orchestration: Docker infra + API, host clients via concurrently, layered env, run-mode + tools/aaa profiles | Accepted |

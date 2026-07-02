@@ -16,10 +16,15 @@ out/
 dist/
 build/
 
-# env
+# env — ignore real layered files, keep the committed *.example templates
 .env
 .env.local
 .env*.local
+.env.current
+.env.legacy
+!.env.example
+!.env.current.example
+!.env.legacy.example
 
 # misc
 *.log

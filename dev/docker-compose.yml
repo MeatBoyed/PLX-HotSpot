@@ -1,0 +1,107 @@
+# dev/docker-compose.yml — dev-orchestration stack, backing services for local dev.
+# Lives under dev/ to keep the repo root tidy; brought up by the root `yarn dev*`
+# scripts (see package.json). Host ports come from the central port map (docs slice
+# 2026-07-01--02); defaults below keep `docker compose config` working with zero env
+# for the gate test.
+#
+# Scope note: this file grows across the slice — Postgres two-DB init (Inc 2),
+# the `dotnet watch` API service (Inc 3), and compose profiles for run modes +
+# AAA-emulation room (Inc 6). Inc 1 is the Postgres + admin-UI skeleton.
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      # Superuser + neutral bootstrap DB. The app databases (current + legacy) are
+      # created by the per-group init scripts in ./init, not by POSTGRES_DB.
+      POSTGRES_USER: ${POSTGRES_USER:-local_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5442}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Separate init script per group (current 10-, legacy 20-); runs once on a
+      # fresh volume, alphabetically.
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-local_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Optional admin UIs (opt-in: `--profile tools`) ─────────────────────────
+  # Kept out of the default `up` so the core loop stays light; bring them up with
+  # `docker compose --profile tools up -d` (or add tools to the dev script).
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@auraconnect.co.za}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "${PGADMIN_HOST_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  seq:
+    image: datalust/seq:latest
+    profiles: ["tools"]
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "${SEQ_HOST_PORT:-5342}:80"
+    volumes:
+      - seq_data:/data
+    restart: unless-stopped
+
+  # ── AAA emulation (RESERVED — profile `aaa`, its own slice) ─────────────────
+  # Not wired here (slice 2026-07-01--02 scope note): the RadiusDesk + MikroTik
+  # stub/CHR emulators land in the AAA-emulation slice. This block reserves the
+  # `aaa` profile + host-port lane so they can be added without disturbing the
+  # core loop:
+  #
+  #   radiusdesk:
+  #     image: <radiusdesk-image>
+  #     profiles: ["aaa"]
+  #     ports: ["${RADIUSDESK_HOST_PORT:-5480}:80"]
+  #   mikrotik:
+  #     image: <chr-or-stub-image>
+  #     profiles: ["aaa"]
+  #     ports: ["${MIKROTIK_HOST_PORT:-5481}:80"]
+
+  # ── ASP.NET API under dotnet watch ─────────────────────────────────────────
+  # Runs the SDK image directly against a bind-mounted source tree — no image
+  # build, so editing source triggers `dotnet watch` hot reload, never a rebuild.
+  # (The api/Dockerfile publish image is for deploy, not this inner loop.)
+  api:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /src
+    command: >
+      dotnet watch --project AuraConnectAPI/AuraConnect.API.csproj run
+      --urls http://0.0.0.0:8080
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      # inotify does not cross the bind mount reliably (WSL2/Docker) — poll instead.
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+      DOTNET_WATCH_RESTART_ON_RUDE_EDIT: "true"
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=auraconnect;Username=auraconnect;Password=auraconnect_pw
+    ports:
+      - "${API_HOST_PORT:-5299}:8080"
+    volumes:
+      - ../api:/src
+      - nuget_cache:/root/.nuget/packages
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  seq_data:
+  nuget_cache:
