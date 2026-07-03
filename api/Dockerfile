@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.301 AS build
 WORKDIR /src
 
 COPY nuget.config .
@@ -18,7 +18,7 @@ COPY . .
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish AuraConnectAPI/AuraConnect.API.csproj -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.9 AS runtime
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/publish .

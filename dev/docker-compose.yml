@@ -79,7 +79,7 @@ services:
   # build, so editing source triggers `dotnet watch` hot reload, never a rebuild.
   # (The api/Dockerfile publish image is for deploy, not this inner loop.)
   api:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
+    image: mcr.microsoft.com/dotnet/sdk:10.0.301
     working_dir: /src
     command: >
       dotnet watch --project AuraConnectAPI/AuraConnect.API.csproj run
