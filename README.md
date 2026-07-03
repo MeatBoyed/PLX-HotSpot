@@ -17,6 +17,8 @@ clients/
   legacy/
     captive-portal-and-admin/  @auraconnect/captive-portal-and-admin-legacy
                                            original monolith — maintenance track, still deployed
+dev/                                       root dev orchestration — compose stack, DB init,
+                                           layered-env templates, gate tests (see dev/README.md)
 docs/
   adr/                                     architecture decision records (this repo's decisions)
   projects/                                slice docs (planning + execution record)
@@ -40,14 +42,26 @@ Adding or bumping a dependency? See the `supply-chain-guard` skill in `.claude/s
 
 ## Running the system
 
-Root dev orchestration (one command for API + Postgres + all clients) is being built
-in a **dedicated dev-orchestration slice** — see `docs/projects/`. Until it lands, run
-each client with its own `yarn workspace … run dev` and the API from `api/` (see
-`api/README.md`).
+One command brings the whole stack up for local development — Postgres (one server,
+two logical DBs) + the ASP.NET API under `dotnet watch` (Docker), and the Next.js
+clients on the host via `concurrently`:
+
+```bash
+cp .env.example .env                    # shared base (port map + Postgres creds)
+cp .env.current.example .env.current    # current clients' config
+cp .env.legacy.example .env.legacy      # legacy client + DATABASE_URL
+yarn dev                                # default = current mode
+```
+
+Run modes: `yarn dev` / `dev:current` (admin + captive-portal + monitor),
+`yarn dev:legacy`, `yarn dev:both`. Helpers: `yarn infra:up|down`, `yarn db:reset`,
+`yarn test:dev`. Full usage — ports, profiles, the persistent-volume gotcha — in
+[`dev/README.md`](dev/README.md); design rationale in
+[ADR 0004](docs/adr/0004-dev-orchestration.md).
 
 ## The `api/` tree
 
-`api/` is .NET and does not participate in the Node workspace graph; it is wired in via
-root compose (dev-orchestration slice). Its history was imported by `git subtree`; the
-legacy monolith by `git-filter-repo` — see
+`api/` is .NET and does not participate in the Node workspace graph; it is wired into
+the root dev stack via `dev/docker-compose.yml` ([ADR 0004](docs/adr/0004-dev-orchestration.md)).
+Its history was imported by `git subtree`; the legacy monolith by `git-filter-repo` — see
 [ADR 0003](docs/adr/0003-repository-history-import-method.md).
