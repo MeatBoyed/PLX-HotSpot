@@ -26,6 +26,9 @@ build/
 !.env.current.example
 !.env.legacy.example
 
+# direnv (commit .envrc; ignore its local cache)
+.direnv/
+
 # misc
 *.log
 .DS_Store
