@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY nuget.config .
+COPY global.json .
 COPY AuraConnect.slnx .
 COPY AuraConnect.Core/AuraConnect.Core.csproj AuraConnect.Core/
 COPY AuraConnect.Application/AuraConnect.Application.csproj AuraConnect.Application/
