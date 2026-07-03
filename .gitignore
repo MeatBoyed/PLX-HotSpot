@@ -32,3 +32,7 @@ build/
 # misc
 *.log
 .DS_Store
+
+# Playwright e2e output
+dev/e2e/test-results/
+dev/e2e/playwright-report/

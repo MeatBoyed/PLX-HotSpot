@@ -4,20 +4,23 @@
   "packageManager": "yarn@4.13.0",
   "scripts": {
     "test:dev": "node --test dev/*.test.mjs",
+    "test:e2e": "yarn workspace @auraconnect/e2e test",
     "build:legacy": "dotenv -e .env.legacy -- yarn workspace @auraconnect/captive-portal-and-admin-legacy build",
-
     "infra:up": "docker compose -f dev/docker-compose.yml up -d postgres api",
     "infra:down": "docker compose -f dev/docker-compose.yml down",
+    "dev:seed": "cat dev/seed/*.sql | docker compose -f dev/docker-compose.yml exec -T postgres psql -v ON_ERROR_STOP=1 -U local_dev -d auraconnect -f -",
     "db:reset": "docker compose -f dev/docker-compose.yml down -v && docker compose -f dev/docker-compose.yml up -d postgres",
-
     "dev": "yarn dev:current",
     "dev:current": "docker compose -f dev/docker-compose.yml up -d postgres api && concurrently -k -n admin,captive,monitor -c blue,green,magenta 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/admin dev -p 3301' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/captive-portal dev -p 3302' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/monitor dev -p 3303'",
     "dev:legacy": "docker compose -f dev/docker-compose.yml up -d postgres api && concurrently -k -n legacy -c yellow 'dotenv -e .env.legacy -e .env -- yarn workspace @auraconnect/captive-portal-and-admin-legacy dev -p 3401'",
-    "dev:both": "docker compose -f dev/docker-compose.yml up -d postgres api && concurrently -k -n admin,captive,monitor,legacy -c blue,green,magenta,yellow 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/admin dev -p 3301' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/captive-portal dev -p 3302' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/monitor dev -p 3303' 'dotenv -e .env.legacy -e .env -- yarn workspace @auraconnect/captive-portal-and-admin-legacy dev -p 3401'"
+    "dev:both": "docker compose -f dev/docker-compose.yml up -d postgres api && concurrently -k -n admin,captive,monitor,legacy -c blue,green,magenta,yellow 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/admin dev -p 3301' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/captive-portal dev -p 3302' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/monitor dev -p 3303' 'dotenv -e .env.legacy -e .env -- yarn workspace @auraconnect/captive-portal-and-admin-legacy dev -p 3401'",
+    "dev:aaa": "docker compose -f dev/docker-compose.yml --profile aaa up -d --build postgres api radius-db mikrotik radiusdesk && node dev/wait-migrated.mjs && yarn dev:seed && concurrently -k -n admin,captive,monitor -c blue,green,magenta 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/admin dev -p 3301' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/captive-portal dev -p 3302' 'dotenv -e .env.current -e .env -- yarn workspace @auraconnect/monitor dev -p 3303'"
   },
   "workspaces": [
     "clients/current/*",
-    "clients/legacy/*"
+    "clients/legacy/*",
+    "dev/stubs/*",
+    "dev/e2e"
   ],
   "dependenciesMeta": {
     "@clerk/shared": {

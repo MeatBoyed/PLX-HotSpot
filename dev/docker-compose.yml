@@ -59,20 +59,64 @@ services:
       - seq_data:/data
     restart: unless-stopped
 
-  # ── AAA emulation (RESERVED — profile `aaa`, its own slice) ─────────────────
-  # Not wired here (slice 2026-07-01--02 scope note): the RadiusDesk + MikroTik
-  # stub/CHR emulators land in the AAA-emulation slice. This block reserves the
-  # `aaa` profile + host-port lane so they can be added without disturbing the
-  # core loop:
+  # ── AAA emulation (profile `aaa`, slice 2026-07-03--01) ─────────────────────
+  # Thin emulators of the integration backends the apps call, one compose service
+  # per system (stub-per-system), all behind the opt-in `aaa` profile so the core
+  # loop stays light. Host ports live on the 548x AAA lane in the central map.
   #
-  #   radiusdesk:
-  #     image: <radiusdesk-image>
-  #     profiles: ["aaa"]
-  #     ports: ["${RADIUSDESK_HOST_PORT:-5480}:80"]
-  #   mikrotik:
-  #     image: <chr-or-stub-image>
-  #     profiles: ["aaa"]
-  #     ports: ["${MIKROTIK_HOST_PORT:-5481}:80"]
+  # D — FreeRADIUS accounting DB. The API reads radacct / radacct_history /
+  # radpostauth / user_stats_dailies over the MySQL wire (MySqlConnector), so this
+  # is a real MariaDB, NOT a RADIUS server. Schema + seed come from ./radius-db/init.
+  radius-db:
+    image: mariadb:11.4.5
+    profiles: ["aaa"]
+    environment:
+      MARIADB_ROOT_PASSWORD: ${RADIUS_DB_ROOT_PASSWORD:-radius_root_pw}
+      MARIADB_DATABASE: ${RADIUS_DB_NAME:-radius}
+      MARIADB_USER: ${RADIUS_DB_USER:-radius}
+      MARIADB_PASSWORD: ${RADIUS_DB_PASSWORD:-radius_pw}
+    ports:
+      - "${RADIUS_DB_HOST_PORT:-5482}:3306"
+    volumes:
+      - radius_db_data:/var/lib/mysql
+      # Schema + seed; runs once on a fresh volume, alphabetically.
+      - ./radius-db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  #
+  # A — MikroTik RouterOS REST stub. Fastify HTTPS service (self-signed cert) emulating
+  # the `/rest` surface the monitor + API consume. Built from the stub workspace; serves
+  # 8443 in-container, published on the 5481 AAA lane. Reachable from the API container
+  # (service DNS `mikrotik`) and host clients (localhost:5481).
+  mikrotik:
+    build: ./stubs/mikrotik
+    profiles: ["aaa"]
+    environment:
+      MIKROTIK_STUB_USER: ${MIKROTIK_STUB_USER:-admin}
+      MIKROTIK_STUB_PASS: ${MIKROTIK_STUB_PASS:-admin}
+      PORT: "8443"        # REST API (HTTPS)
+      LOGIN_PORT: "8080"  # hotspot /login page (stub B, plain HTTP)
+    ports:
+      - "${MIKROTIK_HOST_PORT:-5481}:8443"
+      - "${MIKROTIK_LOGIN_HOST_PORT:-5483}:8080"
+  #
+  # C — RadiusDesk rd_cake stub. Fastify HTTP service emulating the `cake4/rd_cake/…`
+  # surface the API + captive portals call (token auth, voucher/permanent-user/profile
+  # endpoints). Built from the stub workspace; serves 8080, published on the 5480 lane.
+  radiusdesk:
+    build: ./stubs/radiusdesk
+    profiles: ["aaa"]
+    environment:
+      RADIUSDESK_STUB_TOKEN: ${RADIUSDESK_STUB_TOKEN:-dev-radiusdesk-token}
+      PORT: "8080"
+    ports:
+      - "${RADIUSDESK_HOST_PORT:-5480}:8080"
+  #
+  # Optional stubs not yet built (DoD marks them optional): PayFast IPN (E) and an SMS
+  # capture endpoint (F). Stub B (hotspot /login) is served by the `mikrotik` service above.
 
   # ── ASP.NET API under dotnet watch ─────────────────────────────────────────
   # Runs the SDK image directly against a bind-mounted source tree — no image
@@ -105,3 +149,4 @@ volumes:
   pgadmin_data:
   seq_data:
   nuget_cache:
+  radius_db_data:

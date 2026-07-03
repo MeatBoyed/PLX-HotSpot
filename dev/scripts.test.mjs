@@ -67,6 +67,38 @@ test('dev:both runs all four clients', () => {
   }
 });
 
+test('dev:seed applies every dev/seed SQL file to the app Postgres', () => {
+  const s = scripts['dev:seed'];
+  assert.ok(s, 'missing script: dev:seed');
+  // Applies all seed files (platform-settings + captive-site + any later ones), not one.
+  assert.match(s, /dev\/seed\/\*\.sql/, 'dev:seed must apply all dev/seed/*.sql files');
+  assert.match(s, /-d auraconnect/, 'dev:seed must target the auraconnect app DB');
+  assert.match(s, /exec .*postgres/, 'dev:seed must run psql inside the compose postgres service');
+});
+
+test('dev:aaa is the one-command AAA mode: stubs up + seed + current clients', () => {
+  const s = scripts['dev:aaa'];
+  assert.ok(s, 'missing script: dev:aaa');
+  assert.match(s, /--profile aaa/, 'dev:aaa must enable the aaa profile');
+  assert.match(s, /up -d/, 'dev:aaa must bring the stack up');
+  for (const stub of ['radius-db', 'mikrotik', 'radiusdesk']) {
+    assert.ok(s.includes(stub), `dev:aaa must bring up the ${stub} stub`);
+  }
+  assert.match(s, /dev:seed/, 'dev:aaa must seed the API config after migration');
+  // Runs the current clients (pointed at the stubs via .env.current), like dev:current.
+  for (const c of CURRENT) {
+    assert.ok(s.includes(c.name), `dev:aaa must run ${c.name}`);
+    assert.ok(s.includes(c.port), `dev:aaa must run ${c.name} on port ${c.port}`);
+  }
+  assert.match(s, /\.env\.current/, 'dev:aaa must layer .env.current');
+});
+
+test('test:e2e runs the e2e workspace suite', () => {
+  const s = scripts['test:e2e'];
+  assert.ok(s, 'missing script: test:e2e');
+  assert.match(s, /@auraconnect\/e2e/, 'test:e2e must run the e2e workspace');
+});
+
 test('the four client ports are distinct', () => {
   const all = [...CURRENT.map((c) => c.port), LEGACY.port];
   assert.equal(new Set(all).size, all.length, `client ports must be distinct: ${all.join(', ')}`);
