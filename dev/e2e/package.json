@@ -1,0 +1,13 @@
+{
+  "name": "@auraconnect/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end tests for the AAA-emulation local stack (AAA slice 2026-07-03--01).",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
+  }
+}

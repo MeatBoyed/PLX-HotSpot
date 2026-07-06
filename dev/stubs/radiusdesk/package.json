@@ -1,0 +1,14 @@
+{
+  "name": "@auraconnect/stub-radiusdesk",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Thin RadiusDesk rd_cake emulator for local dev + e2e (AAA slice 2026-07-03--01, stub C).",
+  "main": "app.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "fastify": "5.9.0"
+  }
+}

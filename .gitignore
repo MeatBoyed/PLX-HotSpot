@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# yarn berry (node-modules linker: keep releases, ignore install state)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# next / build output
+.next/
+out/
+dist/
+build/
+
+# env — ignore real layered files, keep the committed *.example templates
+.env
+.env.local
+.env*.local
+.env.current
+.env.legacy
+!.env.example
+!.env.current.example
+!.env.legacy.example
+
+# direnv (commit .envrc; ignore its local cache)
+.direnv/
+
+# misc
+*.log
+.DS_Store
+
+# Playwright e2e output
+dev/e2e/test-results/
+dev/e2e/playwright-report/

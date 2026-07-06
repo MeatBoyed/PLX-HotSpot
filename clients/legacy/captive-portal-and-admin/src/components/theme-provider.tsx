@@ -1,0 +1,149 @@
+'use client';
+
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { pluxnetTheme } from '@/lib/theme';
+import { BrandingConfig } from '@/lib/types';
+import { normalizeBranding, brandingToCssVars } from '@/lib/utils/branding-normalize';
+import { fetchBrandingConfigAction } from '@/lib/actions/branding-actions';
+
+const STALE_CLIENT_TTL_MS = 6 * 60 * 1000;
+
+interface ThemeContextType {
+  theme: BrandingConfig;
+  setTheme: (theme: BrandingConfig) => void;
+  refreshTheme: () => Promise<void>;
+  loading: boolean;
+  error: string | null;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
+
+interface ThemeProviderProps {
+  children: ReactNode;
+  initialTheme?: BrandingConfig;
+  ssid: string;
+  showInitialSpinner?: boolean;
+}
+
+function getStoredTheme(ssid: string): BrandingConfig | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(`branding:${ssid}`);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return normalizeBranding(parsed?.theme || parsed);
+  } catch { return null; }
+}
+
+function storeTheme(ssid: string, theme: BrandingConfig) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`branding:${ssid}`, JSON.stringify({ ssid, updatedAt: theme.updatedAt, theme }));
+  } catch { }
+}
+
+export function ThemeProvider({ children, initialTheme, ssid, showInitialSpinner = true }: ThemeProviderProps) {
+  const [loading, setLoading] = useState<boolean>(() => !initialTheme && showInitialSpinner);
+  const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
+
+  const [theme, setThemeState] = useState<BrandingConfig>(() => initialTheme || getStoredTheme(ssid) || pluxnetTheme);
+
+  // ✅ THIS IS THE KEY FIX — apply CSS vars to :root whenever theme changes
+  useEffect(() => {
+    const vars = brandingToCssVars(theme);
+    const root = document.documentElement;
+    for (const [key, value] of Object.entries(vars)) {
+      if (value) root.style.setProperty(key, value);
+    }
+  }, [theme]);
+
+  // Persist theme to localStorage on change
+  useEffect(() => { storeTheme(ssid, theme); }, [theme, ssid]);
+
+  const applyThemeIfChanged = (incoming: BrandingConfig | null | undefined) => {
+    if (!incoming) return;
+    if (theme.updatedAt !== incoming.updatedAt || theme.id !== incoming.id) {
+      setThemeState(incoming);
+    }
+  };
+
+  const isFreshEnough = (incoming?: BrandingConfig | null) => {
+    if (!incoming?.updatedAt) return false;
+    const age = Date.now() - new Date(incoming.updatedAt).getTime();
+    return age < STALE_CLIENT_TTL_MS;
+  };
+
+  const fetchTheme = async (force = false) => {
+    if (fetchingRef.current) return;
+    if (!force && initialTheme && isFreshEnough(initialTheme)) {
+      setLoading(false);
+      return;
+    }
+    fetchingRef.current = true;
+    setError(null);
+    try {
+      const incoming = await fetchBrandingConfigAction(ssid);
+      const normalized = normalizeBranding(incoming);
+      applyThemeIfChanged(normalized);
+      if (normalized) storeTheme(ssid, normalized);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to load branding config';
+      setError(msg);
+      setThemeState(pluxnetTheme);
+      console.log("ThemeProvider Error (Failed to fetch theme): ", msg);
+    } finally {
+      fetchingRef.current = false;
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const stored = getStoredTheme(ssid);
+    if (!initialTheme && stored) {
+      applyThemeIfChanged(stored);
+    }
+    const force = stored?.ssid && stored.ssid !== ssid;
+    fetchTheme(!!force);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ssid, initialTheme]);
+
+  const setTheme = (newTheme: BrandingConfig) => setThemeState(newTheme || pluxnetTheme);
+  const refreshTheme = async () => { await fetchTheme(true); };
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, refreshTheme, loading, error }}>
+      {loading && showInitialSpinner ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Spinner />
+            <p className="text-sm text-gray-500">Loading theme…</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {error && (
+            <div className="fixed top-2 right-2 bg-red-100 border border-red-300 text-red-700 px-3 py-1 rounded text-xs shadow">
+              Theme load error: {error}
+            </div>
+          )}
+          {children}
+        </>
+      )}
+    </ThemeContext.Provider>
+  );
+}
+
+function Spinner() {
+  return (
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-brandPrimary" aria-label="Loading" />
+  );
+}

@@ -1,0 +1,36 @@
+<!--
+  AuraConnect login-result reporter — failure path.
+  Extends the original error.html (which only printed $(error) and a static link back
+  to $(link-login)) with a POST to the AuraConnect API first. login.html now handles
+  the "failed login retry" case directly via its own $(if error == '') branch, so this
+  file covers everything else in errors.txt that isn't tied to a fresh login.html
+  submission — e.g. visiting status/logout while not logged in, session/uptime limits,
+  shutting-down. Includes the same noscript + visible "continue" fallback as login.html
+  for non-JS clients.
+
+  Upload to each hotspot profile's html-directory, replacing the existing error.html.
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="-1">
+    <title>Internet hotspot - Error</title>
+</head>
+<body>
+    <noscript><center><b>JavaScript required. Enable JavaScript to continue.</b></center></noscript>
+    <center>
+    Login failed: $(error)<br>
+    If you are not redirected in a few seconds, click 'continue' below<br>
+    <form name="errorReport" action="https://api.auraconnect.co.za/gateway/login-result" method="post">
+        <input type="hidden" name="mac" value="$(mac-esc)">
+        <input type="hidden" name="nasid" value="$(identity)">
+        <input type="hidden" name="result" value="failed">
+        <input type="hidden" name="error" value="$(error)">
+        <input type="hidden" name="error_orig" value="$(error-orig)">
+        <input type="submit" value="continue">
+    </form>
+    </center>
+    <script>document.errorReport.submit();</script>
+</body>
+</html>
