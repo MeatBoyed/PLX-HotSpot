@@ -48,3 +48,14 @@ test('.env.legacy.example supplies the build-required Clerk publishable key', ()
     'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY must be a well-formed Clerk key (pk_test_/pk_live_)',
   );
 });
+
+test('.env.current.example supplies API_URL and NEXT_PUBLIC_API_URL — the keys admin/captive-portal actually read', () => {
+  // admin (lib/infrastructure/api/client.ts, branding.api.ts) and captive-portal (src/env.ts)
+  // read API_URL server-side and NEXT_PUBLIC_API_URL client-side. An earlier version of this
+  // file set NEXT_PUBLIC_API_BASE_URL instead — a name neither client's source ever
+  // referenced — so both silently fell back to a hardcoded localhost default regardless of
+  // what was configured here (slice 2026-07-05--02, 2026-07-06 correction).
+  const env = parseEnv(join(repoRoot, '.env.current.example'));
+  assert.match(env.API_URL ?? '', /^https?:\/\//, 'API_URL must be a well-formed URL');
+  assert.match(env.NEXT_PUBLIC_API_URL ?? '', /^https?:\/\//, 'NEXT_PUBLIC_API_URL must be a well-formed URL');
+});

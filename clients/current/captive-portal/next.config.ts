@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
-  allowedDevOrigins: ['*'],
+  allowedDevOrigins: ['*', '192.168.100.45'],
   // crossOrigin: 'anonymous',
   async headers() {
     return [

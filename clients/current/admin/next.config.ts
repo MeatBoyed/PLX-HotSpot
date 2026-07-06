@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  allowedDevOrigins: ["*", "192.168.100.45"],
   experimental: {
     serverActions: {
       // Default is 1 MB — raised to match the 10 MB per-image limit enforced client-side.

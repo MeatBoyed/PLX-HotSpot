@@ -2,7 +2,7 @@
 
 **Status:** done
 **Started:** 2026-07-03
-**Finished:** —
+**Finished:** 2026-07-06
 
 ## Plan reference
 
@@ -428,6 +428,33 @@ Stepped back to make the slice pushable: a fresh engineer must be able to bootst
   stubs, Docker). The one sharp edge — stub images `COPY` their workspace `node_modules`,
   so `yarn install` MUST precede `dev:aaa`/`test:e2e` — is documented in both READMEs.
 
+### Checkpoint 17 (2026-07-06) — post-completion correction: real GUID ids
+
+Reopened after this slice had already been marked done. While building on top of this seed
+in a later slice ([2026-07-05--01](2026-07-05--01--auraconnect-dev-site-seed.md), then
+[2026-07-05--02](2026-07-05--02--captive-portal-tenant-id-required.md)), it surfaced that
+`captive-site.sql`'s `tenant-dev`/`site-dev` ids are hand-picked human-readable strings, not
+real GUIDs — same defect as the one found and fixed on the AuraConnect tenant/site added in
+2026-07-05--01. Every `Tenant`/`Site` normally gets an opaque auto-generated id from
+`BaseEntity` (`Guid.NewGuid().ToString("N")`); the API's create DTOs don't even expose an `id`
+field, so this could only happen via this seed's raw SQL bypassing the domain layer.
+
+**Fix**: `tenants.id` becomes `de49b6cbe9d24edfb7d32dcec06a474f` (was `tenant-dev`),
+`sites.id` becomes `eaafa0ff706d4a52b6f45dbcced67b3b` (was `site-dev`) — freshly generated,
+matching the `Guid.NewGuid().ToString("N")` shape. `name` (`Dev Tenant`/`Dev Site`), `slug`
+(`dev`), and `ssid` (`my-demo-ssid`) are UNCHANGED. `radius_config.site_id` moves with the new
+site id. Blast radius checked before changing: only `dev/seed/captive-site.sql`,
+`dev/captive-seed.test.mjs`, and slice docs reference the literal old ids — no e2e tests,
+client code, or `.env*` files depend on them.
+
+Same migration note as the AuraConnect correction: this changes the `ON CONFLICT (id) DO
+UPDATE` key, so re-applying against an already-seeded local DB inserts new rows rather than
+updating the old `tenant-dev`/`site-dev` ones — `yarn db:reset` (or a manual delete) avoids
+orphaned duplicates.
+
+**Done (2026-07-06)**: implemented test-first in `dev/captive-seed.test.mjs` (RED confirmed
+against the old ids for the right reason, GREEN after the seed update); `yarn test:dev` 81/81.
+
 ## Deferred / pushed forward
 
 What we explicitly are not doing this slice, and where it picks up.
@@ -525,6 +552,12 @@ the domain, or the tooling — facts that outlive the slice and inform later one
 - **Captive config is a FK chain** — `tenants → sites → radius_config` (+ `packages` for
   voucher `profile_id`). Seeding one site is 3 dependent inserts in order; the voucher
   path additionally needs a `packages` row (deferred).
+- **A hand-written dev seed can silently violate a convention the application layer itself
+  enforces everywhere else.** `tenants.id`/`sites.id` are plain `varchar(32)`, so raw SQL can
+  insert any string — but every real `Tenant`/`Site` gets an opaque GUID from `BaseEntity`,
+  and the API's create DTOs don't even expose `id` as settable. Nothing caught the mismatch
+  until a much later slice needed the id to look like a UUID. Worth checking, next time a seed
+  hand-picks a primary key, whether the domain model normally auto-generates it.
 
 ## Retrospective
 

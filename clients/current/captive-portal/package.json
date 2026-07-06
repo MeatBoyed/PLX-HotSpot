@@ -7,6 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
+    "test": "node --test src/env.test.mjs",
     "api:types": "node scripts/gen-api-types.js"
   },
   "dependencies": {

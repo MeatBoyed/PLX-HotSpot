@@ -26,6 +26,11 @@ First run pulls the .NET SDK image (~1GB) and restores NuGet — subsequent runs
 Prereqs: Docker (Compose v2), Node + Yarn Berry v4. Most tests spin throwaway containers,
 so **Docker must be running** for `yarn test:dev` and `yarn test:e2e`.
 
+**Node version** — the committed root `.envrc` auto-switches to the `.nvmrc` version via
+[direnv](https://direnv.net/) + nvm. Install `direnv`, hook it into your shell (`eval
+"$(direnv hook bash)"` / `zsh` equivalent in your rc file), then run `direnv allow` once in
+the repo root. Without direnv, `nvm use` manually accomplishes the same thing.
+
 ## Run modes
 
 | Command | Brings up |

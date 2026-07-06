@@ -10,10 +10,11 @@ export const env = createEnv({
         // AuraConnect API
         API_URL: z.string().url().default('http://localhost:5299'),
 
-        // Tenant this container serves — 32-char hex or standard UUID, must be set before deploying
+        // Tenant this container serves — 32-char hex or standard UUID. Required: the portal
+        // cannot resolve sites/branding/packages/gateway config without it (slice 2026-07-05--02).
         TENANT_ID: z.preprocess(
             v => (v === '' ? undefined : v),
-            z.string().regex(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i, 'TENANT_ID must be a UUID (with or without hyphens)').optional()
+            z.string().regex(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i, 'TENANT_ID must be a UUID (with or without hyphens)')
         ),
 
         // Branding / site metadata
