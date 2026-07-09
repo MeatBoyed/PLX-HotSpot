@@ -27,3 +27,18 @@ services:
     env_file:
       - .env
       - ./env/dev.env
+      
+  foxystreet:
+    <<: *portal-base
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SHARED_BUILD_ENV_FILE: docker/.env
+        BUILD_ENV_FILE: docker/env/foxystreet.env
+    image: auraconnect-foxystreet:latest
+    ports:
+      - "4004:3000"
+    env_file:
+      - .env
+      - ./env/foxystreet.env
